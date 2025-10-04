@@ -214,3 +214,4 @@ export class Catalog implements IBaseEntityWithCompany {
     return this.isEngineType() ? this.metadata?.fuelType : undefined;
   }
 }
+

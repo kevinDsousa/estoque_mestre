@@ -51,3 +51,4 @@ export interface CustomerPreferences {
   language: string;
   timezone: string;
 }
+

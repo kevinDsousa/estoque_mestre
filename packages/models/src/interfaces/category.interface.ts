@@ -30,3 +30,4 @@ export interface CategorySEO {
   keywords?: string[];
   slug: string;
 }
+

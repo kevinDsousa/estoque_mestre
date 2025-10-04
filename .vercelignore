@@ -1,0 +1,12 @@
+node_modules
+apps/api
+packages/models/src
+packages/models/dist
+packages/eslint-config
+packages/typescript-config
+packages/ui
+*.log
+.env*
+.DS_Store
+coverage
+.nyc_output

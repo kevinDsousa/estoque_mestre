@@ -117,3 +117,4 @@ export const UpdateSupplierRatingRequestSchema = z.object({
 });
 
 export type UpdateSupplierRatingRequest = z.infer<typeof UpdateSupplierRatingRequestSchema>;
+

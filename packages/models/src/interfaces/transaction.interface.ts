@@ -50,3 +50,4 @@ export interface TransactionSummary {
   total: number;
   itemsCount: number;
 }
+

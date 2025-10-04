@@ -91,3 +91,4 @@ export const CompanySettingsResponseSchema = z.object({
 });
 
 export type CompanySettingsResponse = z.infer<typeof CompanySettingsResponseSchema>;
+

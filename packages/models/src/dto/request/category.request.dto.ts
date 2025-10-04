@@ -78,3 +78,4 @@ export const CategoryHierarchyRequestSchema = z.object({
 });
 
 export type CategoryHierarchyRequest = z.infer<typeof CategoryHierarchyRequestSchema>;
+

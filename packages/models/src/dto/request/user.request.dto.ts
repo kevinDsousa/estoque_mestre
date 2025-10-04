@@ -99,3 +99,4 @@ export const UpdateProfileRequestSchema = z.object({
 });
 
 export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;
+

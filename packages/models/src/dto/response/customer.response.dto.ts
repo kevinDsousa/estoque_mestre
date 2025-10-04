@@ -129,3 +129,4 @@ export const CustomerPaymentInfoResponseSchema = z.object({
 });
 
 export type CustomerPaymentInfoResponse = z.infer<typeof CustomerPaymentInfoResponseSchema>;
+

@@ -72,3 +72,4 @@ export interface PaymentOrderSummary {
   pendingAmount: number;
   executedAmount: number;
 }
+

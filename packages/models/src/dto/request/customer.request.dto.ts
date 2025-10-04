@@ -118,3 +118,4 @@ export const UpdateCustomerPaymentRequestSchema = z.object({
 });
 
 export type UpdateCustomerPaymentRequest = z.infer<typeof UpdateCustomerPaymentRequestSchema>;
+

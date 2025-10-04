@@ -170,3 +170,4 @@ npm run prisma:studio
 3. Documente interfaces complexas
 4. Teste mudanças no schema Prisma
 5. Atualize este README quando necessário
+

@@ -52,3 +52,4 @@ export interface ISupplierRating {
   overall: number; // 1-5
   lastUpdated: Date;
 }
+

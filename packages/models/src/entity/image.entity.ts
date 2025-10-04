@@ -274,3 +274,4 @@ export class Image implements IBaseEntityWithCompany {
     return ratio ? Math.abs(ratio - 1) < 0.1 : false;
   }
 }
+

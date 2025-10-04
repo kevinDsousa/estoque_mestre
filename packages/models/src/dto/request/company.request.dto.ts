@@ -89,3 +89,4 @@ export const UpdateCompanySettingsRequestSchema = z.object({
 });
 
 export type UpdateCompanySettingsRequest = z.infer<typeof UpdateCompanySettingsRequestSchema>;
+
