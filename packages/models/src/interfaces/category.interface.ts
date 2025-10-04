@@ -31,3 +31,4 @@ export interface CategorySEO {
   slug: string;
 }
 
+

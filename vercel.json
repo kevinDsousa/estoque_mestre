@@ -2,5 +2,11 @@
   "buildCommand": "pnpm --filter front build && mkdir -p dist && if [ -d 'apps/front/dist/front/browser' ]; then cp -r apps/front/dist/front/browser/* dist/ && rm -rf apps/front/dist/front/browser; fi",
   "installCommand": "pnpm install",
   "framework": null,
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
