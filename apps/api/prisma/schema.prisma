@@ -1,0 +1,951 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================
+// ENUMS
+// ==============================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_ACTIVATION
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_APPROVAL
+}
+
+enum CompanyType {
+  AUTO_PARTS
+  GENERAL_RETAIL
+  WHOLESALE
+  MANUFACTURING
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+  OUT_OF_STOCK
+}
+
+enum ProductType {
+  AUTO_PART
+  ACCESSORY
+  TOOL
+  CONSUMABLE
+  SERVICE
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BLACKLISTED
+}
+
+enum SupplierType {
+  MANUFACTURER
+  DISTRIBUTOR
+  WHOLESALER
+  RETAILER
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BLACKLISTED
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+  WHOLESALE
+}
+
+enum TransactionType {
+  SALE
+  PURCHASE
+  RETURN
+  ADJUSTMENT
+  TRANSFER
+  DAMAGE
+  EXPIRATION
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+  TRANSFER
+}
+
+enum MovementReason {
+  PURCHASE
+  SALE
+  RETURN
+  DAMAGE
+  EXPIRATION
+  THEFT
+  ADJUSTMENT
+  TRANSFER
+  PRODUCTION
+  CONSUMPTION
+}
+
+enum NotificationType {
+  LOW_STOCK
+  OUT_OF_STOCK
+  EXPIRATION_WARNING
+  EXPIRED_PRODUCT
+  OVERDUE_PAYMENT
+  NEW_ORDER
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  SYSTEM_MAINTENANCE
+  SECURITY_ALERT
+  USER_ACTIVITY
+  REPORT_READY
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+  DELETED
+}
+
+enum PaymentOrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentOrderType {
+  SUPPLIER_PAYMENT
+  CUSTOMER_REFUND
+  EXPENSE_PAYMENT
+  INTERNAL_TRANSFER
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  CHECK
+  CREDIT
+}
+
+enum CatalogType {
+  CURRENCY
+  SECTOR
+  BRAND
+  UNIT_OF_MEASURE
+  PAYMENT_TERM
+  DOCUMENT_TYPE
+  VEHICLE_MAKE
+  VEHICLE_MODEL
+  VEHICLE_YEAR
+  ENGINE_TYPE
+}
+
+enum CatalogStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AttachmentType {
+  PDF
+  DOC
+  XLS
+  TXT
+  OTHER
+}
+
+enum ImageType {
+  USER_AVATAR
+  PRODUCT_IMAGE
+  PRODUCT_ATTACHMENT
+  COMPANY_LOGO
+  BRAND_LOGO
+  CATEGORY_IMAGE
+  VEHICLE_IMAGE
+}
+
+enum ImageStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
+  DELETED
+}
+
+enum ImageFormat {
+  JPEG
+  PNG
+  WEBP
+  GIF
+  SVG
+  BMP
+}
+
+// ==============================================
+// MODELS
+// ==============================================
+
+model Company {
+  id          String        @id @default(cuid())
+  name        String
+  legalName   String
+  document    String        @unique // CNPJ
+  type        CompanyType
+  status      CompanyStatus @default(PENDING_APPROVAL)
+  
+  // Address
+  street      String
+  number      String
+  complement  String?
+  neighborhood String
+  city        String
+  state       String
+  zipCode     String
+  country     String        @default("Brasil")
+  
+  // Contact
+  email       String
+  phone       String
+  website     String?
+  facebook    String?
+  instagram   String?
+  linkedin    String?
+  
+  // Settings
+  timezone    String        @default("America/Sao_Paulo")
+  currency    String        @default("BRL")
+  language    String        @default("pt-BR")
+  dateFormat  String        @default("DD/MM/YYYY")
+  timeFormat  String        @default("24h")
+  
+  // Inventory Settings
+  lowStockThreshold    Int     @default(10)
+  autoReorderEnabled   Boolean @default(false)
+  trackExpiration      Boolean @default(false)
+  
+  // Notification Settings
+  emailNotifications   Boolean @default(true)
+  smsNotifications     Boolean @default(false)
+  lowStockAlerts       Boolean @default(true)
+  expirationAlerts     Boolean @default(true)
+  
+  // Additional fields
+  logo        Json?              // CompanyLogo object
+  description String?
+  foundedAt   DateTime?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  categories  Category[]
+  products    Product[]
+  suppliers   Supplier[]
+  customers   Customer[]
+  transactions Transaction[]
+  inventoryMovements InventoryMovement[]
+  auditLogs   AuditLog[]
+  notifications Notification[]
+  paymentOrders PaymentOrder[]
+  catalogs    Catalog[]
+  images      Image[]
+  
+  @@map("companies")
+}
+
+model User {
+  id                    String     @id @default(cuid())
+  email                 String     @unique
+  password              String
+  role                  UserRole
+  status                UserStatus @default(ACTIVE)
+  
+  // Profile
+  firstName             String
+  lastName              String
+  phone                 String?
+  avatar                Json?              // UserAvatar object
+  lastLoginAt           DateTime?
+  
+  // Permissions
+  canCreateUsers        Boolean    @default(false)
+  canDeleteUsers        Boolean    @default(false)
+  canManageProducts     Boolean    @default(false)
+  canManageCategories   Boolean    @default(false)
+  canManageInventory    Boolean    @default(false)
+  canViewReports        Boolean    @default(false)
+  canManageCompany      Boolean    @default(false)
+  canManageSuppliers    Boolean    @default(false)
+  canManageCustomers    Boolean    @default(false)
+  
+  // Company relation (null for SUPER_ADMIN)
+  companyId             String?
+  company               Company?   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Email verification
+  emailVerified         Boolean    @default(false)
+  emailVerificationToken String?
+  
+  // Password reset
+  passwordResetToken    String?
+  passwordResetExpires  DateTime?
+  
+  // Preferences
+  preferences           Json?
+  
+  // Timestamps
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  
+  // Relations
+  transactions          Transaction[]
+  inventoryMovements    InventoryMovement[]
+  auditLogs             AuditLog[]
+  notifications         Notification[]
+  sessions              UserSession[]
+  paymentOrders         PaymentOrder[]
+  uploadedImages        Image[]
+  
+  @@map("users")
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  @@map("user_sessions")
+}
+
+model Category {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  slug        String
+  status      CategoryStatus @default(ACTIVE)
+  
+  // Hierarchy
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      Category?      @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[]     @relation("CategoryHierarchy")
+  
+  // Hierarchy metadata
+  level       Int            @default(0)
+  path        String[]       @default([])
+  fullPath    String
+  
+  // Settings
+  allowSubcategories Boolean @default(true)
+  requireSpecifications Boolean @default(false)
+  customFields       Json?
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[]
+  image           String?
+  icon            String?
+  sortOrder       Int        @default(0)
+  
+  // Timestamps
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // Relations
+  products        Product[]
+  
+  @@unique([companyId, slug])
+  @@map("categories")
+}
+
+model Supplier {
+  id          String         @id @default(cuid())
+  name        String
+  legalName   String?
+  document    String         // CPF or CNPJ
+  type        SupplierType
+  status      SupplierStatus @default(ACTIVE)
+  
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Contact information
+  contacts    Json           // Array of contact objects
+  addresses   Json           // Array of address objects
+  
+  // Business information
+  website     String?
+  description String?
+  
+  // Payment terms
+  paymentMethod      String  @default("CASH")
+  creditLimit        Float?
+  paymentDays        Int     @default(30)
+  discountPercentage Float?
+  discountDays       Int?
+  
+  // Rating
+  qualityRating      Float   @default(3)
+  deliveryRating     Float   @default(3)
+  communicationRating Float  @default(3)
+  priceRating        Float   @default(3)
+  overallRating      Float   @default(3)
+  ratingLastUpdated  DateTime @default(now())
+  
+  // Additional fields
+  notes        String?
+  tags         String[]
+  isPreferred  Boolean @default(false)
+  
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  products     Product[]
+  transactions Transaction[]
+  paymentOrders PaymentOrder[]
+  
+  @@unique([companyId, document])
+  @@map("suppliers")
+}
+
+model Customer {
+  id          String         @id @default(cuid())
+  name        String
+  legalName   String?
+  document    String         // CPF or CNPJ
+  type        CustomerType
+  status      CustomerStatus @default(ACTIVE)
+  
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Contact information
+  contacts    Json           // Array of contact objects
+  addresses   Json           // Array of address objects
+  
+  // Business information
+  website     String?
+  description String?
+  
+  // Payment information
+  preferredPaymentMethod String  @default("CASH")
+  creditLimit            Float?
+  paymentTerms           Int?
+  hasOutstandingBalance  Boolean @default(false)
+  outstandingAmount      Float?
+  
+  // Preferences
+  preferredContactMethod String  @default("EMAIL")
+  receivePromotions      Boolean @default(false)
+  receiveNewsletter      Boolean @default(false)
+  language               String  @default("pt-BR")
+  timezone               String  @default("America/Sao_Paulo")
+  
+  // Additional fields
+  notes         String?
+  tags          String[]
+  birthDate     DateTime?
+  isVip         Boolean @default(false)
+  totalPurchases Float  @default(0)
+  lastPurchaseAt DateTime?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  transactions  Transaction[]
+  paymentOrders PaymentOrder[]
+  
+  @@unique([companyId, document])
+  @@map("customers")
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  sku         String
+  barcode     String?
+  status      ProductStatus @default(ACTIVE)
+  type        ProductType
+  
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  supplierId  String?
+  supplier    Supplier?     @relation(fields: [supplierId], references: [id])
+  
+  // Product details
+  specifications Json       // Array of specification objects
+  images         Json       // Array of ProductImage objects with variants
+  
+  // Kit/SubItems
+  isKit          Boolean    @default(false)
+  
+  // Pricing
+  costPrice      Float
+  sellingPrice   Float
+  discountPrice  Float?
+  bulkPricing    Json?      // Array of bulk pricing objects
+  
+  // Inventory
+  currentStock   Int        @default(0)
+  minStock       Int        @default(0)
+  maxStock       Int?
+  reservedStock  Int        @default(0)
+  lastRestockedAt DateTime?
+  nextRestockDate DateTime?
+  
+  // Compatibility (for auto parts)
+  vehicleMake    String?
+  vehicleModel   String?
+  vehicleYear    String?
+  engineType     String?
+  partNumber     String?
+  oemNumber      String?
+  
+  // Additional fields
+  weight         Float?
+  length         Float?
+  width          Float?
+  height         Float?
+  brand          String?
+  model          String?
+  warranty       Int?        // months
+  expirationDate DateTime?
+  notes          String?
+  
+  // SEO
+  metaTitle      String?
+  metaDescription String?
+  keywords       String[]
+  slug           String
+  
+  // Timestamps
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  
+  // Relations
+  transactionItems TransactionItem[]
+  inventoryMovements InventoryMovement[]
+  attachments ProductAttachment[]
+  subItems ProductSubItem[]
+  parentSubItems ProductSubItem[] @relation("ProductSubItems")
+  
+  @@unique([companyId, sku])
+  @@unique([companyId, slug])
+  @@map("products")
+}
+
+model Transaction {
+  id            String           @id @default(cuid())
+  type          TransactionType
+  status        TransactionStatus @default(PENDING)
+  paymentStatus PaymentStatus    @default(PENDING)
+  
+  companyId     String
+  company       Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      Customer?        @relation(fields: [customerId], references: [id])
+  supplierId    String?
+  supplier      Supplier?        @relation(fields: [supplierId], references: [id])
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  
+  // Transaction details
+  reference     String?
+  notes         String?
+  discount      Float?
+  tax           Float?
+  shippingCost  Float?
+  
+  // Dates
+  transactionDate DateTime @default(now())
+  dueDate         DateTime?
+  paidAt          DateTime?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  items           TransactionItem[]
+  payments        TransactionPayment[]
+  inventoryMovements InventoryMovement[]
+  
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  quantity      Int
+  unitPrice     Float
+  discount      Float?
+  notes         String?
+  
+  @@map("transaction_items")
+}
+
+model TransactionPayment {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  method        String      // CASH, CREDIT, PIX, CARD, TRANSFER
+  amount        Float
+  reference     String?
+  processedAt   DateTime?
+  
+  @@map("transaction_payments")
+}
+
+model InventoryMovement {
+  id            String         @id @default(cuid())
+  productId     String
+  product       Product        @relation(fields: [productId], references: [id])
+  companyId     String
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type          MovementType
+  reason        MovementReason
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  unitCost      Float?
+  totalCost     Float?
+  reference     String?        // transaction ID or other reference
+  transactionId String?
+  transaction   Transaction?   @relation(fields: [transactionId], references: [id])
+  notes         String?
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  movementDate  DateTime       @default(now())
+  
+  // Timestamps
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  @@map("inventory_movements")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      String   // CREATE, UPDATE, DELETE
+  changes     Json?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  paymentOrderId String?
+  paymentOrder PaymentOrder? @relation(fields: [paymentOrderId], references: [id], onDelete: Cascade)
+  catalogId   String?
+  catalog     Catalog? @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  imageId     String?
+  image       Image? @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  @@map("audit_logs")
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  type        NotificationType
+  priority    NotificationPriority @default(MEDIUM)
+  status      NotificationStatus @default(UNREAD)
+  title       String
+  message     String
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entityId    String?
+  entityType  String?
+  metadata    Json?
+  readAt      DateTime?
+  
+  // Timestamps
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  @@map("notifications")
+}
+
+model NotificationTemplate {
+  id          String             @id @default(cuid())
+  type        NotificationType
+  priority    NotificationPriority @default(MEDIUM)
+  title       String
+  message     String
+  variables   String[]
+  isActive    Boolean            @default(true)
+  
+  // Timestamps
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  @@map("notification_templates")
+}
+
+model NotificationPreferences {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  email       Json     // { enabled: boolean, types: string[], frequency: string }
+  push        Json     // { enabled: boolean, types: string[] }
+  sms         Json     // { enabled: boolean, types: string[], phone?: string }
+  inApp       Json     // { enabled: boolean, types: string[] }
+  
+  // Timestamps
+  updatedAt   DateTime @updatedAt
+  
+  @@map("notification_preferences")
+}
+
+model ProductAttachment {
+  id          String         @id @default(cuid())
+  productId   String
+  product     Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  url         String
+  type        AttachmentType
+  size        Int            // in bytes
+  description String?
+  uploadedAt  DateTime       @default(now())
+  
+  // Timestamps
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  @@map("product_attachments")
+}
+
+model ProductSubItem {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  subProductId  String
+  subProduct    Product  @relation("ProductSubItems", fields: [subProductId], references: [id])
+  quantity      Int
+  isRequired    Boolean  @default(true)
+  notes         String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([productId, subProductId])
+  @@map("product_sub_items")
+}
+
+model PaymentOrder {
+  id            String             @id @default(cuid())
+  number        String             @unique // Sequential number
+  type          PaymentOrderType
+  status        PaymentOrderStatus @default(PENDING)
+  companyId     String
+  company       Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Basic information
+  title         String
+  description   String?
+  priority      String             @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  
+  // Related entities
+  supplierId    String?
+  supplier      Supplier?          @relation(fields: [supplierId], references: [id])
+  customerId    String?
+  customer      Customer?          @relation(fields: [customerId], references: [id])
+  userId        String
+  user          User               @relation(fields: [userId], references: [id])
+  
+  // Items and amounts
+  items         Json               // Array of payment order items
+  totalAmount   Float
+  approvedAmount Float             @default(0)
+  executedAmount Float             @default(0)
+  
+  // Approval workflow
+  approvals     Json               // Array of approvals
+  requiresApproval Boolean         @default(true)
+  approvalLimit Float?
+  
+  // Execution
+  execution     Json?              // Execution details
+  
+  // Dates
+  requestedAt   DateTime           @default(now())
+  approvedAt    DateTime?
+  executedAt    DateTime?
+  dueDate       DateTime?
+  
+  // Additional information
+  notes         String?
+  tags          String[]
+  
+  // Timestamps
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  
+  // Relations
+  auditLogs     AuditLog[]
+  
+  @@map("payment_orders")
+}
+
+model Catalog {
+  id          String        @id @default(cuid())
+  type        CatalogType
+  name        String
+  code        String
+  description String?
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  status      CatalogStatus @default(ACTIVE)
+  
+  // Metadata for specific types
+  metadata    Json?
+  
+  // Hierarchy support
+  parentId    String?
+  parent      Catalog?      @relation("CatalogHierarchy", fields: [parentId], references: [id])
+  children    Catalog[]     @relation("CatalogHierarchy")
+  
+  // Hierarchy metadata
+  level       Int           @default(0)
+  path        String[]      @default([])
+  fullPath    String
+  
+  // Ordering and defaults
+  sortOrder   Int           @default(0)
+  isDefault   Boolean       @default(false)
+  
+  // Timestamps
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  auditLogs   AuditLog[]
+  
+  @@unique([companyId, type, code])
+  @@map("catalogs")
+}
+
+model Image {
+  id            String        @id @default(cuid())
+  url           String
+  type          ImageType
+  status        ImageStatus   @default(UPLOADING)
+  companyId     String
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Entity relationship
+  entityId      String
+  entityType    String
+  
+  // Image metadata
+  metadata      Json          // ImageMetadata object
+  variants      Json          // ImageVariants object
+  
+  // Additional information
+  tags          String[]      @default([])
+  isPublic      Boolean       @default(false)
+  uploadedBy    String
+  uploadedByUser User         @relation(fields: [uploadedBy], references: [id])
+  
+  // Processing information
+  processingJobId String?
+  errorMessage    String?
+  
+  // Timestamps
+  uploadedAt    DateTime      @default(now())
+  processedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  auditLogs     AuditLog[]
+  
+  @@index([companyId, type])
+  @@index([entityId, entityType])
+  @@index([status])
+  @@index([uploadedBy])
+  @@map("images")
+}
