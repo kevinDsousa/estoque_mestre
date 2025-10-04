@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm --filter front build && if [ -d 'apps/front/dist/front/browser' ]; then cp -r apps/front/dist/front/browser/* apps/front/dist/front/ && rm -rf apps/front/dist/front/browser; fi",
+  "buildCommand": "pnpm --filter front build && mkdir -p dist && if [ -d 'apps/front/dist/front/browser' ]; then cp -r apps/front/dist/front/browser/* dist/ && rm -rf apps/front/dist/front/browser; fi",
   "installCommand": "pnpm install",
   "framework": null,
-  "outputDirectory": "apps/front/dist/front"
+  "outputDirectory": "dist"
 }
