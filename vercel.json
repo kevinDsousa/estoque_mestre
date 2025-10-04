@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm --filter front build",
+  "buildCommand": "./build-frontend.sh",
   "installCommand": "pnpm install",
   "framework": null,
-  "outputDirectory": "apps/front/dist/front/browser"
+  "outputDirectory": "apps/front/dist/front"
 }
