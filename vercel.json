@@ -1,6 +1,6 @@
 {
   "buildCommand": "ng build",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "pnpm install",
   "framework": null,
   "outputDirectory": "dist/front/browser",
   "rewrites": [
