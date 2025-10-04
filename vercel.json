@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd apps/front && pnpm run build",
+  "buildCommand": "pnpm --filter front build",
   "installCommand": "pnpm install",
   "framework": null,
   "outputDirectory": "apps/front/dist/front/browser"
