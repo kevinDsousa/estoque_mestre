@@ -8,10 +8,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "apps/front/dist/front/browser/**": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
