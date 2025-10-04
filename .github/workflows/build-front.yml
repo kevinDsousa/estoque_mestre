@@ -1,0 +1,35 @@
+# .github/workflows/build-front.yml
+name: Build and Push Front Docker Image
+
+on:
+  push:
+    branches: [ "main" ] # Roda quando houver push na branch main
+    paths:
+      - 'apps/front/**'
+      - 'packages/**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Permissão para fazer push no GHCR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Contexto na raiz do monorepo
+          file: ./apps/front/Dockerfile # Caminho para o Dockerfile do Front
+          push: true
+          tags: ghcr.io/${{ github.repository }}/front:latest,ghcr.io/${{ github.repository }}/front:${{ github.sha }}
