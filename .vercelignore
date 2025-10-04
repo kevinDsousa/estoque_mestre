@@ -1,12 +1,19 @@
-node_modules
-apps/api
-packages/models/src
-packages/models/dist
-packages/eslint-config
-packages/typescript-config
-packages/ui
+# Arquivos que devem ser ignorados no deploy da Vercel
+node_modules/
+.git/
+.turbo/
+apps/api/
+packages/models/src/
+packages/models/dist/
+packages/eslint-config/
+packages/typescript-config/
+packages/ui/
 *.log
 .env*
 .DS_Store
-coverage
+coverage/
 .nyc_output
+test/
+tests/
+**/*.test.*
+**/*.spec.*

@@ -1,0 +1,244 @@
+name: CI Otimizado com Cache Turbo
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  # Job 1: Detecta mudanças e cria versão enxuta
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      front: ${{ steps.changes.outputs.front }}
+      api: ${{ steps.changes.outputs.api }}
+      models: ${{ steps.changes.outputs.models }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            front:
+              - 'apps/front/**'
+              - 'packages/**'
+            api:
+              - 'apps/api/**'
+              - 'packages/**'
+            models:
+              - 'packages/models/**'
+
+  # Job 2: Build do Frontend (só executa se houver mudanças)
+  build-front:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.front == 'true' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create pruned workspace for frontend
+        run: pnpm turbo prune front --docker
+
+      - name: Setup Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: out/.turbo
+          key: ${{ runner.os }}-turbo-front-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-front-
+
+      - name: Build frontend
+        run: |
+          cd out
+          pnpm install --frozen-lockfile
+          pnpm turbo build --filter=front
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: out/apps/front/dist/
+          retention-days: 1
+
+  # Job 3: Build da API (só executa se houver mudanças)
+  build-api:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create pruned workspace for API
+        run: pnpm turbo prune api --docker
+
+      - name: Setup Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: out/.turbo
+          key: ${{ runner.os }}-turbo-api-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-api-
+
+      - name: Build API
+        run: |
+          cd out
+          pnpm install --frozen-lockfile
+          pnpm turbo build --filter=api
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-build
+          path: out/apps/api/dist/
+          retention-days: 1
+
+  # Job 4: Build dos Models (só executa se houver mudanças)
+  build-models:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.models == 'true' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create pruned workspace for models
+        run: pnpm turbo prune @estoque-mestre/models --docker
+
+      - name: Setup Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: out/.turbo
+          key: ${{ runner.os }}-turbo-models-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-models-
+
+      - name: Build models
+        run: |
+          cd out
+          pnpm install --frozen-lockfile
+          pnpm turbo build --filter=@estoque-mestre/models
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: models-build
+          path: out/packages/models/dist/
+          retention-days: 1
+
+  # Job 5: Deploy para Vercel (só se frontend mudou)
+  deploy-vercel:
+    runs-on: ubuntu-latest
+    needs: [changes, build-front]
+    if: ${{ needs.changes.outputs.front == 'true' && needs.build-front.result == 'success' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./

@@ -4,23 +4,61 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/test/**",
+        "!**/tests/**"
+      ],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
         "dist/**",
-        "apps/front/dist/**"
+        "apps/front/dist/**",
+        "apps/api/dist/**",
+        "packages/models/dist/**"
+      ],
+      "env": [
+        "NODE_ENV"
       ]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*"
+      ]
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^check-types"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     }
-  }
+  },
+  "globalDependencies": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "turbo.json"
+  ]
 }

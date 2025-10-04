@@ -1,8 +1,8 @@
 {
-  "buildCommand": "ng build",
-  "installCommand": "pnpm install",
+  "buildCommand": "pnpm turbo prune front --docker && cd out/full && cp ../pnpm-lock.yaml . && pnpm install --frozen-lockfile && pnpm turbo build --filter=front",
+  "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
-  "outputDirectory": "dist/front/browser",
+  "outputDirectory": "out/full/apps/front/dist/front/browser",
   "rewrites": [
     {
       "source": "/(.*)",
