@@ -1,12 +1,17 @@
 {
-  "buildCommand": "pnpm --filter front build",
+  "buildCommand": "pnpm turbo prune front --docker && cd out && pnpm install --frozen-lockfile && pnpm turbo build --filter=front",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
-  "outputDirectory": "apps/front/dist/front/browser",
+  "outputDirectory": "out/apps/front/dist/front/browser",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "apps/front/dist/front/browser/**": {
+      "maxDuration": 30
+    }
+  }
 }
