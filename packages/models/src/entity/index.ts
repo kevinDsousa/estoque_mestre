@@ -14,3 +14,11 @@ export * from './audit-log.entity';
 export * from './payment-order.entity';
 export * from './catalog.entity';
 export * from './image.entity';
+
+// Payment and Subscription entities
+export * from './subscription.entity';
+export * from './subscription-plan.entity';
+export * from './payment.entity';
+
+// Error Logging entities
+export * from './error-log.entity';
