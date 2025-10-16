@@ -63,6 +63,12 @@ export class ProductService {
       }
     }
 
+    // Generate slug from name
+    const slug = createProductDto.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
     const product = await this.prisma.product.create({
       data: {
         name: createProductDto.name,
@@ -83,6 +89,7 @@ export class ProductService {
         weight: createProductDto.weight,
         brand: createProductDto.brand,
         model: createProductDto.model,
+        slug: slug,
       },
       include: {
         category: true,
@@ -97,7 +104,7 @@ export class ProductService {
           productId: product.id,
           companyId,
           type: MovementType.IN,
-          reason: MovementReason.INITIAL_STOCK,
+          reason: MovementReason.PURCHASE,
           quantity: createProductDto.currentStock,
           previousStock: 0,
           newStock: createProductDto.currentStock,
@@ -280,7 +287,7 @@ export class ProductService {
 
     // Create inventory movement record
     const movementType = adjustStockDto.quantity > 0 ? MovementType.IN : MovementType.OUT;
-    const movementReason = adjustStockDto.quantity > 0 ? MovementReason.ADJUSTMENT_IN : MovementReason.ADJUSTMENT_OUT;
+    const movementReason = MovementReason.ADJUSTMENT;
     
     await this.prisma.inventoryMovement.create({
       data: {
