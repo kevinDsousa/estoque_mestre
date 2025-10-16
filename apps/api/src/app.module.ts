@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { CompanyModule } from './modules/company/company.module';
 import { ProductModule } from './modules/product/product.module';
 import { CategoryModule } from './modules/category/category.module';
+import { SupplierModule } from './modules/supplier/supplier.module';
 import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -37,6 +38,7 @@ import { DatabaseHealthCheckService } from './database/health-check.service';
     CompanyModule,
     ProductModule,
     CategoryModule,
+    SupplierModule,
     ErrorLoggingModule,
   ],
   controllers: [AppController],
