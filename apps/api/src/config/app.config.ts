@@ -6,4 +6,5 @@ export default registerAs('app', () => ({
   version: process.env.API_VERSION || 'v1',
   environment: process.env.NODE_ENV || 'development',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:4200',
+  enableSwagger: (process.env.ENABLE_SWAGGER || 'true') === 'true',
 }));

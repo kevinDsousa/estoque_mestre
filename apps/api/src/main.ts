@@ -33,40 +33,43 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle(swaggerConfig.title)
-    .setDescription(swaggerConfig.description)
-    .setVersion(swaggerConfig.version)
-    .setContact(
-      swaggerConfig.contact.name,
-      swaggerConfig.contact.email,
-      '',
-    )
-    .setLicense(swaggerConfig.license.name, swaggerConfig.license.url)
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
-    .addServer(swaggerConfig.servers[0].url, swaggerConfig.servers[0].description)
-    .addServer(swaggerConfig.servers[1].url, swaggerConfig.servers[1].description)
-    .build();
+  // Swagger documentation (gated by env)
+  const enableSwagger = configService.get<boolean>('app.enableSwagger');
+  if (enableSwagger) {
+    const config = new DocumentBuilder()
+      .setTitle(swaggerConfig.title)
+      .setDescription(swaggerConfig.description)
+      .setVersion(swaggerConfig.version)
+      .setContact(
+        swaggerConfig.contact.name,
+        swaggerConfig.contact.email,
+        '',
+      )
+      .setLicense(swaggerConfig.license.name, swaggerConfig.license.url)
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter JWT token',
+          in: 'header',
+        },
+        'JWT-auth',
+      )
+      .addServer(swaggerConfig.servers[0].url, swaggerConfig.servers[0].description)
+      .addServer(swaggerConfig.servers[1].url, swaggerConfig.servers[1].description)
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`${globalPrefix}/docs`, app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-      tagsSorter: 'alpha',
-      operationsSorter: 'alpha',
-    },
-  });
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(`${globalPrefix}/docs`, app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+      },
+    });
+  }
 
   // Start server
   const port = configService.get<number>('app.port') || 3003;

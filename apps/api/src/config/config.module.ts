@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 import appConfig from './app.config';
 import databaseConfig from './database.config';
 import jwtConfig from './jwt.config';
@@ -22,6 +23,36 @@ import emailConfig from './email.config';
         emailConfig,
       ],
       envFilePath: ['.env.local', '.env'],
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+        // App
+        API_PORT: Joi.number().default(3003),
+        API_GLOBAL_PREFIX: Joi.string().default('api'),
+        FRONTEND_URL: Joi.string().uri().default('http://localhost:4200'),
+        ENABLE_SWAGGER: Joi.boolean().default(true),
+        // Database
+        DATABASE_URL: Joi.string().uri().required(),
+        ERROR_LOGS_DB_URL: Joi.string().uri().required(),
+        // JWT
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRES_IN: Joi.string().default('7d'),
+        JWT_REFRESH_SECRET: Joi.string().required(),
+        JWT_REFRESH_EXPIRES_IN: Joi.string().default('30d'),
+        // Throttle
+        API_THROTTLE_TTL: Joi.number().default(60),
+        API_THROTTLE_LIMIT: Joi.number().default(100),
+        // MinIO
+        MINIO_ENDPOINT: Joi.string().default('localhost'),
+        MINIO_PORT: Joi.number().default(9000),
+        MINIO_USE_SSL: Joi.boolean().default(false),
+        MINIO_ACCESS_KEY: Joi.string().default('minioadmin'),
+        MINIO_SECRET_KEY: Joi.string().default('minioadmin'),
+        MINIO_BUCKET_NAME: Joi.string().default('estoque-mestre'),
+        // Stripe (optional in dev)
+        STRIPE_SECRET_KEY: Joi.string().allow('').default(''),
+        STRIPE_PUBLISHABLE_KEY: Joi.string().allow('').default(''),
+        STRIPE_WEBHOOK_SECRET: Joi.string().allow('').default(''),
+      }),
     }),
   ],
   exports: [NestConfigModule],
