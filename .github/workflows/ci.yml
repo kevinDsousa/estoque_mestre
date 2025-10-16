@@ -1,4 +1,4 @@
-name: CI
+name: CI (light)
 
 on:
   push:
@@ -6,86 +6,14 @@ on:
   pull_request:
     branches: [ main ]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  build:
+  noop:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Print pnpm version
-        run: pnpm --version
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build shared models
-        run: pnpm --filter @estoque-mestre/models build
-
-      - name: Build API
-        env:
-          # Prisma only needs a value to generate client; it won't connect during build
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-          ERROR_LOGS_DB_URL: postgresql://postgres:postgres@localhost:5432/postgres
-        run: pnpm --filter api build
-
-      - name: Build Frontend
-        run: pnpm --filter front build
-
-      - name: Upload Pages artifact (frontend)
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/front/dist/front
-
-      - name: Upload API artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-dist
-          path: apps/api/dist
-
-      - name: Upload Frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: front-dist
-          path: apps/front/dist/front
-
-      - name: Upload Models artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: models-dist
-          path: packages/models/dist
-
-  deploy-pages:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Note
+        run: |
+          echo "Skipping builds and deploys here. Frontend is built on Vercel."
 
 
