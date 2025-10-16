@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
@@ -17,15 +18,15 @@ import { LoggerService } from './common/logger/logger.service';
     ConfigModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService) => ({
+      useFactory: (configService: ConfigService) => ({
         throttlers: [
           {
-            ttl: configService.get<number>('throttle.ttl') * 1000,
-            limit: configService.get<number>('throttle.limit'),
+            ttl: (configService.get('throttle.ttl') || 60) * 1000,
+            limit: configService.get('throttle.limit') || 100,
           },
         ],
       }),
-      inject: ['ConfigService'],
+      inject: [ConfigService],
     }),
     DatabaseModule,
     AuthModule,

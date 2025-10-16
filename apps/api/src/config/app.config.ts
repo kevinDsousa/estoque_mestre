@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('app', () => ({
-  port: parseInt(process.env.API_PORT, 10) || 3000,
+  port: parseInt(process.env.API_PORT || '3003', 10),
   globalPrefix: process.env.API_GLOBAL_PREFIX || 'api',
   version: process.env.API_VERSION || 'v1',
   environment: process.env.NODE_ENV || 'development',

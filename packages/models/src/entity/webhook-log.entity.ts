@@ -19,6 +19,10 @@ export class WebhookLog implements IBaseEntity {
   errorMessage?: string;
   retryCount!: number;
   
+  // Base entity fields
+  createdAt!: Date;
+  updatedAt!: Date;
+  
   // Timestamps
   triggeredAt!: Date;
 

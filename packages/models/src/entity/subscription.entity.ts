@@ -5,7 +5,6 @@
 import { IBaseEntityWithCompany } from '../interfaces/base.interface';
 import { 
   SubscriptionStatus, 
-  SubscriptionPlan, 
   PaymentStatus,
   ISubscriptionFeatures,
   ISubscriptionBilling
@@ -21,7 +20,7 @@ export class Subscription implements IBaseEntityWithCompany {
   stripePriceId!: string;
   
   // Plan information
-  plan!: SubscriptionPlan;
+  planId!: string;
   planName!: string;
   planDescription?: string;
   
@@ -103,7 +102,7 @@ export class Subscription implements IBaseEntityWithCompany {
   }
 
   isTrialing(): boolean {
-    return this.isInTrial && this.trialEnd && new Date() < this.trialEnd;
+    return !!(this.isInTrial && this.trialEnd && new Date() < this.trialEnd);
   }
 
   // Payment status checks
@@ -166,11 +165,12 @@ export class Subscription implements IBaseEntityWithCompany {
 
   // Feature checks
   hasFeature(feature: string): boolean {
-    return this.features[feature] === true;
+    return (this.features as any)[feature] === true;
   }
 
   getFeatureLimit(feature: string): number {
-    return this.features[feature] || 0;
+    const value = (this.features as any)[feature];
+    return typeof value === 'number' ? value : 0;
   }
 
   canUseFeature(feature: string, currentUsage: number): boolean {

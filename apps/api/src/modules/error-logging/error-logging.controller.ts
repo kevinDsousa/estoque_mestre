@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ErrorLoggingService } from './error-logging.service';
-import { CreateErrorLogDto } from '@estoque-mestre/models';
+import { CreateErrorLogDto } from './dto/create-error-log.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @Controller('error-logs')

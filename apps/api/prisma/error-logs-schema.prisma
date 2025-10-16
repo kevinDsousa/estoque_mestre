@@ -1,0 +1,73 @@
+// Error Logs Database Schema
+// This is a separate database for error logging
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/error-logs-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("ERROR_LOGS_DB_URL")
+}
+
+model ErrorLog {
+  id            String   @id @default(cuid())
+  errorId       String   @unique
+  errorType     String
+  errorMessage  String
+  errorCode     String?
+  severity      ErrorSeverity
+  source        ErrorSource
+  component     String?
+  url           String?
+  method        String?
+  userId        String?
+  companyId     String?
+  sessionId     String?
+  status        ErrorStatus @default(UNPROCESSED)
+  processedAt   DateTime?
+  processedBy   String?
+  timestamp     DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Additional context
+  browserInfo   Json?
+  deviceInfo    Json?
+  networkInfo   Json?
+  metadata      Json?
+  tags          String[]
+  stack         String?
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([severity])
+  @@index([source])
+  @@index([timestamp])
+  @@index([status])
+  @@map("error_logs")
+}
+
+enum ErrorSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ErrorSource {
+  FRONTEND
+  BACKEND
+  API
+  DATABASE
+  EXTERNAL
+}
+
+enum ErrorStatus {
+  UNPROCESSED
+  PROCESSING
+  PROCESSED
+  IGNORED
+  RESOLVED
+}

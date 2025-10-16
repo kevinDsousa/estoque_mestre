@@ -48,6 +48,9 @@ export interface ISubscriptionFeatures {
   emailIntegration: boolean;
   exportData: boolean;
   backupData: boolean;
+  
+  // Index signature for dynamic access
+  [key: string]: boolean | number;
 }
 
 export interface ISubscriptionBilling {

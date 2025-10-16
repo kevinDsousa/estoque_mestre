@@ -130,11 +130,12 @@ export class SubscriptionPlan implements IBaseEntity {
 
   // Feature checks
   hasFeature(feature: string): boolean {
-    return this.features[feature] === true;
+    return (this.features as any)[feature] === true;
   }
 
   getFeatureLimit(feature: string): number {
-    return this.features[feature] || 0;
+    const value = (this.features as any)[feature];
+    return typeof value === 'number' ? value : 0;
   }
 
   isUnlimited(feature: string): boolean {
