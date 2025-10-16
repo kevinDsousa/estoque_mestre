@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared models
+        run: pnpm --filter @estoque-mestre/models build
+
+      - name: Build API
+        env:
+          # Prisma only needs a value to generate client; it won't connect during build
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          ERROR_LOGS_DB_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: pnpm --filter api build
+
+      - name: Build Frontend
+        run: pnpm --filter front build
+
+      - name: Upload API artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-dist
+          path: apps/api/dist
+
+      - name: Upload Frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: front-dist
+          path: apps/front/dist/front
+
+      - name: Upload Models artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: models-dist
+          path: packages/models/dist
+
+

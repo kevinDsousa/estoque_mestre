@@ -50,3 +50,4 @@ export class CreateErrorLogDto {
   @IsOptional()
   context?: Record<string, any>;
 }
+
