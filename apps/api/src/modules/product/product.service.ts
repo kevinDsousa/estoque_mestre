@@ -5,10 +5,14 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
 import { TransferStockDto } from './dto/transfer-stock.dto';
 import { ProductStatus, MovementType, MovementReason } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ProductService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
 
   async create(createProductDto: CreateProductDto, companyId: string) {
     // Check if product with same SKU already exists in company
@@ -305,6 +309,9 @@ export class ProductService {
       },
     });
 
+    // Check for stock alerts after update
+    await this.checkStockAlerts(updatedProduct.id, companyId, newStock);
+
     return updatedProduct;
   }
 
@@ -433,5 +440,37 @@ export class ProductService {
       expiringProducts,
       totalStockValue: totalValue._sum.currentStock || 0,
     };
+  }
+
+  private async checkStockAlerts(productId: string, companyId: string, currentStock: number) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) return;
+
+    // Check for out of stock
+    if (currentStock === 0) {
+      await this.notificationService.createOutOfStockAlert(productId, companyId);
+    }
+    // Check for low stock
+    else if (currentStock <= product.minStock) {
+      await this.notificationService.createLowStockAlert(productId, companyId, currentStock, product.minStock);
+    }
+
+    // Check for expiration alerts
+    if (product.expirationDate) {
+      const today = new Date();
+      const expirationDate = new Date(product.expirationDate);
+      const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysUntilExpiration < 0) {
+        // Product is expired
+        await this.notificationService.createExpiredProductAlert(productId, companyId, expirationDate);
+      } else if (daysUntilExpiration <= 7) {
+        // Product expires in 7 days or less
+        await this.notificationService.createExpirationWarningAlert(productId, companyId, expirationDate, daysUntilExpiration);
+      }
+    }
   }
 }

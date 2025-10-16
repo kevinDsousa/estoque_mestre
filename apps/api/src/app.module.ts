@@ -14,6 +14,9 @@ import { SupplierModule } from './modules/supplier/supplier.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { UserModule } from './modules/user/user.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { MinioModule } from './modules/minio/minio.module';
+import { ImageModule } from './modules/image/image.module';
 import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -44,8 +47,11 @@ import { DatabaseHealthCheckService } from './database/health-check.service';
     SupplierModule,
     CustomerModule,
     TransactionModule,
-    UserModule,
-    ErrorLoggingModule,
+          UserModule,
+          NotificationModule,
+          MinioModule,
+          ImageModule,
+          ErrorLoggingModule,
   ],
   controllers: [AppController],
   providers: [

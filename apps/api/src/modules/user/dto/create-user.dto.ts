@@ -35,7 +35,7 @@ export class CreateUserDto {
   @MaxLength(15)
   phone?: string;
 
-  @ApiProperty({ enum: UserRole, description: 'User role', default: UserRole.USER })
+  @ApiProperty({ enum: UserRole, description: 'User role', default: UserRole.MANAGER })
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;

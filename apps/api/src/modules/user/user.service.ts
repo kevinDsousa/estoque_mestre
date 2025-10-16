@@ -34,19 +34,13 @@ export class UserService {
         firstName: createUserDto.firstName,
         lastName: createUserDto.lastName,
         phone: createUserDto.phone,
-        role: createUserDto.role || UserRole.USER,
+        role: createUserDto.role || UserRole.MANAGER,
         status: createUserDto.status || UserStatus.ACTIVE,
-        isActive: createUserDto.isActive !== undefined ? createUserDto.isActive : true,
-        notes: createUserDto.notes,
         companyId,
-        createdBy,
       },
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
@@ -97,17 +91,11 @@ export class UserService {
           lastName: true,
           phone: true,
           role: true,
-          status: true,
-          isActive: true,
-          notes: true,
           lastLoginAt: true,
           createdAt: true,
           updatedAt: true,
           company: {
             select: { id: true, name: true },
-          },
-          createdByUser: {
-            select: { id: true, email: true, firstName: true, lastName: true },
           },
           _count: {
             select: {
@@ -137,9 +125,6 @@ export class UserService {
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
@@ -186,16 +171,10 @@ export class UserService {
         phone: updateUserDto.phone,
         role: updateUserDto.role,
         status: updateUserDto.status,
-        isActive: updateUserDto.isActive,
-        notes: updateUserDto.notes,
-        updatedBy,
       },
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
@@ -211,11 +190,23 @@ export class UserService {
     const user = await this.findOne(id, companyId);
 
     // Check if user can be deleted
-    if (user._count.transactions > 0) {
+    const userWithCounts = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            transactions: true,
+            inventoryMovements: true,
+          },
+        },
+      },
+    });
+
+    if (userWithCounts?._count?.transactions && userWithCounts._count.transactions > 0) {
       throw new BadRequestException('Cannot delete user with transaction history');
     }
 
-    if (user._count.inventoryMovements > 0) {
+    if (userWithCounts?._count?.inventoryMovements && userWithCounts._count.inventoryMovements > 0) {
       throw new BadRequestException('Cannot delete user with inventory movement history');
     }
 
@@ -223,16 +214,11 @@ export class UserService {
     return this.prisma.user.update({
       where: { id },
       data: {
-        isActive: false,
         status: UserStatus.INACTIVE,
-        updatedBy: deletedBy,
       },
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
@@ -253,15 +239,10 @@ export class UserService {
         firstName: updateProfileDto.firstName,
         lastName: updateProfileDto.lastName,
         phone: updateProfileDto.phone,
-        notes: updateProfileDto.notes,
-        updatedBy: id, // User updating their own profile
       },
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
@@ -300,7 +281,6 @@ export class UserService {
       where: { id },
       data: {
         password: hashedNewPassword,
-        updatedBy: id,
       },
       select: {
         id: true,
@@ -309,7 +289,6 @@ export class UserService {
         lastName: true,
         role: true,
         status: true,
-        isActive: true,
         updatedAt: true,
       },
     });
@@ -322,15 +301,10 @@ export class UserService {
       where: { id },
       data: { 
         status,
-        isActive: status === UserStatus.ACTIVE,
-        updatedBy,
       },
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
@@ -349,14 +323,10 @@ export class UserService {
       where: { id },
       data: { 
         role,
-        updatedBy,
       },
       include: {
         company: {
           select: { id: true, name: true },
-        },
-        createdByUser: {
-          select: { id: true, email: true, firstName: true, lastName: true },
         },
         _count: {
           select: {
