@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,6 +50,11 @@ jobs:
       - name: Build Frontend
         run: pnpm --filter front build
 
+      - name: Upload Pages artifact (frontend)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/front/dist/front
+
       - name: Upload API artifact
         uses: actions/upload-artifact@v4
         with:
@@ -58,5 +72,17 @@ jobs:
         with:
           name: models-dist
           path: packages/models/dist
+
+  deploy-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
 
