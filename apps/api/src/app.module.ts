@@ -12,6 +12,7 @@ import { ProductModule } from './modules/product/product.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { CustomerModule } from './modules/customer/customer.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -41,6 +42,7 @@ import { DatabaseHealthCheckService } from './database/health-check.service';
     CategoryModule,
     SupplierModule,
     CustomerModule,
+    TransactionModule,
     ErrorLoggingModule,
   ],
   controllers: [AppController],
