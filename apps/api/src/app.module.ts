@@ -1,10 +1,52 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigModule } from './config/config.module';
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './auth/auth.module';
+import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { LoggerService } from './common/logger/logger.service';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService) => ({
+        throttlers: [
+          {
+            ttl: configService.get<number>('throttle.ttl') * 1000,
+            limit: configService.get<number>('throttle.limit'),
+          },
+        ],
+      }),
+      inject: ['ConfigService'],
+    }),
+    DatabaseModule,
+    AuthModule,
+    ErrorLoggingModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    LoggerService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

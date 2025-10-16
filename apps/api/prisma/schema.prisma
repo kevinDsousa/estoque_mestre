@@ -285,9 +285,9 @@ model Company {
   
   // Notification Settings
   emailNotifications   Boolean @default(true)
-  smsNotifications     Boolean @default(false)
   lowStockAlerts       Boolean @default(true)
   expirationAlerts     Boolean @default(true)
+  criticalAlerts       Boolean @default(true)
   
   // Additional fields
   logo        Json?              // CompanyLogo object
@@ -311,6 +311,16 @@ model Company {
   paymentOrders PaymentOrder[]
   catalogs    Catalog[]
   images      Image[]
+  subscription Subscription?
+  payments    Payment[]
+  
+  // Advanced features relations
+  qualityInspections QualityInspection[]
+  productBatches ProductBatch[]
+  integrations Integration[]
+  businessMetrics BusinessMetric[]
+  autoReplenishments AutoReplenishment[]
+  webhooks Webhook[]
   
   @@map("companies")
 }
@@ -367,6 +377,7 @@ model User {
   sessions              UserSession[]
   paymentOrders         PaymentOrder[]
   uploadedImages        Image[]
+  qualityInspections    QualityInspection[]
   
   @@map("users")
 }
@@ -381,7 +392,7 @@ model UserSession {
   ipAddress String?
   createdAt DateTime @default(now())
   
-  @@map("user_sessions")
+  @@map("userSessions")
 }
 
 model Category {
@@ -474,6 +485,8 @@ model Supplier {
   products     Product[]
   transactions Transaction[]
   paymentOrders PaymentOrder[]
+  productBatches ProductBatch[]
+  autoReplenishments AutoReplenishment[]
   
   @@unique([companyId, document])
   @@map("suppliers")
@@ -550,7 +563,6 @@ model Product {
   
   // Product details
   specifications Json       // Array of specification objects
-  images         Json       // Array of ProductImage objects with variants
   
   // Kit/SubItems
   isKit          Boolean    @default(false)
@@ -604,6 +616,12 @@ model Product {
   attachments ProductAttachment[]
   subItems ProductSubItem[]
   parentSubItems ProductSubItem[] @relation("ProductSubItems")
+  productImages ProductImage[]
+  
+  // Advanced features relations
+  qualityInspections QualityInspection[]
+  productBatches ProductBatch[]
+  autoReplenishment AutoReplenishment?
   
   @@unique([companyId, sku])
   @@unique([companyId, slug])
@@ -660,7 +678,7 @@ model TransactionItem {
   discount      Float?
   notes         String?
   
-  @@map("transaction_items")
+  @@map("transactionItems")
 }
 
 model TransactionPayment {
@@ -672,7 +690,7 @@ model TransactionPayment {
   reference     String?
   processedAt   DateTime?
   
-  @@map("transaction_payments")
+  @@map("transactionPayments")
 }
 
 model InventoryMovement {
@@ -700,7 +718,7 @@ model InventoryMovement {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   
-  @@map("inventory_movements")
+  @@map("inventoryMovements")
 }
 
 model AuditLog {
@@ -723,7 +741,7 @@ model AuditLog {
   userAgent   String?
   createdAt   DateTime @default(now())
   
-  @@map("audit_logs")
+  @@map("auditLogs")
 }
 
 model Notification {
@@ -762,7 +780,7 @@ model NotificationTemplate {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   
-  @@map("notification_templates")
+  @@map("notificationTemplates")
 }
 
 model NotificationPreferences {
@@ -770,13 +788,13 @@ model NotificationPreferences {
   userId      String   @unique
   email       Json     // { enabled: boolean, types: string[], frequency: string }
   push        Json     // { enabled: boolean, types: string[] }
-  sms         Json     // { enabled: boolean, types: string[], phone?: string }
   inApp       Json     // { enabled: boolean, types: string[] }
   
   // Timestamps
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  @@map("notification_preferences")
+  @@map("notificationPreferences")
 }
 
 model ProductAttachment {
@@ -794,7 +812,7 @@ model ProductAttachment {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   
-  @@map("product_attachments")
+  @@map("productAttachments")
 }
 
 model ProductSubItem {
@@ -812,7 +830,7 @@ model ProductSubItem {
   updatedAt     DateTime @updatedAt
   
   @@unique([productId, subProductId])
-  @@map("product_sub_items")
+  @@map("productSubItems")
 }
 
 model PaymentOrder {
@@ -867,7 +885,7 @@ model PaymentOrder {
   // Relations
   auditLogs     AuditLog[]
   
-  @@map("payment_orders")
+  @@map("paymentOrders")
 }
 
 model Catalog {
@@ -942,10 +960,496 @@ model Image {
   
   // Relations
   auditLogs     AuditLog[]
+  productImages ProductImage[]
   
   @@index([companyId, type])
   @@index([entityId, entityType])
   @@index([status])
   @@index([uploadedBy])
   @@map("images")
+}
+
+model ProductImage {
+  id            String        @id @default(cuid())
+  productId     String
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageId       String
+  image         Image         @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  
+  // Image properties
+  type          String        @default("GALLERY") // MAIN, DETAIL, GALLERY, THUMBNAIL
+  isPrimary     Boolean       @default(false)
+  order         Int           @default(0)
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@unique([productId, imageId])
+  @@index([productId, type])
+  @@index([productId, isPrimary])
+  @@map("productImages")
+}
+
+// ==============================================
+// SUBSCRIPTION AND PAYMENT MODELS
+// ==============================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+}
+
+enum SubscriptionPaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum SubscriptionPaymentMethod {
+  CARD
+  BANK_TRANSFER
+  PIX
+  BOLETO
+}
+
+enum PaymentType {
+  SUBSCRIPTION
+  ONE_TIME
+  REFUND
+}
+
+enum PlanStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum PlanType {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+model SubscriptionPlan {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  slug        String        @unique
+  
+  // Plan details
+  type        PlanType
+  status      PlanStatus    @default(ACTIVE)
+  
+  // Pricing
+  monthlyPrice Int           // in cents
+  yearlyPrice  Int?          // in cents
+  currency     String        @default("BRL")
+  
+  // Features
+  features     Json          // SubscriptionFeatures object
+  
+  // Stripe integration
+  stripePriceId String?
+  stripeProductId String?
+  
+  // Display settings
+  isPopular    Boolean       @default(false)
+  isRecommended Boolean      @default(false)
+  displayOrder Int           @default(0)
+  
+  // Availability
+  isPublic     Boolean       @default(true)
+  availableFrom DateTime?
+  availableUntil DateTime?
+  
+  // Trial settings
+  trialDays    Int           @default(0)
+  
+  // Promotional settings
+  isPromotional Boolean      @default(false)
+  promotionalPrice Int?
+  promotionalStartDate DateTime?
+  promotionalEndDate DateTime?
+  promotionalDescription String?
+  
+  // Referral settings
+  referralReward Int         @default(0) // in cents
+  referralRewardType String  @default("fixed") // percentage or fixed
+  
+  // Timestamps
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Relations
+  subscriptions Subscription[]
+  
+  @@map("subscriptionPlans")
+}
+
+model Subscription {
+  id              String                    @id @default(cuid())
+  companyId       String
+  company         Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  planId          String
+  plan            SubscriptionPlan          @relation(fields: [planId], references: [id])
+  
+  // Stripe integration
+  stripeCustomerId String
+  stripeSubscriptionId String?
+  stripePriceId   String
+  
+  // Status and billing
+  status          SubscriptionStatus        @default(ACTIVE)
+  paymentStatus   SubscriptionPaymentStatus @default(PENDING)
+  
+  // Pricing
+  amount          Int                       // in cents
+  currency        String                    @default("BRL")
+  interval        String                    @default("month") // month or year
+  intervalCount   Int                       @default(1)
+  
+  // Features
+  features        Json                      // SubscriptionFeatures object
+  
+  // Billing information
+  billing         Json                      // SubscriptionBilling object
+  
+  // Trial information
+  trialStart      DateTime?
+  trialEnd        DateTime?
+  isInTrial       Boolean                   @default(false)
+  
+  // Payment dates
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  nextBillingDate    DateTime?
+  
+  // Payment history
+  lastPaymentDate DateTime?
+  lastPaymentAmount Int?
+  failedPaymentCount Int                    @default(0)
+  lastFailedPaymentDate DateTime?
+  
+  // Cancellation
+  cancelAtPeriodEnd Boolean                 @default(false)
+  canceledAt       DateTime?
+  cancellationReason String?
+  
+  // Discounts and promotions
+  discountCode    String?
+  discountAmount  Int?
+  discountType    String?                   // percentage or fixed
+  discountEndDate DateTime?
+  
+  // Referral system
+  referredBy      String?                   // Company ID
+  referralCode    String?
+  referralDiscount Int?
+  
+  // Timestamps
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  
+  // Relations
+  payments        Payment[]
+  
+  @@unique([companyId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([stripeCustomerId])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  subscriptionId  String
+  subscription    Subscription  @relation(fields: [subscriptionId], references: [id])
+  
+  // Stripe integration
+  stripePaymentIntentId String?
+  stripeChargeId String?
+  stripeInvoiceId String?
+  
+  // Payment information
+  amount          Int           // in cents
+  currency        String        @default("BRL")
+  status          SubscriptionPaymentStatus @default(PENDING)
+  method          SubscriptionPaymentMethod @default(CARD)
+  type            PaymentType   @default(SUBSCRIPTION)
+  
+  // Payment details
+  details         Json          // PaymentDetails object
+  
+  // Billing period
+  billingPeriodStart DateTime
+  billingPeriodEnd   DateTime
+  
+  // Payment dates
+  attemptedAt     DateTime?
+  paidAt          DateTime?
+  failedAt        DateTime?
+  refundedAt      DateTime?
+  
+  // Failure information
+  failure         Json?         // PaymentFailure object
+  retryCount      Int           @default(0)
+  maxRetries      Int           @default(3)
+  
+  // Refund information
+  refundAmount    Int?
+  refundReason    String?
+  refundedBy      String?       // User ID
+  
+  // Webhook information
+  webhookReceived Boolean       @default(false)
+  webhookProcessedAt DateTime?
+  webhookSignature String?
+  
+  // Additional information
+  description     String?
+  metadata        Json?
+  
+  // Timestamps
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([companyId])
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+// ==============================================
+// ADVANCED FEATURES MODELS
+// ==============================================
+
+enum QualityStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_REVIEW
+}
+
+enum BatchStatus {
+  ACTIVE
+  EXPIRED
+  RECALLED
+  QUARANTINED
+}
+
+enum IntegrationType {
+  ERP
+  MARKETPLACE
+  SHIPPING
+  BANKING
+  ACCOUNTING
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  SYNCING
+}
+
+enum BusinessMetricType {
+  REVENUE
+  COST
+  PROFIT
+  TURNOVER
+  ABC_ANALYSIS
+  SALES_TREND
+}
+
+model QualityInspection {
+  id            String        @id @default(cuid())
+  productId     String
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchNumber   String
+  inspectionDate DateTime
+  inspectorId   String
+  inspector     User          @relation(fields: [inspectorId], references: [id])
+  companyId     String
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Inspection details
+  results       Json          // Array of inspection results
+  status        QualityStatus @default(PENDING)
+  notes         String?
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@map("qualityInspections")
+}
+
+model ProductBatch {
+  id                String      @id @default(cuid())
+  productId         String
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchNumber       String
+  manufacturingDate DateTime
+  expiryDate        DateTime?
+  supplierId        String?
+  supplier          Supplier?   @relation(fields: [supplierId], references: [id])
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Batch details
+  quantity          Int
+  remainingQuantity Int
+  status            BatchStatus @default(ACTIVE)
+  qualityStatus     QualityStatus @default(PENDING)
+  
+  // Location tracking
+  location          String?
+  warehouse         String?
+  
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@unique([productId, batchNumber])
+  @@map("productBatches")
+}
+
+model Integration {
+  id            String            @id @default(cuid())
+  name          String
+  type          IntegrationType
+  status        IntegrationStatus @default(INACTIVE)
+  companyId     String
+  company       Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Configuration
+  config        Json              // Integration configuration
+  credentials   Json              // Encrypted credentials
+  webhookUrl    String?
+  
+  // Sync settings
+  syncFrequency String            @default("HOURLY") // REAL_TIME, HOURLY, DAILY
+  lastSyncAt    DateTime?
+  nextSyncAt    DateTime?
+  
+  // Error handling
+  errorCount    Int               @default(0)
+  lastErrorAt   DateTime?
+  lastErrorMessage String?
+  
+  // Timestamps
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  @@map("integrations")
+}
+
+model BusinessMetric {
+  id            String            @id @default(cuid())
+  companyId     String
+  company       Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type          BusinessMetricType
+  period        String            // DAILY, WEEKLY, MONTHLY, YEARLY
+  periodStart   DateTime
+  periodEnd     DateTime
+  
+  // Metric data
+  value         Float
+  metadata      Json?             // Additional metric data
+  calculatedAt  DateTime          @default(now())
+  
+  // Timestamps
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  @@unique([companyId, type, period, periodStart])
+  @@map("businessMetrics")
+}
+
+model AutoReplenishment {
+  id              String    @id @default(cuid())
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Replenishment settings
+  minStock        Int
+  maxStock        Int
+  reorderPoint    Int
+  leadTime        Int       // days
+  supplierId      String?
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  
+  // Status
+  isActive        Boolean   @default(true)
+  lastCalculation DateTime?
+  nextOrderDate   DateTime?
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([productId])
+  @@map("autoReplenishments")
+}
+
+model Webhook {
+  id            String   @id @default(cuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Webhook details
+  name          String
+  url           String
+  events        String[] // Array of event types
+  secret        String   // Webhook secret for signature verification
+  
+  // Status
+  isActive      Boolean  @default(true)
+  lastTriggered DateTime?
+  successCount  Int      @default(0)
+  failureCount  Int      @default(0)
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  logs WebhookLog[]
+  
+  @@map("webhooks")
+}
+
+model WebhookLog {
+  id            String   @id @default(cuid())
+  webhookId     String
+  webhook       Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  
+  // Request details
+  event         String
+  payload       Json
+  response      Json?
+  statusCode    Int?
+  
+  // Status
+  success       Boolean
+  errorMessage  String?
+  retryCount    Int      @default(0)
+  
+  // Timestamps
+  triggeredAt   DateTime @default(now())
+  
+  @@map("webhookLogs")
 }

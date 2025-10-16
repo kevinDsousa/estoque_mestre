@@ -168,6 +168,18 @@ graph TD
 - ✅ Alertas automáticos por severidade
 - ✅ Analytics de erros e tendências
 
+### Funcionalidades Avançadas
+- ✅ **Segurança e Compliance**: LGPD, auditoria, backup
+- ✅ **Analytics e BI**: Métricas de negócio, previsão de demanda
+- ✅ **Integrações**: ERPs, marketplaces, transportadoras
+- ✅ **Mobile e Offline**: PWA, app nativo, sincronização
+- ✅ **Automação e IA**: Reabastecimento automático, preços dinâmicos
+- ✅ **Escalabilidade**: Cache Redis, CDN, load balancing
+- ✅ **Notificações**: Push, email, SMS, WhatsApp
+- ✅ **Qualidade**: Controle de qualidade, lotes, rastreabilidade
+- ✅ **Financeiro**: Gestão completa, impostos, multi-moeda
+- ✅ **Multi-tenant**: White-label, customizações, templates
+
 ## 🚀 Tecnologias
 
 ### Backend
@@ -195,7 +207,7 @@ graph TD
 - [`architecture/`](./architecture/) - Arquitetura detalhada
 - [`entities/`](./entities/) - Documentação das entidades
 - [`flows/`](./flows/) - Fluxos de negócio
-- [`modules/`](./modules/) - Módulos específicos
+- [`modules/`](./modules/) - Módulos específicos e funcionalidades avançadas
 - [`api/`](./api/) - Documentação da API
 - [`deployment/`](./deployment/) - Guias de deploy
 
@@ -206,7 +218,8 @@ graph TD
 3. ✅ Documentação das entidades existentes
 4. ✅ Fluxos de negócio detalhados
 5. ✅ Sistema de logs de erro
-6. ✅ Guias de desenvolvimento
+6. ✅ Funcionalidades avançadas mapeadas
+7. ✅ Guias de desenvolvimento
 
 ---
 
