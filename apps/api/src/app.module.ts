@@ -7,11 +7,14 @@ import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
+import { CompanyModule } from './modules/company/company.module';
+import { ProductModule } from './modules/product/product.module';
 import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggerService } from './common/logger/logger.service';
+import { DatabaseHealthCheckService } from './database/health-check.service';
 
 @Module({
   imports: [
@@ -30,12 +33,15 @@ import { LoggerService } from './common/logger/logger.service';
     }),
     DatabaseModule,
     AuthModule,
+    CompanyModule,
+    ProductModule,
     ErrorLoggingModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     LoggerService,
+    DatabaseHealthCheckService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,

@@ -1,11 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { DatabaseHealthCheckService } from './database/health-check.service';
 
 @ApiTags('health')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly dbHealth: DatabaseHealthCheckService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Health check endpoint' })
@@ -50,5 +54,12 @@ export class AppController {
   })
   getHealth() {
     return this.appService.getHealth();
+  }
+
+  @Get('health/db')
+  @ApiOperation({ summary: 'Database health check' })
+  @ApiResponse({ status: 200, description: 'Database connection OK' })
+  async getDbHealth() {
+    return this.dbHealth.check();
   }
 }
