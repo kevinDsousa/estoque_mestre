@@ -7,13 +7,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ErrorLoggingService } from '../../modules/error-logging/error-logging.service';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
-
-  constructor(private readonly errorLoggingService: ErrorLoggingService) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -39,22 +36,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       error = exception.name;
     }
 
-    // Log error to database if we have user context
+    // Log error to console (simplified for now)
     const user = (request as any).user;
     if (user) {
-      this.errorLoggingService.logBackendError(
-        user.id,
-        user.companyId,
-        exception,
-        {
-          method: request.method,
-          url: request.url,
-          userAgent: request.get('User-Agent'),
-          ip: request.ip,
-          body: request.body,
-          query: request.query,
-          params: request.params,
-        },
+      this.logger.error(
+        `User Error: ${user.id} - ${request.method} ${request.url} - ${message}`,
       );
     }
 
