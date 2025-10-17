@@ -8,12 +8,15 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Public } from '../common/decorators/public.decorator';
+import { User } from '../common/decorators/user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({ summary: 'Authenticate user and return tokens' })
@@ -23,6 +26,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
@@ -32,6 +36,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({ status: 201, description: 'New access token issued' })
@@ -46,8 +51,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getProfile(@Request() req) {
-    return this.authService.getProfile(req.user.userId);
+  async getProfile(@User('userId') userId: string) {
+    return this.authService.getProfile(userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -57,8 +62,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @Request() req) {
-    return this.authService.changePassword(req.user.userId, changePasswordDto);
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @User('userId') userId: string) {
+    return this.authService.changePassword(userId, changePasswordDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -67,7 +72,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout current user' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@Request() req) {
-    return this.authService.logout(req.user.userId);
+  async logout(@User('userId') userId: string) {
+    return this.authService.logout(userId);
   }
 }
