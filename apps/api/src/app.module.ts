@@ -19,6 +19,8 @@ import { MinioModule } from './modules/minio/minio.module';
 import { ImageModule } from './modules/image/image.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { SubscriptionPlanModule } from './modules/subscription-plan/subscription-plan.module';
 import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -55,6 +57,8 @@ import { DatabaseHealthCheckService } from './database/health-check.service';
           ImageModule,
           StripeModule,
           PaymentModule,
+          SubscriptionModule,
+          SubscriptionPlanModule,
           ErrorLoggingModule,
   ],
   controllers: [AppController],
