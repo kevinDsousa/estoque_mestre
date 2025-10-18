@@ -1,5 +1,6 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { AuthContextService } from '../../common/services/auth-context.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
@@ -12,6 +13,7 @@ export class ProductService {
   constructor(
     private prisma: PrismaService,
     private notificationService: NotificationService,
+    private authContextService: AuthContextService,
   ) {}
 
   async create(createProductDto: CreateProductDto, companyId: string) {
@@ -322,14 +324,25 @@ export class ProductService {
       throw new BadRequestException('Insufficient stock for transfer');
     }
 
-    // For now, we'll just update the product without location validation
-    // TODO: Implement location management when Location model is available
+    // Update product with location validation
+    if (transferStockDto.targetLocationId) {
+      const targetLocation = await this.prisma.location.findFirst({
+        where: {
+          id: transferStockDto.targetLocationId,
+          companyId,
+          isActive: true,
+        },
+      });
 
-    // Update product (location will be handled when Location model is available)
+      if (!targetLocation) {
+        throw new BadRequestException('Target location not found or inactive');
+      }
+    }
+
     const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: {
-        // locationId: transferStockDto.targetLocationId, // TODO: Add when Location model exists
+        // Location will be handled at the batch level
       },
     });
 

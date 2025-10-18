@@ -23,8 +23,15 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { SubscriptionPlanModule } from './modules/subscription-plan/subscription-plan.module';
 import { ErrorLoggingModule } from './modules/error-logging/error-logging.module';
+import { EmailModule } from './modules/email/email.module';
+import { LocationModule } from './modules/location/location.module';
+import { QualityModule } from './modules/quality/quality.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { IntegrationModule } from './modules/integration/integration.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { AuthContextInterceptor } from './common/interceptors/auth-context.interceptor';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggerService } from './common/logger/logger.service';
 import { DatabaseHealthCheckService } from './database/health-check.service';
@@ -63,12 +70,22 @@ import { CustomThrottlerGuard } from './common/guards/throttler.guard';
           SubscriptionModule,
           SubscriptionPlanModule,
           ErrorLoggingModule,
-  ],
+          EmailModule,
+          LocationModule,
+          QualityModule,
+          AdminModule,
+          IntegrationModule,
+          ReportsModule,
+        ],
   controllers: [AppController],
   providers: [
     AppService,
     LoggerService,
     DatabaseHealthCheckService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuthContextInterceptor,
+    },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ResponseInterceptor,

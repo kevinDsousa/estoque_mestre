@@ -3,11 +3,12 @@ import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { DatabaseModule } from '../../database/database.module';
 import { NotificationModule } from '../notification/notification.module';
+import { AuthContextService } from '../../common/services/auth-context.service';
 
 @Module({
   imports: [DatabaseModule, NotificationModule],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService, AuthContextService],
   exports: [ProductService],
 })
 export class ProductModule {}

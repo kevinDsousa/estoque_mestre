@@ -1,12 +1,16 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyStatus } from '@prisma/client';
 
 @Injectable()
 export class CompanyService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   async create(createCompanyDto: CreateCompanyDto) {
     // Check if company with same document already exists
@@ -38,8 +42,13 @@ export class CompanyService {
       },
     });
 
-    // TODO: Send verification email
-    // await this.emailService.sendCompanyVerificationEmail(company);
+    // Send verification email
+    await this.emailService.sendEmailVerification({
+      name: createCompanyDto.name,
+      email: createCompanyDto.email,
+      verificationLink: `${process.env.FRONTEND_URL}/verify-company?token=${company.id}`,
+      companyName: createCompanyDto.name,
+    });
 
     return company;
   }
@@ -156,8 +165,13 @@ export class CompanyService {
       },
     });
 
-    // TODO: Send approval email
-    // await this.emailService.sendCompanyApprovalEmail(company, reason);
+    // Send approval email
+    await this.emailService.sendCompanyApproval({
+      companyName: company.name,
+      email: company.email,
+      status: 'approved',
+      adminName: 'Administrador',
+    });
 
     // TODO: Create default subscription
     // await this.subscriptionService.createDefaultSubscription(id);
@@ -179,8 +193,14 @@ export class CompanyService {
       },
     });
 
-    // TODO: Send rejection email
-    // await this.emailService.sendCompanyRejectionEmail(company, reason);
+    // Send rejection email
+    await this.emailService.sendCompanyApproval({
+      companyName: company.name,
+      email: company.email,
+      status: 'rejected',
+      reason,
+      adminName: 'Administrador',
+    });
 
     return updatedCompany;
   }

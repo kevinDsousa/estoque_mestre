@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { NotificationPreferenceDto } from './dto/notification-preference.dto';
@@ -8,7 +9,10 @@ import { NotificationType, NotificationPriority, NotificationStatus, UserRole } 
 
 @Injectable()
 export class NotificationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   async create(createNotificationDto: CreateNotificationDto, companyId: string, userId?: string) {
     const notification = await this.prisma.notification.create({
@@ -260,10 +264,50 @@ export class NotificationService {
       )
     );
 
+    // Send email notifications to users who have email notifications enabled
+    await this.sendEmailNotifications(notifications, companyId);
+
     return {
       sent: notifications.length,
       notifications: notifications.slice(0, 10), // Return first 10 for preview
     };
+  }
+
+  private async sendEmailNotifications(notifications: any[], companyId: string) {
+    for (const notification of notifications) {
+      try {
+        // Get user preferences
+        const user = await this.prisma.user.findUnique({
+          where: { id: notification.userId },
+          select: { 
+            email: true, 
+            firstName: true, 
+            preferences: true,
+            company: { select: { name: true } }
+          },
+        });
+
+        if (!user) continue;
+
+        // Check if user has email notifications enabled
+        const preferences = user.preferences as any;
+        const emailEnabled = preferences?.email?.enabled !== false; // Default to true
+
+        if (emailEnabled) {
+          await this.emailService.sendNotificationEmail({
+            name: user.firstName,
+            email: user.email,
+            title: notification.title,
+            message: notification.message,
+            priority: notification.priority.toLowerCase(),
+            actionUrl: notification.metadata?.actionUrl,
+            companyName: user.company?.name,
+          });
+        }
+      } catch (error) {
+        console.error(`Failed to send email notification to user ${notification.userId}:`, error);
+      }
+    }
   }
 
   async getNotificationStats(companyId: string, userId?: string) {

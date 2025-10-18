@@ -3,9 +3,10 @@ import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
 import { DatabaseModule } from '../../database/database.module';
 import { NotificationScheduler } from './notification.scheduler';
+import { EmailModule } from '../email/email.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, EmailModule],
   controllers: [NotificationController],
   providers: [NotificationService, NotificationScheduler],
   exports: [NotificationService],

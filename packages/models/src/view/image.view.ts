@@ -296,3 +296,4 @@ export type ImageValidationRulesPortuguese = z.infer<typeof ImageValidationRules
 
 
 
+

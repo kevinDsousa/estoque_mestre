@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - Estoque Mestre</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: {{#if (eq priority 'critical')}}#dc3545{{else if (eq priority 'high')}}#fd7e14{{else if (eq priority 'medium')}}#ffc107{{else}}#007bff{{/if}};
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+        }
+        .button {
+            display: inline-block;
+            background-color: {{#if (eq priority 'critical')}}#dc3545{{else if (eq priority 'high')}}#fd7e14{{else if (eq priority 'medium')}}#ffc107{{else}}#007bff{{/if}};
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .priority-critical { background-color: #dc3545; color: white; }
+        .priority-high { background-color: #fd7e14; color: white; }
+        .priority-medium { background-color: #ffc107; color: #000; }
+        .priority-low { background-color: #6c757d; color: white; }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔔 {{title}}</h1>
+        <p>Estoque Mestre</p>
+    </div>
+    
+    <div class="content">
+        <div class="priority-badge priority-{{priority}}">
+            {{#if (eq priority 'critical')}}🚨 Crítica{{/if}}
+            {{#if (eq priority 'high')}}⚠️ Alta{{/if}}
+            {{#if (eq priority 'medium')}}📢 Média{{/if}}
+            {{#if (eq priority 'low')}}ℹ️ Baixa{{/if}}
+        </div>
+        
+        <h2>Olá {{name}}!</h2>
+        
+        <p>{{message}}</p>
+        
+        {{#if actionUrl}}
+        <p>Clique no botão abaixo para ver mais detalhes:</p>
+        
+        <a href="{{actionUrl}}" class="button">Ver Detalhes</a>
+        {{/if}}
+        
+        <p>Esta notificação foi enviada automaticamente pelo sistema Estoque Mestre.</p>
+        
+        {{#if companyName}}
+        <p><small>Empresa: {{companyName}}</small></p>
+        {{/if}}
+    </div>
+    
+    <div class="footer">
+        <p>Este é um email automático, não responda a esta mensagem.</p>
+        <p>© 2024 Estoque Mestre. Todos os direitos reservados.</p>
+    </div>
+</body>
+</html>
+

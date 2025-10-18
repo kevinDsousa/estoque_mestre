@@ -27,6 +27,7 @@ import { AdjustStockDto } from './dto/adjust-stock.dto';
 import { TransferStockDto } from './dto/transfer-stock.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ProductStatus } from '@prisma/client';
+import { AuthContext } from '../../common/decorators/auth-context.decorator';
 
 @ApiTags('products')
 @Controller('products')
@@ -40,8 +41,8 @@ export class ProductController {
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 409, description: 'Product with this SKU or barcode already exists' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  create(@Body() createProductDto: CreateProductDto, @Request() req) {
-    return this.productService.create(createProductDto, req.user.companyId);
+  create(@Body() createProductDto: CreateProductDto, @AuthContext() authContext: any) {
+    return this.productService.create(createProductDto, authContext.companyId);
   }
 
   @Get()

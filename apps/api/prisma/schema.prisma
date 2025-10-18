@@ -18,6 +18,7 @@ enum UserRole {
   SUPER_ADMIN
   ADMIN
   MANAGER
+  EMPLOYEE
 }
 
 enum UserStatus {
@@ -32,6 +33,9 @@ enum CompanyStatus {
   INACTIVE
   SUSPENDED
   PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  PENDING
 }
 
 enum CompanyType {
@@ -294,6 +298,20 @@ model Company {
   description String?
   foundedAt   DateTime?
   
+  // Audit fields
+  approvedAt      DateTime?
+  approvedBy      String?
+  approvalReason  String?
+  rejectedAt      DateTime?
+  rejectedBy      String?
+  rejectionReason String?
+  suspendedAt     DateTime?
+  suspendedBy     String?
+  suspensionReason String?
+  suspensionEndDate DateTime?
+  reactivatedAt   DateTime?
+  reactivatedBy   String?
+  
   // Timestamps
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -313,6 +331,7 @@ model Company {
   images      Image[]
   subscription Subscription?
   payments    Payment[]
+  locations   Location[]
   
   // Advanced features relations
   qualityInspections QualityInspection[]
@@ -376,6 +395,11 @@ model User {
   notifications         Notification[]
   sessions              UserSession[]
   paymentOrders         PaymentOrder[]
+  syncLogs              SyncLog[]
+  integrationsCreated   Integration[] @relation("IntegrationCreatedBy")
+  integrationsUpdated   Integration[] @relation("IntegrationUpdatedBy")
+  webhooksCreated       Webhook[] @relation("WebhookCreatedBy")
+  webhooksUpdated       Webhook[] @relation("WebhookUpdatedBy")
   uploadedImages        Image[]
   qualityInspections    QualityInspection[]
   
@@ -713,6 +737,12 @@ model InventoryMovement {
   userId        String
   user          User           @relation(fields: [userId], references: [id])
   movementDate  DateTime       @default(now())
+  
+  // Location tracking
+  fromLocationId String?
+  fromLocation   Location? @relation("MovementFromLocation", fields: [fromLocationId], references: [id])
+  toLocationId   String?
+  toLocation     Location? @relation("MovementToLocation", fields: [toLocationId], references: [id])
   
   // Timestamps
   createdAt     DateTime       @default(now())
@@ -1263,6 +1293,21 @@ enum IntegrationStatus {
   SYNCING
 }
 
+enum SyncDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+enum SyncEntity {
+  PRODUCTS
+  CUSTOMERS
+  SUPPLIERS
+  ORDERS
+  INVENTORY
+  CATEGORIES
+}
+
 enum BusinessMetricType {
   REVENUE
   COST
@@ -1270,6 +1315,13 @@ enum BusinessMetricType {
   TURNOVER
   ABC_ANALYSIS
   SALES_TREND
+}
+
+enum MetricPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
 }
 
 model QualityInspection {
@@ -1286,6 +1338,7 @@ model QualityInspection {
   // Inspection details
   results       Json          // Array of inspection results
   status        QualityStatus @default(PENDING)
+  passRate      Float?        // Calculated pass rate percentage
   notes         String?
   
   // Timestamps
@@ -1314,8 +1367,9 @@ model ProductBatch {
   qualityStatus     QualityStatus @default(PENDING)
   
   // Location tracking
-  location          String?
-  warehouse         String?
+  locationId        String?
+  location          Location? @relation(fields: [locationId], references: [id])
+  locationString    String?   // Fallback for simple location tracking
   
   // Timestamps
   createdAt         DateTime    @default(now())
@@ -1325,34 +1379,138 @@ model ProductBatch {
   @@map("productBatches")
 }
 
+model Location {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  code        String   @unique
+  type        LocationType @default(WAREHOUSE)
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  country     String   @default("Brasil")
+  
+  // Company relationship
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Parent-child relationship for hierarchical locations
+  parentId    String?
+  parent      Location? @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children    Location[] @relation("LocationHierarchy")
+  
+  // Status and metadata
+  isActive    Boolean  @default(true)
+  capacity    Int?     // Maximum capacity (optional)
+  currentStock Int     @default(0) // Current stock count
+  metadata    Json?    // Additional location-specific data
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  productBatches ProductBatch[]
+  inventoryMovementsFrom InventoryMovement[] @relation("MovementFromLocation")
+  inventoryMovementsTo InventoryMovement[] @relation("MovementToLocation")
+  
+  @@unique([companyId, code])
+  @@map("locations")
+}
+
+enum LocationType {
+  WAREHOUSE
+  STORE
+  SHELF
+  RACK
+  BIN
+  OFFICE
+  OTHER
+}
+
 model Integration {
   id            String            @id @default(cuid())
   name          String
+  description   String?
   type          IntegrationType
   status        IntegrationStatus @default(INACTIVE)
   companyId     String
   company       Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   
+  // API Configuration
+  baseUrl       String?
+  apiKey        String?
+  username      String?
+  password      String?
+  
   // Configuration
   config        Json              // Integration configuration
-  credentials   Json              // Encrypted credentials
+  credentials   Json?             // Encrypted credentials
   webhookUrl    String?
   
   // Sync settings
   syncFrequency String            @default("HOURLY") // REAL_TIME, HOURLY, DAILY
+  syncInterval  Int?              // Interval in minutes
   lastSyncAt    DateTime?
   nextSyncAt    DateTime?
+  lastConnectionTest DateTime?
+  
+  // Status
+  isActive      Boolean           @default(true)
+  notes         String?
   
   // Error handling
   errorCount    Int               @default(0)
   lastErrorAt   DateTime?
   lastErrorMessage String?
   
+  // User tracking
+  createdBy     String?
+  createdByUser User?             @relation("IntegrationCreatedBy", fields: [createdBy], references: [id])
+  updatedBy     String?
+  updatedByUser User?             @relation("IntegrationUpdatedBy", fields: [updatedBy], references: [id])
+  
   // Timestamps
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   
+  // Relations
+  syncLogs      SyncLog[]
+  webhooks      Webhook[]
+  
   @@map("integrations")
+}
+
+model SyncLog {
+  id            String        @id @default(cuid())
+  integrationId String
+  integration   Integration   @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  
+  // Sync details
+  entity        SyncEntity
+  direction     SyncDirection
+  status        String        @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  
+  // Results
+  recordsProcessed  Int       @default(0)
+  recordsSucceeded  Int       @default(0)
+  recordsFailed     Int       @default(0)
+  errorMessage      String?
+  
+  // Metadata
+  metadata      Json?
+  
+  // User tracking
+  startedBy     String?
+  startedByUser User?        @relation(fields: [startedBy], references: [id])
+  
+  // Timestamps
+  createdAt     DateTime     @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+  
+  @@map("syncLogs")
 }
 
 model BusinessMetric {
@@ -1360,7 +1518,7 @@ model BusinessMetric {
   companyId     String
   company       Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   type          BusinessMetricType
-  period        String            // DAILY, WEEKLY, MONTHLY, YEARLY
+  period        MetricPeriod
   periodStart   DateTime
   periodEnd     DateTime
   
@@ -1407,20 +1565,33 @@ model AutoReplenishment {
 
 model Webhook {
   id            String   @id @default(cuid())
+  integrationId String?
+  integration   Integration? @relation(fields: [integrationId], references: [id], onDelete: Cascade)
   companyId     String
   company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   
   // Webhook details
-  name          String
+  name          String?
   url           String
   events        String[] // Array of event types
   secret        String   // Webhook secret for signature verification
+  
+  // Configuration
+  headers       Json?    // Additional headers
+  timeout       Int      @default(30000) // Timeout in milliseconds
+  retryAttempts Int      @default(3)
   
   // Status
   isActive      Boolean  @default(true)
   lastTriggered DateTime?
   successCount  Int      @default(0)
   failureCount  Int      @default(0)
+  
+  // User tracking
+  createdBy     String?
+  createdByUser User?    @relation("WebhookCreatedBy", fields: [createdBy], references: [id])
+  updatedBy     String?
+  updatedByUser User?    @relation("WebhookUpdatedBy", fields: [updatedBy], references: [id])
   
   // Timestamps
   createdAt     DateTime @default(now())
@@ -1444,12 +1615,15 @@ model WebhookLog {
   statusCode    Int?
   
   // Status
+  status        String   @default("PENDING") // PENDING, SUCCESS, FAILED
   success       Boolean
   errorMessage  String?
   retryCount    Int      @default(0)
+  attempts      Int      @default(0)
   
   // Timestamps
   triggeredAt   DateTime @default(now())
+  completedAt   DateTime?
   
   @@map("webhookLogs")
 }

@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
+import { EmailService } from '../modules/email/email.service';
 import { RegisterDto } from './dto/register.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangePasswordDto } from '../modules/user/dto/change-password.dto';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -80,7 +82,10 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ 
+      where: { email },
+      include: { company: true }
+    });
     if (!user) return { message: 'If the email exists, a reset link was sent' };
 
     const token = await bcrypt.hash(user.id + Date.now().toString(), 5);
@@ -91,7 +96,14 @@ export class AuthService {
       data: { passwordResetToken: token, passwordResetExpires: expires },
     });
 
-    // TODO: send email using configured email provider
+    // Send password reset email
+    const resetLink = `${this.configService.get('app.frontendUrl')}/reset-password?token=${token}`;
+    await this.emailService.sendPasswordReset({
+      name: user.firstName,
+      email: user.email,
+      resetLink,
+      companyName: user.company?.name,
+    });
     return { message: 'Password reset email sent' };
   }
 
@@ -117,12 +129,25 @@ export class AuthService {
   }
 
   async sendEmailVerification(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { company: true }
+    });
+    if (!user) throw new NotFoundException('User not found');
+
     const token = await bcrypt.hash(userId + Date.now().toString(), 5);
     await this.prisma.user.update({
       where: { id: userId },
       data: { emailVerificationToken: token },
     });
-    // TODO: send verification email with token
+    // Send email verification
+    const verificationLink = `${this.configService.get('app.frontendUrl')}/verify-email?token=${token}`;
+    await this.emailService.sendEmailVerification({
+      name: user.firstName,
+      email: user.email,
+      verificationLink,
+      companyName: user.company?.name,
+    });
     return { message: 'Verification email sent' };
   }
 
