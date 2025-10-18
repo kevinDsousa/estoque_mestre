@@ -3,6 +3,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { AppCacheModule } from './common/cache/cache.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
@@ -42,6 +43,7 @@ import { CustomThrottlerGuard } from './common/guards/throttler.guard';
 @Module({
   imports: [
     ConfigModule,
+    AppCacheModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { EmailService } from '../email/email.service';
+import { NotificationCacheService } from '../../common/cache/notification-cache.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { NotificationPreferenceDto } from './dto/notification-preference.dto';
@@ -12,6 +13,7 @@ export class NotificationService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
+    private notificationCacheService: NotificationCacheService,
   ) {}
 
   async create(createNotificationDto: CreateNotificationDto, companyId: string, userId?: string) {
@@ -38,6 +40,20 @@ export class NotificationService {
       },
     });
 
+    // Cachear notificação
+    await this.notificationCacheService.cacheNotification({
+      id: notification.id,
+      userId: notification.userId,
+      companyId: notification.companyId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      data: notification.metadata,
+      priority: notification.priority,
+      isRead: notification.status === NotificationStatus.READ,
+      createdAt: notification.createdAt,
+    });
+
     return notification;
   }
 
@@ -51,6 +67,37 @@ export class NotificationService {
     priority?: NotificationPriority,
     isUrgent?: boolean,
   ) {
+    // Verificar cache primeiro (apenas para consultas simples)
+    if (!type && !status && !priority && isUrgent === undefined) {
+      if (userId) {
+        const cached = await this.notificationCacheService.getUserNotifications(userId);
+        if (cached.length > 0) {
+          return {
+            notifications: cached.slice((page - 1) * limit, page * limit),
+            pagination: {
+              page,
+              limit,
+              total: cached.length,
+              totalPages: Math.ceil(cached.length / limit),
+            },
+          };
+        }
+      } else {
+        const cached = await this.notificationCacheService.getCompanyNotifications(companyId);
+        if (cached.length > 0) {
+          return {
+            notifications: cached.slice((page - 1) * limit, page * limit),
+            pagination: {
+              page,
+              limit,
+              total: cached.length,
+              totalPages: Math.ceil(cached.length / limit),
+            },
+          };
+        }
+      }
+    }
+
     const skip = (page - 1) * limit;
     
     const where: any = { companyId };

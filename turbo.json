@@ -51,6 +51,22 @@
         "coverage/**"
       ]
     },
+    "test:watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
+    },
     "dev": {
       "cache": false,
       "persistent": true

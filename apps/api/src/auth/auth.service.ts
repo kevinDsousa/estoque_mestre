@@ -4,6 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../modules/email/email.service';
+import { SessionCacheService } from '../common/cache/session-cache.service';
 import { RegisterDto } from './dto/register.dto';
 import { ChangePasswordDto } from '../modules/user/dto/change-password.dto';
 import { UserRole } from '@prisma/client';
@@ -15,6 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
+    private sessionCacheService: SessionCacheService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -30,7 +32,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: any, deviceId?: string, ipAddress?: string, userAgent?: string) {
     const payload = { 
       email: user.email, 
       sub: user.id, 
@@ -38,12 +40,23 @@ export class AuthService {
       companyId: user.companyId 
     };
     
+    // Criar sessão no cache
+    const sessionId = await this.sessionCacheService.createSession(
+      user.id,
+      user.companyId,
+      deviceId || 'unknown',
+      [user.role], // Permissões baseadas no role
+      ipAddress,
+      userAgent,
+    );
+    
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, {
         secret: this.configService.get<string>('jwt.refreshSecret'),
         expiresIn: this.configService.get<string>('jwt.refreshExpiresIn'),
       }),
+      session_id: sessionId,
       user: {
         id: user.id,
         email: user.email,
@@ -265,14 +278,14 @@ export class AuthService {
     return { message: 'Password changed successfully' };
   }
 
-  async logout(userId: string) {
-    // In a real application, you might want to:
-    // 1. Store refresh tokens in a database and invalidate them
-    // 2. Add the token to a blacklist
-    // 3. Clear any session data
+  async logout(userId: string, sessionId?: string) {
+    // Remover sessão específica ou todas as sessões do usuário
+    if (sessionId) {
+      await this.sessionCacheService.removeSession(sessionId);
+    } else {
+      await this.sessionCacheService.removeAllUserSessions(userId);
+    }
     
-    // For now, we'll just return success
-    // The client should remove the tokens from storage
     return { message: 'Logged out successfully' };
   }
 

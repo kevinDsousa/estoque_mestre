@@ -5,6 +5,7 @@ import appConfig from './app.config';
 import databaseConfig from './database.config';
 import jwtConfig from './jwt.config';
 import minioConfig from './minio.config';
+import redisConfig from './redis.config';
 import stripeConfig from './stripe.config';
 import throttleConfig from './throttle.config';
 import emailConfig from './email.config';
@@ -18,6 +19,7 @@ import emailConfig from './email.config';
         databaseConfig,
         jwtConfig,
         minioConfig,
+        redisConfig,
         stripeConfig,
         throttleConfig,
         emailConfig,
@@ -52,6 +54,20 @@ import emailConfig from './email.config';
         STRIPE_SECRET_KEY: Joi.string().allow('').default(''),
         STRIPE_PUBLISHABLE_KEY: Joi.string().allow('').default(''),
         STRIPE_WEBHOOK_SECRET: Joi.string().allow('').default(''),
+        // Redis
+        REDIS_HOST: Joi.string().default('localhost'),
+        REDIS_PORT: Joi.number().default(6379),
+        REDIS_PASSWORD: Joi.string().allow('').default(''),
+        REDIS_DB: Joi.number().default(0),
+        REDIS_TTL: Joi.number().default(3600),
+        CACHE_TTL_PRODUCTS: Joi.number().default(1800),
+        CACHE_TTL_CATEGORIES: Joi.number().default(3600),
+        CACHE_TTL_USERS: Joi.number().default(1800),
+        CACHE_TTL_COMPANIES: Joi.number().default(3600),
+        CACHE_TTL_METRICS: Joi.number().default(300),
+        CACHE_TTL_SESSIONS: Joi.number().default(3600),
+        CACHE_TTL_NOTIFICATIONS: Joi.number().default(1800),
+        CACHE_TTL_INTEGRATIONS: Joi.number().default(600),
       }),
     }),
   ],

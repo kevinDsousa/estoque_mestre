@@ -4,6 +4,7 @@ import type { Response } from 'express';
 import { MetricsService } from '../services/metrics.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RoleGuard, Roles } from '../guards/role.guard';
+import { BasicAuthGuard } from '../guards/basic-auth.guard';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('metrics')
@@ -191,6 +192,7 @@ export class MetricsController {
   }
 
   @Get('prometheus')
+  @UseGuards(BasicAuthGuard)
   @ApiExcludeEndpoint() // Hide from Swagger as this is for Prometheus scraping
   async getPrometheusMetrics(@Res() res: Response) {
     const metrics = await this.metricsService.getMetrics();

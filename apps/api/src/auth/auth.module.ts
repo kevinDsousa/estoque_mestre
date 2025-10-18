@@ -9,6 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { DatabaseModule } from '../database/database.module';
+import { SessionCacheService } from '../common/cache/session-cache.service';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { DatabaseModule } from '../database/database.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy, LocalStrategy, RefreshTokenStrategy],
+  providers: [AuthService, SessionCacheService, JwtStrategy, LocalStrategy, RefreshTokenStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

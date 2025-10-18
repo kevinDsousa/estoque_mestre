@@ -1,6 +1,7 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { AuthContextService } from '../../common/services/auth-context.service';
+import { QueryCacheService } from '../../common/cache/query-cache.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
@@ -14,6 +15,7 @@ export class ProductService {
     private prisma: PrismaService,
     private notificationService: NotificationService,
     private authContextService: AuthContextService,
+    private queryCacheService: QueryCacheService,
   ) {}
 
   async create(createProductDto: CreateProductDto, companyId: string) {
@@ -122,6 +124,9 @@ export class ProductService {
       });
     }
 
+    // Invalidar cache relacionado
+    await this.queryCacheService.invalidateProductCache(undefined, companyId);
+    
     return product;
   }
 
@@ -134,6 +139,23 @@ export class ProductService {
     supplierId?: string,
     search?: string,
   ) {
+    // Verificar cache primeiro (apenas para consultas sem filtros complexos)
+    if (!search && !status && !categoryId && !supplierId) {
+      const cacheKey = `products:company:${companyId}:page:${page}:limit:${limit}`;
+      const cached = await this.queryCacheService.getProductsByStatus('ALL', companyId);
+      if (cached) {
+        return {
+          products: cached.slice((page - 1) * limit, page * limit),
+          pagination: {
+            page,
+            limit,
+            total: cached.length,
+            totalPages: Math.ceil(cached.length / limit),
+          },
+        };
+      }
+    }
+
     const skip = (page - 1) * limit;
     
     const where: any = { companyId };
@@ -168,7 +190,7 @@ export class ProductService {
       this.prisma.product.count({ where }),
     ]);
 
-    return {
+    const result = {
       products,
       pagination: {
         page,
@@ -177,6 +199,13 @@ export class ProductService {
         totalPages: Math.ceil(total / limit),
       },
     };
+
+    // Cachear resultado se não há filtros complexos
+    if (!search && !status && !categoryId && !supplierId) {
+      await this.queryCacheService.setProductsByStatus('ALL', companyId, products);
+    }
+
+    return result;
   }
 
   async findOne(id: string, companyId: string) {

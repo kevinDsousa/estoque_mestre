@@ -7,4 +7,8 @@ export default registerAs('app', () => ({
   environment: process.env.NODE_ENV || 'development',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:4200',
   enableSwagger: (process.env.ENABLE_SWAGGER || 'true') === 'true',
+  prometheus: {
+    username: process.env.PROMETHEUS_USERNAME || 'prometheus',
+    password: process.env.PROMETHEUS_PASSWORD || 'prometheus123',
+  },
 }));

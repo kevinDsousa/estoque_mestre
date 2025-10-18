@@ -23,7 +23,11 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto, @Request() req) {
-    return this.authService.login(req.user);
+    const deviceId = req.headers['x-device-id'] || 'unknown';
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    
+    return this.authService.login(req.user, deviceId, ipAddress, userAgent);
   }
 
   @Public()
@@ -101,7 +105,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout current user' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@User('userId') userId: string) {
-    return this.authService.logout(userId);
+  async logout(@User('userId') userId: string, @Request() req) {
+    const sessionId = req.headers['x-session-id'];
+    return this.authService.logout(userId, sessionId);
   }
 }
