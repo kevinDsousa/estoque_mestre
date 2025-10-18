@@ -29,9 +29,11 @@ import { QualityModule } from './modules/quality/quality.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { MetricsModule } from './common/modules/metrics.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuthContextInterceptor } from './common/interceptors/auth-context.interceptor';
+import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggerService } from './common/logger/logger.service';
 import { DatabaseHealthCheckService } from './database/health-check.service';
@@ -76,16 +78,21 @@ import { CustomThrottlerGuard } from './common/guards/throttler.guard';
           AdminModule,
           IntegrationModule,
           ReportsModule,
+          MetricsModule,
         ],
   controllers: [AppController],
   providers: [
     AppService,
     LoggerService,
     DatabaseHealthCheckService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: AuthContextInterceptor,
-    },
+          {
+            provide: APP_INTERCEPTOR,
+            useClass: AuthContextInterceptor,
+          },
+          {
+            provide: APP_INTERCEPTOR,
+            useClass: MetricsInterceptor,
+          },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ResponseInterceptor,
