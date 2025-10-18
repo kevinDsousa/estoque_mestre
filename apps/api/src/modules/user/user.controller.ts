@@ -25,6 +25,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../company/guards/admin.guard';
 import { UserRole, UserStatus } from '@prisma/client';
@@ -114,6 +115,13 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   updateProfile(@Body() updateProfileDto: UpdateProfileDto, @Request() req) {
     return this.userService.updateProfile(req.user.id, updateProfileDto, req.user.companyId);
+  }
+
+  @Patch('preferences')
+  @ApiOperation({ summary: 'Update current user notification preferences' })
+  @ApiResponse({ status: 200, description: 'Preferences updated successfully' })
+  updatePreferences(@Body() dto: UpdatePreferencesDto, @Request() req) {
+    return this.userService.updatePreferences(req.user.id, dto);
   }
 
   @Patch('change-password')

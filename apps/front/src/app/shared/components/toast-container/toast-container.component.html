@@ -1,0 +1,8 @@
+<div class="toast-container">
+  @for (toast of toastService.getToasts(); track toast.id) {
+    <app-toast 
+      [toast]="toast" 
+      (close)="onCloseToast($event)"
+    />
+  }
+</div>

@@ -1,0 +1,211 @@
+<div class="registration-container">
+  <div class="registration-card">
+    <div class="header">
+      <h1>Criar Conta</h1>
+      <p>Preencha os dados abaixo para criar sua conta</p>
+    </div>
+
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="registration-form">
+      <!-- Nome e Sobrenome -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Nome *</label>
+          <input
+            type="text"
+            id="firstName"
+            formControlName="firstName"
+            placeholder="Digite seu nome"
+            [class.error]="isFieldInvalid('firstName')"
+          />
+          <span class="error-message" *ngIf="getFieldError('firstName')">
+            {{ getFieldError('firstName') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Sobrenome *</label>
+          <input
+            type="text"
+            id="lastName"
+            formControlName="lastName"
+            placeholder="Digite seu sobrenome"
+            [class.error]="isFieldInvalid('lastName')"
+          />
+          <span class="error-message" *ngIf="getFieldError('lastName')">
+            {{ getFieldError('lastName') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Email e Telefone -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="seu@email.com"
+            [class.error]="isFieldInvalid('email')"
+          />
+          <span class="error-message" *ngIf="getFieldError('email')">
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Telefone *</label>
+          <input
+            type="tel"
+            id="phone"
+            formControlName="phone"
+            placeholder="(11) 99999-9999"
+            (input)="formatPhone($event)"
+            [class.error]="isFieldInvalid('phone')"
+          />
+          <span class="error-message" *ngIf="getFieldError('phone')">
+            {{ getFieldError('phone') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Nacionalidade e País de Origem -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nationality">Nacionalidade *</label>
+          <select
+            id="nationality"
+            formControlName="nationality"
+            (change)="onNationalityChange($event)"
+            [class.error]="isFieldInvalid('nationality')"
+          >
+            <option value="">Selecione sua nacionalidade</option>
+            <option *ngFor="let country of countries" [value]="country.code">
+              {{ country.name }}
+            </option>
+          </select>
+          <span class="error-message" *ngIf="getFieldError('nationality')">
+            {{ getFieldError('nationality') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="countryOfOrigin">País de Origem *</label>
+          <select
+            id="countryOfOrigin"
+            formControlName="countryOfOrigin"
+            [class.error]="isFieldInvalid('countryOfOrigin')"
+            [class.locked]="isCountryLocked()"
+            [disabled]="isCountryLocked()"
+          >
+            <option value="">Selecione o país de origem</option>
+            <option *ngFor="let country of countries" [value]="country.code">
+              {{ country.name }}
+            </option>
+          </select>
+          <span class="error-message" *ngIf="getFieldError('countryOfOrigin')">
+            {{ getFieldError('countryOfOrigin') }}
+          </span>
+          <span class="info-message" *ngIf="isCountryLocked()">
+            🔒 Campo bloqueado automaticamente para brasileiros
+          </span>
+        </div>
+      </div>
+
+      <!-- CPFs da Mãe e Pai -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="motherCPF">CPF da Mãe *</label>
+          <input
+            type="text"
+            id="motherCPF"
+            formControlName="motherCPF"
+            placeholder="000.000.000-00"
+            (input)="formatCPF($event, 'motherCPF')"
+            [class.error]="isFieldInvalid('motherCPF')"
+          />
+          <span class="error-message" *ngIf="getFieldError('motherCPF')">
+            {{ getFieldError('motherCPF') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="fatherCPF">CPF do Pai *</label>
+          <input
+            type="text"
+            id="fatherCPF"
+            formControlName="fatherCPF"
+            placeholder="000.000.000-00"
+            (input)="formatCPF($event, 'fatherCPF')"
+            [class.error]="isFieldInvalid('fatherCPF')"
+          />
+          <span class="error-message" *ngIf="getFieldError('fatherCPF')">
+            {{ getFieldError('fatherCPF') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Senhas -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Senha *</label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres"
+            [class.error]="isFieldInvalid('password')"
+          />
+          <span class="error-message" *ngIf="getFieldError('password')">
+            {{ getFieldError('password') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar Senha *</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            placeholder="Digite a senha novamente"
+            [class.error]="isFieldInvalid('confirmPassword')"
+          />
+          <span class="error-message" *ngIf="getFieldError('confirmPassword')">
+            {{ getFieldError('confirmPassword') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Termos de Uso -->
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="acceptTerms"
+            [class.error]="isFieldInvalid('acceptTerms')"
+          />
+          <span class="checkmark"></span>
+          Aceito os <a href="#" class="terms-link">Termos de Uso</a> e <a href="#" class="terms-link">Política de Privacidade</a> *
+        </label>
+        <span class="error-message" *ngIf="getFieldError('acceptTerms')">
+          {{ getFieldError('acceptTerms') }}
+        </span>
+      </div>
+
+      <!-- Botões -->
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="registrationForm.invalid">
+          Criar Conta
+        </button>
+        
+        <div class="login-link">
+          <span>Já tem uma conta?</span>
+          <a href="/login" class="link">Fazer login</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Container de Toasts -->
+<app-toast-container></app-toast-container>

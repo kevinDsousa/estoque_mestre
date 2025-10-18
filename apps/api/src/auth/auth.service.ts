@@ -79,6 +79,63 @@ export class AuthService {
     }
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return { message: 'If the email exists, a reset link was sent' };
+
+    const token = await bcrypt.hash(user.id + Date.now().toString(), 5);
+    const expires = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { passwordResetToken: token, passwordResetExpires: expires },
+    });
+
+    // TODO: send email using configured email provider
+    return { message: 'Password reset email sent' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpires: { gt: new Date() },
+      },
+    });
+    if (!user) throw new UnauthorizedException('Invalid or expired token');
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashed,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      },
+    });
+    return { message: 'Password updated successfully' };
+  }
+
+  async sendEmailVerification(userId: string) {
+    const token = await bcrypt.hash(userId + Date.now().toString(), 5);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { emailVerificationToken: token },
+    });
+    // TODO: send verification email with token
+    return { message: 'Verification email sent' };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.prisma.user.findFirst({ where: { emailVerificationToken: token } });
+    if (!user) throw new UnauthorizedException('Invalid token');
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true, emailVerificationToken: null },
+    });
+    return { message: 'Email verified successfully' };
+  }
+
   async register(registerDto: RegisterDto) {
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({

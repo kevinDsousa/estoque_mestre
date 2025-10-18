@@ -294,6 +294,21 @@ export class UserService {
     });
   }
 
+  async updatePreferences(userId: string, dto: any) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const merged = {
+      ...(user.preferences as any || {}),
+      ...(dto || {}),
+    };
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { preferences: merged as any },
+      select: { id: true, preferences: true },
+    });
+  }
+
   async updateUserStatus(id: string, status: UserStatus, companyId: string, updatedBy: string) {
     await this.findOne(id, companyId); // Verify user exists
 
