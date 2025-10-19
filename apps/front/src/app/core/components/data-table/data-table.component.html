@@ -1,0 +1,85 @@
+<div class="data-table-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner">
+      <i class="pi pi-spin pi-spinner"></i>
+    </div>
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="table-wrapper">
+    <table class="data-table">
+      <!-- Table Header -->
+      <thead>
+        <tr class="table-header">
+          <th 
+            *ngFor="let column of columns; trackBy: trackByColumn"
+            [class]="getColumnClass(column)"
+            [style.width]="column.width"
+            (click)="onSort(column)">
+            <div class="column-header">
+              <span class="column-label">{{ column.label }}</span>
+              <i *ngIf="column.sortable" [class]="getSortIcon(column)" class="sort-icon"></i>
+            </div>
+          </th>
+          <th *ngIf="hasActions()" class="table-column actions-column">
+            Ações
+          </th>
+        </tr>
+      </thead>
+
+      <!-- Table Body -->
+      <tbody>
+        <!-- Data Rows -->
+        <tr 
+          *ngFor="let item of paginatedData; trackBy: trackByIndex; let i = index"
+          [class]="getRowClass(i)">
+          <td 
+            *ngFor="let column of columns; trackBy: trackByColumn"
+            [class]="getColumnClass(column)"
+            [style.width]="column.width">
+            <ng-container *ngIf="column.template; else defaultCell">
+              <ng-container *ngTemplateOutlet="column.template; context: { $implicit: item, column: column }"></ng-container>
+            </ng-container>
+            <ng-template #defaultCell>
+              {{ getCellValue(item, column) }}
+            </ng-template>
+          </td>
+          <td *ngIf="hasActions()" class="table-column actions-column">
+            <div class="action-buttons">
+              <button 
+                *ngFor="let action of actions"
+                type="button"
+                class="action-btn"
+                [class]="action.class || 'btn-secondary'"
+                (click)="action.action(item)"
+                [title]="action.label">
+                <i [class]="action.icon"></i>
+                <span class="action-label">{{ action.label }}</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Empty State -->
+        <tr *ngIf="paginatedData.length === 0" class="empty-row">
+          <td [attr.colspan]="columns.length + (hasActions() ? 1 : 0)" class="empty-cell">
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              <p>{{ emptyMessage }}</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <app-pagination 
+    *ngIf="showPagination && !loading"
+    [config]="pagination"
+    (pageChange)="onPageChange($event)"
+    (itemsPerPageChange)="onItemsPerPageChange($event)">
+  </app-pagination>
+</div>

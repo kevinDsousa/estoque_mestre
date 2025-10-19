@@ -1,0 +1,66 @@
+<div class="multi-select-container" [class.disabled]="disabled">
+  <!-- Trigger Button -->
+  <button 
+    type="button" 
+    class="multi-select-trigger"
+    [class.open]="isOpen"
+    [disabled]="disabled"
+    (click)="toggleDropdown()">
+    <span class="selected-text" [class.placeholder]="!hasSelection()">
+      {{ getSelectedLabels() }}
+    </span>
+    <div class="trigger-actions">
+      <span *ngIf="hasSelection()" class="selected-count">
+        {{ getSelectedCount() }}
+      </span>
+      <i class="pi pi-chevron-down trigger-icon" [class.rotated]="isOpen"></i>
+    </div>
+  </button>
+
+  <!-- Dropdown -->
+  <div class="multi-select-dropdown" [class.open]="isOpen" [style.max-height]="maxHeight">
+    <!-- Search Input -->
+    <div class="search-container">
+      <i class="pi pi-search search-icon"></i>
+      <input 
+        type="text" 
+        class="search-input"
+        placeholder="Buscar..."
+        [(ngModel)]="searchTerm"
+        (input)="filterOptions()"
+        (click)="$event.stopPropagation()">
+    </div>
+
+    <!-- Select All / Deselect All -->
+    <div class="bulk-actions">
+      <button type="button" class="bulk-action-btn" (click)="selectAll()">
+        <i class="pi pi-check-square"></i>
+        Selecionar Todas
+      </button>
+      <button type="button" class="bulk-action-btn" (click)="deselectAll()">
+        <i class="pi pi-square"></i>
+        Desmarcar Todas
+      </button>
+    </div>
+
+    <!-- Options List -->
+    <div class="options-list">
+      <div 
+        *ngFor="let option of filteredOptions; trackBy: trackByValue"
+        class="option-item"
+        [class.selected]="option.selected"
+        (click)="toggleOption(option)">
+        <div class="option-checkbox">
+          <i class="pi pi-check" *ngIf="option.selected"></i>
+        </div>
+        <span class="option-label">{{ option.label }}</span>
+      </div>
+      
+      <!-- No Results -->
+      <div *ngIf="filteredOptions.length === 0" class="no-results">
+        <i class="pi pi-search"></i>
+        <span>Nenhum resultado encontrado</span>
+      </div>
+    </div>
+  </div>
+</div>

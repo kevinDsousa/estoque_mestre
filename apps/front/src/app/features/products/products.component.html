@@ -12,7 +12,7 @@
 
   <!-- Controles da página -->
   <div class="page-controls">
-    <!-- Primeira linha de filtros -->
+    <!-- Primeira linha: Busca, Categorias, Status e Limpar -->
     <div class="filters-row">
       <input 
         type="text" 
@@ -21,15 +21,11 @@
         [(ngModel)]="searchTerm"
         (input)="filterProducts()">
       
-      <select 
-        [(ngModel)]="selectedCategory" 
-        (change)="filterProducts()"
-        class="form-control category-select">
-        <option value="">Todas as categorias</option>
-        <option *ngFor="let category of categories" [value]="category">
-          {{ category }}
-        </option>
-      </select>
+      <app-multi-select
+        [options]="categoryOptions"
+        placeholder="Selecionar categorias..."
+        (selectionChange)="onCategorySelectionChange($event)">
+      </app-multi-select>
 
       <select 
         [(ngModel)]="selectedStatus" 
@@ -49,7 +45,7 @@
       </button>
     </div>
 
-    <!-- Segunda linha de filtros -->
+    <!-- Segunda linha: Estoque e Preços -->
     <div class="filters-row">
       <select 
         [(ngModel)]="selectedStockFilter" 
@@ -79,8 +75,8 @@
   </div>
 
   <!-- Tabela de Produtos -->
-  <div class="products-table">
-    <table>
+  <div class="products-table-container">
+    <table class="products-table">
       <thead>
         <tr>
           <th>Nome</th>
@@ -94,11 +90,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let product of filteredProducts">
+        <tr *ngFor="let product of getPaginatedProducts()">
           <td class="product-name">
             <strong>{{ product.name }}</strong>
           </td>
-          <td>{{ product.category }}</td>
+          <td class="category">{{ product.category }}</td>
           <td class="sku">{{ product.sku }}</td>
           <td class="price">R$ {{ product.price | number:'1.2-2' }}</td>
           <td class="stock">
@@ -131,6 +127,13 @@
       <p>Nenhum produto encontrado</p>
     </div>
   </div>
+
+  <!-- Paginação -->
+  <app-pagination 
+    [config]="paginationConfig"
+    (pageChange)="onPageChange($event)"
+    (itemsPerPageChange)="onItemsPerPageChange($event)">
+  </app-pagination>
 
   <!-- Modal de Adicionar/Editar Produto -->
   <div *ngIf="showAddModal" class="modal-overlay" (click)="closeModal()">

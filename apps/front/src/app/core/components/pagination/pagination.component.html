@@ -1,0 +1,75 @@
+<div class="pagination-container" *ngIf="shouldShowPagination()">
+  <!-- Items per page selector -->
+  <div class="items-per-page">
+    <label for="itemsPerPage">Itens por página:</label>
+    <select 
+      id="itemsPerPage"
+      [value]="config.itemsPerPage" 
+      (change)="onItemsPerPageChange($event)"
+      class="items-per-page-select">
+      <option *ngFor="let option of itemsPerPageOptions" [value]="option">
+        {{ option }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Page info -->
+  <div class="page-info">
+    {{ getPageInfo() }}
+  </div>
+
+  <!-- Pagination controls -->
+  <div class="pagination-controls">
+    <!-- First page -->
+    <button 
+      type="button" 
+      class="pagination-btn first-page"
+      [disabled]="!canGoToPrevious()"
+      (click)="goToFirstPage()"
+      title="Primeira página">
+      <i class="pi pi-angle-double-left"></i>
+    </button>
+
+    <!-- Previous page -->
+    <button 
+      type="button" 
+      class="pagination-btn prev-page"
+      [disabled]="!canGoToPrevious()"
+      (click)="goToPreviousPage()"
+      title="Página anterior">
+      <i class="pi pi-angle-left"></i>
+    </button>
+
+    <!-- Page numbers -->
+    <div class="page-numbers">
+      <button 
+        *ngFor="let page of visiblePages; trackBy: trackByPage"
+        type="button" 
+        class="pagination-btn page-number"
+        [class.active]="page === config.currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <!-- Next page -->
+    <button 
+      type="button" 
+      class="pagination-btn next-page"
+      [disabled]="!canGoToNext()"
+      (click)="goToNextPage()"
+      title="Próxima página">
+      <i class="pi pi-angle-right"></i>
+    </button>
+
+    <!-- Last page -->
+    <button 
+      type="button" 
+      class="pagination-btn last-page"
+      [disabled]="!canGoToNext()"
+      (click)="goToLastPage()"
+      title="Última página">
+      <i class="pi pi-angle-double-right"></i>
+    </button>
+  </div>
+</div>

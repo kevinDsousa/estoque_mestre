@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService } from '../../core/services/dialog.service';
+import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
+import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 
 interface Product {
   id: number;
@@ -17,7 +19,7 @@ interface Product {
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MultiSelectComponent, PaginationComponent],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
@@ -25,13 +27,20 @@ export class ProductsComponent implements OnInit {
   products: Product[] = [];
   filteredProducts: Product[] = [];
   searchTerm = '';
-  selectedCategory = '';
+  selectedCategories: string[] = [];
   selectedStatus = '';
   selectedStockFilter = '';
   minPrice = '';
   maxPrice = '';
   showAddModal = false;
   editingProduct: Product | null = null;
+  
+  // Pagination
+  paginationConfig: PaginationConfig = {
+    currentPage: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  };
 
   constructor(private dialogService: DialogService) {}
 
@@ -60,8 +69,20 @@ export class ProductsComponent implements OnInit {
     { value: 'out', label: 'Sem estoque (0)' }
   ];
 
+  // Multi-select options
+  categoryOptions: MultiSelectOption[] = [];
+
   ngOnInit(): void {
     this.loadProducts();
+    this.initializeCategoryOptions();
+  }
+
+  private initializeCategoryOptions(): void {
+    this.categoryOptions = this.categories.map(category => ({
+      value: category,
+      label: category,
+      selected: false
+    }));
   }
 
   private loadProducts(): void {
@@ -116,9 +137,40 @@ export class ProductsComponent implements OnInit {
         sku: 'SAM-GAL-005',
         status: 'inactive',
         lastUpdated: new Date('2024-01-11')
+      },
+      {
+        id: 6,
+        name: 'Smartphone Samsung Galaxy A54',
+        category: 'Eletrônicos',
+        price: 1200.00,
+        stock: 3,
+        sku: 'SAM-A54-001',
+        status: 'low-stock',
+        lastUpdated: new Date('2024-01-12')
+      },
+      {
+        id: 7,
+        name: 'Monitor LG 24"',
+        category: 'Informática',
+        price: 800.00,
+        stock: 0,
+        sku: 'LG-24-001',
+        status: 'inactive',
+        lastUpdated: new Date('2024-01-08')
+      },
+      {
+        id: 8,
+        name: 'Teclado Mecânico RGB',
+        category: 'Informática',
+        price: 250.00,
+        stock: 5,
+        sku: 'TEC-RGB-001',
+        status: 'low-stock',
+        lastUpdated: new Date('2024-01-14')
       }
     ];
     this.filteredProducts = [...this.products];
+    this.updatePagination();
   }
 
   filterProducts(): void {
@@ -127,8 +179,9 @@ export class ProductsComponent implements OnInit {
       const matchesSearch = product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
                            product.sku.toLowerCase().includes(this.searchTerm.toLowerCase());
       
-      // Filtro por categoria
-      const matchesCategory = !this.selectedCategory || product.category === this.selectedCategory;
+      // Filtro por categorias (múltiplas)
+      const matchesCategory = this.selectedCategories.length === 0 || 
+                             this.selectedCategories.includes(product.category);
       
       // Filtro por status
       const matchesStatus = !this.selectedStatus || product.status === this.selectedStatus;
@@ -141,6 +194,17 @@ export class ProductsComponent implements OnInit {
       
       return matchesSearch && matchesCategory && matchesStatus && matchesStock && matchesPrice;
     });
+
+    // Atualizar paginação
+    this.updatePagination();
+  }
+
+  private updatePagination(): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      totalItems: this.filteredProducts.length,
+      currentPage: 1 // Reset para primeira página quando filtrar
+    };
   }
 
   private matchesStockFilter(stock: number): boolean {
@@ -163,12 +227,42 @@ export class ProductsComponent implements OnInit {
 
   clearFilters(): void {
     this.searchTerm = '';
-    this.selectedCategory = '';
+    this.selectedCategories = [];
     this.selectedStatus = '';
     this.selectedStockFilter = '';
     this.minPrice = '';
     this.maxPrice = '';
+    
+    // Reset multi-select options
+    this.categoryOptions.forEach(option => option.selected = false);
+    
     this.filterProducts();
+  }
+
+  onCategorySelectionChange(selectedValues: string[]): void {
+    this.selectedCategories = selectedValues;
+    this.filterProducts();
+  }
+
+  onPageChange(page: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      currentPage: page
+    };
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      itemsPerPage: itemsPerPage,
+      currentPage: 1
+    };
+  }
+
+  getPaginatedProducts(): Product[] {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    return this.filteredProducts.slice(startIndex, endIndex);
   }
 
   getStatusClass(status: string): string {
