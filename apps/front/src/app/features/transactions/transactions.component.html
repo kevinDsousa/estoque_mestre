@@ -10,6 +10,70 @@
     </button>
   </div>
 
+  <!-- Controles da página -->
+  <div class="page-controls">
+    <!-- Primeira linha: Busca, Tipos, Status e Limpar -->
+    <div class="filters-row">
+      <input 
+        type="text" 
+        placeholder="Buscar por cliente..."
+        class="form-control search-input"
+        [(ngModel)]="searchTerm"
+        (input)="filterTransactions()">
+      
+      <app-multi-select
+        [options]="typeMultiOptions"
+        placeholder="Selecionar tipos..."
+        (selectionChange)="onTypeSelectionChange($event)">
+      </app-multi-select>
+
+      <select 
+        [(ngModel)]="selectedStatus" 
+        (change)="filterTransactions()"
+        class="form-control status-select">
+        <option *ngFor="let status of statusOptions" [value]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+
+      <button 
+        type="button" 
+        class="btn btn-secondary clear-filters-btn"
+        (click)="clearFilters()">
+        <i class="pi pi-filter-slash"></i>
+        Limpar Filtros
+      </button>
+    </div>
+
+    <!-- Segunda linha: Data e Valores -->
+    <div class="filters-row">
+      <select 
+        [(ngModel)]="selectedDateRange" 
+        (change)="filterTransactions()"
+        class="form-control date-select">
+        <option *ngFor="let date of dateRangeOptions" [value]="date.value">
+          {{ date.label }}
+        </option>
+      </select>
+
+      <div class="amount-range">
+        <input 
+          type="number" 
+          placeholder="Valor mínimo"
+          class="form-control amount-input"
+          [(ngModel)]="minAmount"
+          (input)="filterTransactions()">
+        <span class="amount-separator">até</span>
+        <input 
+          type="number" 
+          placeholder="Valor máximo"
+          class="form-control amount-input"
+          [(ngModel)]="maxAmount"
+          (input)="filterTransactions()">
+      </div>
+    </div>
+  </div>
+
   <div class="transactions-table-container">
     <table class="transactions-table">
       <thead>
@@ -25,7 +89,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let transaction of transactions">
+        <tr *ngFor="let transaction of getPaginatedTransactions()">
           <td class="transaction-id">#{{ transaction.id }}</td>
           <td>
             <span class="type-badge" [class]="'type-' + transaction.type">
@@ -58,5 +122,17 @@
         </tr>
       </tbody>
     </table>
+    
+    <div *ngIf="filteredTransactions.length === 0" class="no-results">
+      <i class="pi pi-search"></i>
+      <p>Nenhuma transação encontrada</p>
+    </div>
   </div>
+
+  <!-- Paginação -->
+  <app-pagination 
+    [config]="paginationConfig"
+    (pageChange)="onPageChange($event)"
+    (itemsPerPageChange)="onItemsPerPageChange($event)">
+  </app-pagination>
 </div>

@@ -1,0 +1,39 @@
+<div [class]="getContainerClass()">
+  <!-- Ações visíveis -->
+  <div class="acoes-visible">
+    <button
+      *ngFor="let acao of visibleAcoes; trackBy: trackByLabel"
+      type="button"
+      [class]="getAcaoClass(acao)"
+      [disabled]="acao.disabled"
+      [title]="acao.tooltip || acao.label"
+      (click)="onAcaoClick(acao)">
+      <i [class]="acao.icon"></i>
+      <span *ngIf="showLabels" class="acao-label">{{ acao.label }}</span>
+    </button>
+  </div>
+
+  <!-- Menu de ações adicionais (se houver) -->
+  <div *ngIf="hasMoreAcoes" class="acoes-more">
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm more-btn"
+      title="Mais ações">
+      <i class="pi pi-ellipsis-v"></i>
+    </button>
+    
+    <!-- Dropdown com ações restantes -->
+    <div class="acoes-dropdown">
+      <button
+        *ngFor="let acao of remainingAcoes; trackBy: trackByLabel"
+        type="button"
+        [class]="getAcaoClass(acao)"
+        [disabled]="acao.disabled"
+        [title]="acao.tooltip || acao.label"
+        (click)="onAcaoClick(acao)">
+        <i [class]="acao.icon"></i>
+        <span class="acao-label">{{ acao.label }}</span>
+      </button>
+    </div>
+  </div>
+</div>

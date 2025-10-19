@@ -11,3 +11,4 @@ export { DialogComponent } from './dialog/dialog.component';
 export { MultiSelectComponent } from './multi-select/multi-select.component';
 export { PaginationComponent } from './pagination/pagination.component';
 export { DataTableComponent } from './data-table/data-table.component';
+export { AcoesComponent } from './acoes/acoes.component';
