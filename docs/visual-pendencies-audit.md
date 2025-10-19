@@ -33,9 +33,9 @@ Este documento mapeia todas as pendências visuais identificadas no sistema Esto
 | Suppliers | ✅ Implementado | `suppliers.component.*` |
 | Customers | ✅ Implementado | `customers.component.*` |
 | Transactions | ✅ Implementado | `transactions.component.*` |
-| **Reports** | ❌ Faltando | `reports.component.*` |
-| **Settings** | ❌ Faltando | `settings.component.*` |
-| **Subscription** | ❌ Faltando | `subscription.component.*` |
+| **Reports** | ✅ Implementado | `reports.component.*` |
+| **Settings** | ✅ Implementado | `settings.component.*` |
+| **Subscription** | ✅ Implementado | `subscription.component.*` |
 
 ### Paginação
 
@@ -76,13 +76,13 @@ Este documento mapeia todas as pendências visuais identificadas no sistema Esto
 |------------|-------------|-----------|---------------|---------|--------------|
 | **Dashboard** | N/A | N/A | N/A | N/A | ✅ Completo |
 | **Products** | ✅ | ✅ | ✅ | ✅ Avançados | ✅ Completo |
-| **Categories** | ✅ | ❌ | ✅ | ⚠️ Básicos | 🟡 Parcial |
-| **Suppliers** | ✅ | ❌ | ✅ | ⚠️ Básicos | 🟡 Parcial |
-| **Customers** | ✅ | ❌ | ❌ | ⚠️ Básicos | 🟡 Parcial |
+| **Categories** | ✅ | ✅ | ✅ | ⚠️ Básicos | ✅ Completo |
+| **Suppliers** | ✅ | ✅ | ✅ | ⚠️ Básicos | ✅ Completo |
+| **Customers** | ✅ | ✅ | ✅ | ⚠️ Básicos | ✅ Completo |
 | **Transactions** | ✅ | ✅ | ✅ | ✅ Avançados | ✅ Completo |
-| **Reports** | ❌ | ❌ | N/A | N/A | 🟡 Parcial |
-| **Settings** | ❌ | N/A | N/A | N/A | ✅ Completo |
-| **Subscription** | ❌ | N/A | N/A | N/A | ✅ Completo |
+| **Reports** | ✅ | ✅ | N/A | N/A | ✅ Completo |
+| **Settings** | ✅ | N/A | N/A | N/A | ✅ Completo |
+| **Subscription** | ✅ | N/A | N/A | N/A | ✅ Completo |
 | **Profile** | N/A | N/A | N/A | N/A | ❌ Incompleto |
 | **Register** | N/A | N/A | N/A | N/A | ❌ Incompleto |
 

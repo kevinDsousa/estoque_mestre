@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { ViewToggleComponent } from '../../core/components';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 
 interface Subscription {
   id: string;
@@ -67,7 +69,7 @@ interface SubscriptionPlan {
 @Component({
   selector: 'app-subscription',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ViewToggleComponent],
   templateUrl: './subscription.component.html',
   styleUrl: './subscription.component.scss'
 })
@@ -76,12 +78,17 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   availablePlans: SubscriptionPlan[] = [];
   loading = true;
   error: string | null = null;
+  currentView: ViewMode = 'cards';
 
   private destroy$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private viewPreferencesService: ViewPreferencesService
+  ) {}
 
   ngOnInit(): void {
+    this.currentView = this.viewPreferencesService.getViewPreference('subscription');
     this.loadSubscriptionData();
   }
 
@@ -223,6 +230,16 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   upgradePlan(): void {
     // TODO: Implementar upgrade de plano
     console.log('Upgrading plan...');
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    this.viewPreferencesService.setViewPreference('subscription', view);
+  }
+
+  selectPlan(plan: SubscriptionPlan): void {
+    console.log('Selecionando plano:', plan.name);
+    // TODO: Implementar seleção de plano
   }
 
   viewBillingHistory(): void {

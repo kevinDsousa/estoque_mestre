@@ -4,6 +4,10 @@
       <h1>Relatórios e Analytics</h1>
       <p class="subtitle">Análise completa do seu negócio com dados em tempo real</p>
     </div>
+    <app-view-toggle 
+      [currentView]="currentView" 
+      (viewChange)="onViewChange($event)">
+    </app-view-toggle>
   </div>
 
   @if (loading) {
@@ -115,74 +119,153 @@
     </div>
 
     <!-- Tipos de Relatórios -->
-    <div class="reports-categories">
-      @for (category of getReportsByCategory() | keyvalue; track category.key) {
-        <div class="category-section">
-          <h2 class="category-title">{{ category.key }}</h2>
-          <div class="reports-grid">
-            @for (report of category.value; track report.id) {
-              <div class="report-card">
-                <div class="report-icon">
-                  <i [class]="report.icon"></i>
-                </div>
-                <div class="report-content">
-                  <h3>{{ report.name }}</h3>
-                  <p>{{ report.description }}</p>
-                  <div class="report-features">
+    @if (currentView === 'cards') {
+      <div class="reports-categories">
+        @for (category of getReportsByCategory() | keyvalue; track category.key) {
+          <div class="category-section">
+            <h2 class="category-title">{{ category.key }}</h2>
+            <div class="reports-grid">
+              @for (report of category.value; track report.id) {
+                <div class="report-card">
+                  <div class="report-icon">
+                    <i [class]="report.icon"></i>
+                  </div>
+                  <div class="report-content">
+                    <h3>{{ report.name }}</h3>
+                    <p>{{ report.description }}</p>
+                    <div class="report-features">
+                      @if (report.hasAnalytics) {
+                        <span class="feature-badge analytics">
+                          <i class="pi pi-chart-bar"></i>
+                          Analytics
+                        </span>
+                      }
+                      @if (report.hasExport) {
+                        <span class="feature-badge export">
+                          <i class="pi pi-download"></i>
+                          Exportar
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="report-actions">
+                    <button class="btn btn-primary" (click)="generateReport(report)">
+                      <i class="pi pi-play"></i>
+                      Gerar Relatório
+                    </button>
                     @if (report.hasAnalytics) {
-                      <span class="feature-badge analytics">
+                      <button class="btn btn-secondary" (click)="generateAnalytics(report)">
                         <i class="pi pi-chart-bar"></i>
                         Analytics
-                      </span>
+                      </button>
                     }
                     @if (report.hasExport) {
-                      <span class="feature-badge export">
-                        <i class="pi pi-download"></i>
-                        Exportar
-                      </span>
+                      <div class="export-dropdown">
+                        <button class="btn btn-outline btn-sm">
+                          <i class="pi pi-download"></i>
+                          Exportar
+                        </button>
+                        <div class="export-options">
+                          <button (click)="exportReport(report, 'PDF')">
+                            <i class="pi pi-file-pdf"></i>
+                            PDF
+                          </button>
+                          <button (click)="exportReport(report, 'EXCEL')">
+                            <i class="pi pi-file-excel"></i>
+                            Excel
+                          </button>
+                          <button (click)="exportReport(report, 'CSV')">
+                            <i class="pi pi-file"></i>
+                            CSV
+                          </button>
+                        </div>
+                      </div>
                     }
                   </div>
                 </div>
-                <div class="report-actions">
-                  <button class="btn btn-primary" (click)="generateReport(report)">
-                    <i class="pi pi-play"></i>
-                    Gerar Relatório
-                  </button>
-                  @if (report.hasAnalytics) {
-                    <button class="btn btn-secondary" (click)="generateAnalytics(report)">
-                      <i class="pi pi-chart-bar"></i>
-                      Analytics
-                    </button>
-                  }
-                  @if (report.hasExport) {
-                    <div class="export-dropdown">
-                      <button class="btn btn-outline btn-sm">
-                        <i class="pi pi-download"></i>
-                        Exportar
-                      </button>
-                      <div class="export-options">
-                        <button (click)="exportReport(report, 'PDF')">
-                          <i class="pi pi-file-pdf"></i>
-                          PDF
-                        </button>
-                        <button (click)="exportReport(report, 'EXCEL')">
-                          <i class="pi pi-file-excel"></i>
-                          Excel
-                        </button>
-                        <button (click)="exportReport(report, 'CSV')">
-                          <i class="pi pi-file"></i>
-                          CSV
-                        </button>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
+              }
+            </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
+
+    @if (currentView === 'table') {
+      <div class="reports-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Descrição</th>
+              <th>Recursos</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (report of getPaginatedReports(); track report.id) {
+              <tr>
+                <td>
+                  <div class="cell-content">
+                    <div class="report-info">
+                      <i [class]="report.icon" class="report-icon"></i>
+                      <span class="report-name">{{ report.name }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-content">
+                    <span class="category-badge">{{ report.category }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-content">
+                    <span class="description">{{ report.description }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-content">
+                    <div class="features">
+                      @if (report.hasAnalytics) {
+                        <span class="feature-badge analytics">
+                          <i class="pi pi-chart-bar"></i>
+                          Analytics
+                        </span>
+                      }
+                      @if (report.hasExport) {
+                        <span class="feature-badge export">
+                          <i class="pi pi-download"></i>
+                          Exportar
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-content">
+                    <div class="actions">
+                      <button class="btn btn-ghost btn-sm" (click)="generateReport(report)">
+                        <i class="pi pi-play"></i>
+                      </button>
+                      @if (report.hasAnalytics) {
+                        <button class="btn btn-ghost btn-sm" (click)="generateAnalytics(report)">
+                          <i class="pi pi-chart-bar"></i>
+                        </button>
+                      }
+                      @if (report.hasExport) {
+                        <button class="btn btn-ghost btn-sm" (click)="exportReport(report, 'PDF')">
+                          <i class="pi pi-download"></i>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
     <!-- Paginação -->
     @if (filteredReportTypes.length > 0) {

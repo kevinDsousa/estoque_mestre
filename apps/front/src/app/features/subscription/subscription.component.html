@@ -4,6 +4,10 @@
       <h1>Minha Assinatura</h1>
       <p class="subtitle">Gerencie sua assinatura e planos</p>
     </div>
+    <app-view-toggle 
+      [currentView]="currentView" 
+      (viewChange)="onViewChange($event)">
+    </app-view-toggle>
   </div>
 
   @if (loading) {
@@ -109,64 +113,162 @@
     @if (availablePlans.length > 0) {
       <div class="available-plans">
         <h3>Planos Disponíveis</h3>
-        <div class="plans-grid">
-          @for (plan of availablePlans; track plan.id) {
-            <div class="plan-card" [class.popular]="plan.isPopular" [class.recommended]="plan.isRecommended">
-              @if (plan.isPopular) {
-                <div class="plan-badge popular">Mais Popular</div>
-              }
-              @if (plan.isRecommended) {
-                <div class="plan-badge recommended">Recomendado</div>
-              }
-              
-              <div class="plan-header">
-                <h4>{{ plan.name }}</h4>
-                <p>{{ plan.description }}</p>
-              </div>
-
-              <div class="plan-pricing">
-                <div class="price">
-                  <span class="currency">R$</span>
-                  <span class="amount">{{ formatPrice(plan.monthlyPrice) }}</span>
-                  <span class="period">/mês</span>
+        @if (currentView === 'cards') {
+          <div class="plans-grid">
+            @for (plan of availablePlans; track plan.id) {
+              <div class="plan-card" [class.popular]="plan.isPopular" [class.recommended]="plan.isRecommended">
+                @if (plan.isPopular) {
+                  <div class="plan-badge popular">Mais Popular</div>
+                }
+                @if (plan.isRecommended) {
+                  <div class="plan-badge recommended">Recomendado</div>
+                }
+                
+                <div class="plan-header">
+                  <h4>{{ plan.name }}</h4>
+                  <p>{{ plan.description }}</p>
                 </div>
-                @if (plan.yearlyPrice) {
-                  <div class="yearly-price">
-                    R$ {{ formatPrice(plan.yearlyPrice) }}/ano
-                    <span class="discount">(Economize {{ calculateDiscount(plan.yearlyPrice, plan.monthlyPrice) }}%)</span>
-                  </div>
-                }
-              </div>
 
-              <div class="plan-features">
-                <ul>
-                  @for (feature of getPlanFeatures(plan.features); track feature) {
-                    <li>
-                      <i class="pi pi-check"></i>
-                      {{ feature }}
-                    </li>
-                  }
-                </ul>
-              </div>
-
-              <div class="plan-actions">
-                @if (plan.trialDays > 0) {
-                  <div class="trial-info">
-                    <i class="pi pi-clock"></i>
-                    {{ plan.trialDays }} dias grátis
+                <div class="plan-pricing">
+                  <div class="price">
+                    <span class="currency">R$</span>
+                    <span class="amount">{{ formatPrice(plan.monthlyPrice) }}</span>
+                    <span class="period">/mês</span>
                   </div>
-                }
-                <button class="btn btn-outline" [class.btn-primary]="plan.isRecommended">
-                  @if (currentSubscription?.planId === plan.id) {
-                    Plano Atual
-                  } @else {
-                    Escolher Plano
+                  @if (plan.yearlyPrice) {
+                    <div class="yearly-price">
+                      R$ {{ formatPrice(plan.yearlyPrice) }}/ano
+                      <span class="discount">(Economize {{ calculateDiscount(plan.yearlyPrice, plan.monthlyPrice) }}%)</span>
+                    </div>
                   }
-                </button>
+                </div>
+
+                <div class="plan-features">
+                  <ul>
+                    @for (feature of getPlanFeatures(plan.features); track feature) {
+                      <li>
+                        <i class="pi pi-check"></i>
+                        {{ feature }}
+                      </li>
+                    }
+                  </ul>
+                </div>
+
+                <div class="plan-actions">
+                  @if (plan.trialDays > 0) {
+                    <div class="trial-info">
+                      <i class="pi pi-clock"></i>
+                      {{ plan.trialDays }} dias grátis
+                    </div>
+                  }
+                  <button class="btn btn-outline" [class.btn-primary]="plan.isRecommended">
+                    @if (currentSubscription?.planId === plan.id) {
+                      Plano Atual
+                    } @else {
+                      Escolher Plano
+                    }
+                  </button>
+                </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
+
+        @if (currentView === 'table') {
+          <div class="plans-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Plano</th>
+                  <th>Preço Mensal</th>
+                  <th>Preço Anual</th>
+                  <th>Recursos</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (plan of availablePlans; track plan.id) {
+                  <tr [class.current-plan]="plan.id === currentSubscription?.planId">
+                    <td>
+                      <div class="cell-content">
+                        <div class="plan-info">
+                          <div class="plan-name">
+                            {{ plan.name }}
+                            @if (plan.isPopular) {
+                              <span class="plan-badge popular">Popular</span>
+                            }
+                            @if (plan.isRecommended) {
+                              <span class="plan-badge recommended">Recomendado</span>
+                            }
+                          </div>
+                          <p class="plan-description">{{ plan.description }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        <span class="price">R$ {{ formatPrice(plan.monthlyPrice) }}/mês</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        @if (plan.yearlyPrice) {
+                          <span class="price">R$ {{ formatPrice(plan.yearlyPrice) }}/ano</span>
+                          <span class="discount">({{ calculateDiscount(plan.yearlyPrice, plan.monthlyPrice) }}% off)</span>
+                        } @else {
+                          <span class="text-muted">-</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        <div class="features-list">
+                          @for (feature of getPlanFeatures(plan.features).slice(0, 3); track feature) {
+                            <span class="feature-item">
+                              <i class="pi pi-check"></i>
+                              {{ feature }}
+                            </span>
+                          }
+                          @if (getPlanFeatures(plan.features).length > 3) {
+                            <span class="more-features">+{{ getPlanFeatures(plan.features).length - 3 }} mais</span>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        @if (plan.id === currentSubscription?.planId) {
+                          <span class="status-badge current">Atual</span>
+                        } @else {
+                          <span class="status-badge available">Disponível</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        <div class="actions">
+                          <button 
+                            class="btn btn-ghost btn-sm" 
+                            [class.btn-primary]="plan.id === currentSubscription?.planId"
+                            (click)="selectPlan(plan)">
+                            @if (plan.id === currentSubscription?.planId) {
+                              <i class="pi pi-check"></i>
+                              Atual
+                            } @else {
+                              <i class="pi pi-arrow-right"></i>
+                              Escolher
+                            }
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       </div>
     }
   }

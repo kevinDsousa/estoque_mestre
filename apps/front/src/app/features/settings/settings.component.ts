@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ViewToggleComponent } from '../../core/components';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 
 interface SettingSection {
   id: string;
@@ -22,15 +24,19 @@ interface Setting {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ViewToggleComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent implements OnInit {
   settingsSections: SettingSection[] = [];
+  currentView: ViewMode = 'cards';
   activeSection = 'general';
 
+  constructor(private viewPreferencesService: ViewPreferencesService) {}
+
   ngOnInit(): void {
+    this.currentView = this.viewPreferencesService.getViewPreference('settings');
     this.settingsSections = [
       {
         id: 'general',
@@ -172,6 +178,11 @@ export class SettingsComponent implements OnInit {
   saveSettings(): void {
     console.log('Salvando configurações...');
     // TODO: Implementar salvamento das configurações
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    this.viewPreferencesService.setViewPreference('settings', view);
   }
 
   resetSettings(): void {

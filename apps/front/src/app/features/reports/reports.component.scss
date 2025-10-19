@@ -568,3 +568,112 @@
     }
   }
 }
+
+// Tabela de relatórios
+.reports-table-container {
+  background: var(--color-background);
+  border-radius: var(--border-radius-medium);
+  box-shadow: var(--border-soft);
+  overflow: hidden;
+  margin-bottom: var(--spacing-xl);
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+
+    th {
+      background: var(--color-background-secondary);
+      color: var(--text-color-secondary);
+      font-weight: 600;
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+
+      &:last-child {
+        text-align: right;
+      }
+    }
+
+    tr:hover {
+      background: var(--color-background-hover);
+    }
+
+    .cell-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .report-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .report-icon {
+          font-size: 1.25rem;
+          color: var(--color-primary);
+        }
+
+        .report-name {
+          font-weight: 500;
+          color: var(--text-color);
+        }
+      }
+
+      .category-badge {
+        background: var(--color-primary-light);
+        color: var(--color-primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-small);
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .description {
+        color: var(--text-color-secondary);
+        line-height: 1.4;
+      }
+
+      .features {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        .feature-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: var(--border-radius-small);
+          font-size: 0.75rem;
+          font-weight: 500;
+
+          &.analytics {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+          }
+
+          &.export {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+          }
+        }
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+      }
+    }
+  }
+}

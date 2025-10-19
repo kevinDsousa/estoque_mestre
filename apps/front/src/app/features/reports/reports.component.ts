@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { ViewToggleComponent } from '../../core/components';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 
 interface ReportTemplate {
   id: string;
@@ -45,7 +47,7 @@ interface QuickStats {
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, ViewToggleComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss'
 })
@@ -59,6 +61,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   selectedPeriod = 'month';
   selectedReportType = '';
   searchTerm = '';
+  currentView: ViewMode = 'cards';
 
   // Paginação
   paginationConfig: PaginationConfig = {
@@ -69,9 +72,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private viewPreferencesService: ViewPreferencesService
+  ) {}
 
   ngOnInit(): void {
+    this.currentView = this.viewPreferencesService.getViewPreference('reports');
     this.loadReportData();
   }
 
@@ -235,6 +242,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
       acc[report.category].push(report);
       return acc;
     }, {} as { [key: string]: ReportType[] });
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    this.viewPreferencesService.setViewPreference('reports', view);
   }
 
   generateReport(report: ReportType): void {

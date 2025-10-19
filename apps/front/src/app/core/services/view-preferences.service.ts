@@ -9,6 +9,9 @@ export interface ViewPreferences {
   transactions: ViewMode;
   suppliers: ViewMode;
   customers: ViewMode;
+  reports: ViewMode;
+  settings: ViewMode;
+  subscription: ViewMode;
 }
 
 @Injectable({
@@ -21,7 +24,10 @@ export class ViewPreferencesService {
     categories: 'cards',
     transactions: 'table',
     suppliers: 'cards',
-    customers: 'cards'
+    customers: 'cards',
+    reports: 'cards',
+    settings: 'cards',
+    subscription: 'cards'
   };
 
   constructor(private storageService: StorageService) {}

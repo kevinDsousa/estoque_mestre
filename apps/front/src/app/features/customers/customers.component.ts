@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { ViewToggleComponent } from '../../core/components';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { DialogService } from '../../core/services/dialog.service';
 
 interface Customer {
   id: number;
@@ -36,7 +37,10 @@ export class CustomersComponent implements OnInit {
     itemsPerPage: 10
   };
 
-  constructor(private viewPreferencesService: ViewPreferencesService) {}
+  constructor(
+    private viewPreferencesService: ViewPreferencesService,
+    private dialogService: DialogService
+  ) {}
 
   ngOnInit(): void {
     // Carrega a preferência salva
@@ -95,6 +99,16 @@ export class CustomersComponent implements OnInit {
   newSale(customer: Customer): void {
     console.log('Nova venda para cliente:', customer);
     // TODO: Navegar para página de nova venda
+  }
+
+  deleteCustomer(customer: Customer): void {
+    this.dialogService.confirmDelete(customer.name, 'cliente').subscribe(result => {
+      if (result.confirmed) {
+        this.customers = this.customers.filter(c => c.id !== customer.id);
+        this.filterCustomers();
+        console.log('Cliente excluído:', customer);
+      }
+    });
   }
 
   onViewChange(view: ViewMode): void {
