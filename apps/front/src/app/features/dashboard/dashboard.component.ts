@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 interface DashboardStats {
   totalProducts: number;
@@ -31,6 +32,8 @@ export class DashboardComponent implements OnInit {
     monthlyRevenue: 125430.50
   };
 
+  constructor(private router: Router) {}
+
   ngOnInit(): void {
     // Aqui você pode carregar dados reais da API
     this.loadDashboardData();
@@ -39,5 +42,23 @@ export class DashboardComponent implements OnInit {
   private loadDashboardData(): void {
     // TODO: Implementar carregamento de dados da API
     console.log('Carregando dados do dashboard...');
+  }
+
+  /**
+   * Navega para a página de relatórios
+   */
+  goToReports(): void {
+    this.router.navigate(['/relatorios']);
+  }
+
+  /**
+   * Navega para a página de produtos com filtro de estoque baixo
+   */
+  goToLowStockProducts(): void {
+    this.router.navigate(['/produtos'], { 
+      queryParams: { 
+        stockFilter: 'low' 
+      } 
+    });
   }
 }

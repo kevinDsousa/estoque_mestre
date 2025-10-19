@@ -33,15 +33,6 @@
         (selectionChange)="onCategorySelectionChange($event)">
       </app-multi-select>
 
-      <select 
-        [(ngModel)]="selectedStatus" 
-        (change)="filterProducts()"
-        class="form-control status-select">
-        <option *ngFor="let status of statusOptions" [value]="status.value">
-          {{ status.label }}
-        </option>
-      </select>
-
       <button 
         type="button" 
         class="btn btn-secondary clear-filters-btn"
@@ -51,16 +42,31 @@
       </button>
     </div>
 
-    <!-- Segunda linha: Estoque e Preços -->
+    <!-- Segunda linha: Status e Estoque -->
     <div class="filters-row">
-      <select 
-        [(ngModel)]="selectedStockFilter" 
-        (change)="filterProducts()"
-        class="form-control stock-select">
-        <option *ngFor="let stock of stockFilterOptions" [value]="stock.value">
-          {{ stock.label }}
-        </option>
-      </select>
+      <div class="selects-group">
+        <select 
+          [(ngModel)]="selectedStatus" 
+          (change)="filterProducts()"
+          class="form-control status-select">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+
+        <select 
+          [(ngModel)]="selectedStockFilter" 
+          (change)="filterProducts()"
+          class="form-control stock-select">
+          <option *ngFor="let stock of stockFilterOptions" [value]="stock.value">
+            {{ stock.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Terceira linha: Preços -->
+    <div class="filters-row">
 
       <div class="price-range">
         <input 

@@ -92,7 +92,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  padding: 5px 5px 1rem 5px;
   box-shadow: var(--border-soft-bottom);
 }
 
@@ -130,7 +130,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 2rem;
-  padding: 1.5rem 0;
+  padding: 1.5rem 5px;
   box-shadow: var(--border-soft-bottom);
 }
 
@@ -230,7 +230,7 @@ select.form-control {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding-top: 1rem;
+  padding: 1rem 5px 0 5px;
   box-shadow: var(--border-soft-top);
 }
 

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { StorageService } from './storage.service';
 
 export type ViewMode = 'table' | 'cards';
 
@@ -23,7 +24,7 @@ export class ViewPreferencesService {
     customers: 'cards'
   };
 
-  constructor() {}
+  constructor(private storageService: StorageService) {}
 
   /**
    * Obtém a preferência de visualização para um componente específico
@@ -65,11 +66,10 @@ export class ViewPreferencesService {
    */
   private loadPreferences(): ViewPreferences {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
+      const stored = this.storageService.getItemAsObject<ViewPreferences>(this.STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
         // Merge com valores padrão para garantir que todas as propriedades existam
-        return { ...this.DEFAULT_PREFERENCES, ...parsed };
+        return { ...this.DEFAULT_PREFERENCES, ...stored };
       }
     } catch (error) {
       console.warn('Erro ao carregar preferências de visualização:', error);
@@ -83,7 +83,7 @@ export class ViewPreferencesService {
    */
   private savePreferences(preferences: ViewPreferences): void {
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(preferences));
+      this.storageService.setItem(this.STORAGE_KEY, preferences);
     } catch (error) {
       console.warn('Erro ao salvar preferências de visualização:', error);
     }

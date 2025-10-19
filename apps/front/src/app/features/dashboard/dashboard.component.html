@@ -57,7 +57,7 @@
       <div class="card-content">
         <div class="warning-number">{{ stats.lowStockProducts }}</div>
         <p>Produtos precisam de reposição</p>
-        <button class="btn btn-primary">Ver Produtos</button>
+        <button class="btn btn-primary" (click)="goToLowStockProducts()">Ver Produtos</button>
       </div>
     </div>
 
@@ -81,7 +81,7 @@
       <div class="card-content">
         <div class="revenue-number">R$ {{ stats.monthlyRevenue | number:'1.2-2' }}</div>
         <p>Receita do mês atual</p>
-        <button class="btn btn-primary">Ver Relatórios</button>
+        <button class="btn btn-primary" (click)="goToReports()">Ver Relatórios</button>
       </div>
     </div>
   </div>

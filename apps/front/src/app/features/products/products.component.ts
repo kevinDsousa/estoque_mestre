@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
@@ -47,7 +48,8 @@ export class ProductsComponent implements OnInit {
 
   constructor(
     private dialogService: DialogService,
-    private viewPreferencesService: ViewPreferencesService
+    private viewPreferencesService: ViewPreferencesService,
+    private route: ActivatedRoute
   ) {}
 
   categories = [
@@ -83,6 +85,15 @@ export class ProductsComponent implements OnInit {
     this.initializeCategoryOptions();
     // Carrega a preferência salva
     this.currentView = this.viewPreferencesService.getViewPreference('products');
+    
+    // Verifica se há query parameters para aplicar filtros
+    this.route.queryParams.subscribe(params => {
+      if (params['stockFilter'] === 'low') {
+        this.selectedStockFilter = 'low';
+        this.loadProducts();
+        this.filterProducts(); // Aplica os filtros após carregar os produtos
+      }
+    });
   }
 
   private initializeCategoryOptions(): void {

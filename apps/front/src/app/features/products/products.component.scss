@@ -112,9 +112,15 @@
     box-shadow: var(--border-soft-enhanced) !important;
   }
   
+  .selects-group {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
   .status-select,
   .stock-select {
-    min-width: 160px;
+    min-width: 120px;
+    flex-shrink: 0;
     box-shadow: var(--border-soft-enhanced) !important;
   }
 
@@ -143,7 +149,7 @@
     justify-content: flex-end;
     
     .price-input {
-      width: 100px;
+      width: 140px;
       box-shadow: var(--border-soft-enhanced) !important;
     }
     
@@ -504,7 +510,7 @@
         justify-content: center;
         
         .price-input {
-          width: 100px;
+          width: 140px;
         }
       }
     }
