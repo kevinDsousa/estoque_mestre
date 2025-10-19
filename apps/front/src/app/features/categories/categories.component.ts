@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService } from '../../core/services/dialog.service';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
+import { ViewToggleComponent } from '../../core/components';
 
 interface Category {
   id: number;
@@ -15,7 +17,7 @@ interface Category {
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ViewToggleComponent],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.scss'
 })
@@ -25,11 +27,17 @@ export class CategoriesComponent implements OnInit {
   searchTerm = '';
   showAddModal = false;
   editingCategory: Category | null = null;
+  currentView: ViewMode = 'cards';
 
-  constructor(private dialogService: DialogService) {}
+  constructor(
+    private dialogService: DialogService,
+    private viewPreferencesService: ViewPreferencesService
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    // Carrega a preferência salva
+    this.currentView = this.viewPreferencesService.getViewPreference('categories');
   }
 
   private loadCategories(): void {
@@ -127,5 +135,11 @@ export class CategoriesComponent implements OnInit {
 
   getStatusText(isActive: boolean): string {
     return isActive ? 'Ativa' : 'Inativa';
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    // Salva a preferência no localStorage
+    this.viewPreferencesService.setViewPreference('categories', view);
   }
 }

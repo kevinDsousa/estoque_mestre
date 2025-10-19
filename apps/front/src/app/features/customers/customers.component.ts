@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
+import { ViewToggleComponent } from '../../core/components';
 
 interface Customer {
   id: number;
@@ -15,14 +17,20 @@ interface Customer {
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ViewToggleComponent],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
 export class CustomersComponent implements OnInit {
   customers: Customer[] = [];
+  currentView: ViewMode = 'cards';
+
+  constructor(private viewPreferencesService: ViewPreferencesService) {}
 
   ngOnInit(): void {
+    // Carrega a preferência salva
+    this.currentView = this.viewPreferencesService.getViewPreference('customers');
+    
     this.customers = [
       {
         id: 1,
@@ -70,5 +78,11 @@ export class CustomersComponent implements OnInit {
   newSale(customer: Customer): void {
     console.log('Nova venda para cliente:', customer);
     // TODO: Navegar para página de nova venda
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    // Salva a preferência no localStorage
+    this.viewPreferencesService.setViewPreference('customers', view);
   }
 }

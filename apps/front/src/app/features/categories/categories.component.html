@@ -4,10 +4,13 @@
       <h1>Categorias</h1>
       <p class="subtitle">Organize seus produtos por categorias</p>
     </div>
-    <button class="btn btn-primary" (click)="addCategory()">
-      <i class="pi pi-plus"></i>
-      Nova Categoria
-    </button>
+    <div class="header-actions">
+      <app-view-toggle [currentView]="currentView" (viewChange)="onViewChange($event)"></app-view-toggle>
+      <button class="btn btn-primary" (click)="addCategory()">
+        <i class="pi pi-plus"></i>
+        Nova Categoria
+      </button>
+    </div>
   </div>
 
   <div class="page-controls">
@@ -19,7 +22,8 @@
       (input)="filterCategories()">
   </div>
 
-  <div class="categories-grid">
+  <!-- Cards View -->
+  <div *ngIf="currentView === 'cards'" class="categories-grid">
     <div *ngFor="let category of filteredCategories" class="category-card">
       <div class="category-header">
         <h3>{{ category.name }}</h3>
@@ -49,6 +53,65 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Table View -->
+  <div *ngIf="currentView === 'table'" class="categories-table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Produtos</th>
+          <th>Status</th>
+          <th>Criado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of filteredCategories">
+          <td>
+            <div class="cell-content">
+              <strong>{{ category.name }}</strong>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ category.description }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="badge">{{ category.productCount }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="status-badge" [class]="getStatusClass(category.isActive)">
+                {{ getStatusText(category.isActive) }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ category.createdAt | date:'dd/MM/yyyy' }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <div class="actions">
+                <button class="btn btn-ghost btn-sm" (click)="editCategory(category)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm text-error" (click)="deleteCategory(category)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <div *ngIf="filteredCategories.length === 0" class="no-results">

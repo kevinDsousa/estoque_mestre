@@ -4,10 +4,13 @@
       <h1>Transações</h1>
       <p class="subtitle">Histórico de vendas, compras e movimentações</p>
     </div>
-    <button class="btn btn-primary">
-      <i class="pi pi-plus"></i>
-      Nova Transação
-    </button>
+    <div class="header-actions">
+      <app-view-toggle [currentView]="currentView" (viewChange)="onViewChange($event)"></app-view-toggle>
+      <button class="btn btn-primary">
+        <i class="pi pi-plus"></i>
+        Nova Transação
+      </button>
+    </div>
   </div>
 
   <!-- Controles da página -->
@@ -74,7 +77,8 @@
     </div>
   </div>
 
-  <div class="transactions-table-container">
+  <!-- Table View -->
+  <div *ngIf="currentView === 'table'" class="transactions-table-container">
     <table class="transactions-table">
       <thead>
         <tr>
@@ -122,11 +126,64 @@
         </tr>
       </tbody>
     </table>
-    
-    <div *ngIf="filteredTransactions.length === 0" class="no-results">
-      <i class="pi pi-search"></i>
-      <p>Nenhuma transação encontrada</p>
+  </div>
+
+  <!-- Cards View -->
+  <div *ngIf="currentView === 'cards'" class="transactions-cards-container">
+    <div class="transactions-grid">
+      <div *ngFor="let transaction of getPaginatedTransactions()" class="transaction-card">
+        <div class="card-header">
+          <div class="transaction-info">
+            <h3 class="transaction-id">#{{ transaction.id }}</h3>
+            <span class="type-badge" [class]="'type-' + transaction.type">
+              {{ getTypeText(transaction.type) }}
+            </span>
+          </div>
+          <span class="status-badge" [class]="getStatusClass(transaction.status)">
+            {{ getStatusText(transaction.status) }}
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="transaction-details">
+            <div class="detail-item">
+              <span class="label">Cliente/Fornecedor:</span>
+              <span class="value">{{ transaction.customer }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Valor:</span>
+              <span class="value amount">R$ {{ transaction.amount | number:'1.2-2' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Itens:</span>
+              <span class="value">{{ transaction.items }} itens</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Data:</span>
+              <span class="value date">{{ transaction.date | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-ghost btn-sm" (click)="viewTransaction(transaction)">
+            <i class="pi pi-eye"></i>
+            Ver
+          </button>
+          <button class="btn btn-ghost btn-sm" (click)="editTransaction(transaction)">
+            <i class="pi pi-pencil"></i>
+            Editar
+          </button>
+          <button class="btn btn-ghost btn-sm text-error" (click)="cancelTransaction(transaction)">
+            <i class="pi pi-times"></i>
+            Cancelar
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div *ngIf="filteredTransactions.length === 0" class="no-results">
+    <i class="pi pi-search"></i>
+    <p>Nenhuma transação encontrada</p>
   </div>
 
   <!-- Paginação -->

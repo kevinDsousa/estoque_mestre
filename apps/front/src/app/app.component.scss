@@ -5,6 +5,10 @@
   background-color: var(--color-background);
 }
 
+.app-layout.login-page {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+}
+
 .app-content {
   flex: 1;
   margin-top: 64px;
@@ -12,6 +16,16 @@
   padding: var(--spacing-lg);
   transition: margin-left var(--transition-normal);
   min-height: calc(100vh - 64px);
+}
+
+.app-content.login-content {
+  margin-top: 0;
+  margin-left: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-content.sidebar-collapsed {

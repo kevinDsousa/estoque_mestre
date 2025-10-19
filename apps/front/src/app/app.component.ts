@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, filter } from 'rxjs';
 
 // Core components
 import { HeaderComponent } from './core/components/header/header.component';
@@ -35,6 +35,7 @@ export class App implements OnInit, OnDestroy {
   
   isSidebarCollapsed = false;
   isSidebarOverlay = false;
+  isLoginPage = false;
 
   private destroy$ = new Subject<void>();
 
@@ -43,12 +44,14 @@ export class App implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private languageService: LanguageService,
     private layoutService: LayoutService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.initializeApp();
     this.subscribeToLayoutChanges();
+    this.subscribeToRouteChanges();
   }
 
   ngOnDestroy(): void {
@@ -94,6 +97,17 @@ export class App implements OnInit, OnDestroy {
       .subscribe(config => {
         this.isSidebarCollapsed = config.sidebar.collapsed;
         this.isSidebarOverlay = config.sidebar.overlay;
+      });
+  }
+
+  private subscribeToRouteChanges(): void {
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.isLoginPage = event.url === '/login';
       });
   }
 }

@@ -4,13 +4,17 @@
       <h1>Fornecedores</h1>
       <p class="subtitle">Gerencie seus fornecedores e parceiros</p>
     </div>
-    <button class="btn btn-primary">
-      <i class="pi pi-plus"></i>
-      Novo Fornecedor
-    </button>
+    <div class="header-actions">
+      <app-view-toggle [currentView]="currentView" (viewChange)="onViewChange($event)"></app-view-toggle>
+      <button class="btn btn-primary">
+        <i class="pi pi-plus"></i>
+        Novo Fornecedor
+      </button>
+    </div>
   </div>
 
-  <div class="suppliers-grid">
+  <!-- Cards View -->
+  <div *ngIf="currentView === 'cards'" class="suppliers-grid">
     <div *ngFor="let supplier of suppliers" class="supplier-card">
       <div class="supplier-header">
         <h3>{{ supplier.name }}</h3>
@@ -57,5 +61,79 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Table View -->
+  <div *ngIf="currentView === 'table'" class="suppliers-table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Contato</th>
+          <th>Email</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Produtos</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let supplier of suppliers">
+          <td>
+            <div class="cell-content">
+              <strong>{{ supplier.name }}</strong>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ supplier.contact }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ supplier.email }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ supplier.phone }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ supplier.address }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="badge">{{ supplier.productCount }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="status-badge" [class]="supplier.isActive ? 'active' : 'inactive'">
+                {{ supplier.isActive ? 'Ativo' : 'Inativo' }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <div class="actions">
+                <button class="btn btn-ghost btn-sm" (click)="editSupplier(supplier)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" (click)="viewProducts(supplier)">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm text-error" (click)="deleteSupplier(supplier)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

@@ -4,10 +4,16 @@
       <h1>Produtos</h1>
       <p class="subtitle">Gerencie seu catálogo de produtos</p>
     </div>
-    <button class="btn btn-primary" (click)="addProduct()">
-      <i class="pi pi-plus"></i>
-      Adicionar Produto
-    </button>
+    <div class="header-actions">
+      <app-view-toggle 
+        [currentView]="currentView"
+        (viewChange)="onViewChange($event)">
+      </app-view-toggle>
+      <button class="btn btn-primary" (click)="addProduct()">
+        <i class="pi pi-plus"></i>
+        Adicionar Produto
+      </button>
+    </div>
   </div>
 
   <!-- Controles da página -->
@@ -74,8 +80,9 @@
     </div>
   </div>
 
-  <!-- Tabela de Produtos -->
-  <div class="products-table-container">
+  <!-- Visualização de Produtos -->
+  <!-- Tabela -->
+  <div *ngIf="currentView === 'table'" class="products-table-container">
     <table class="products-table">
       <thead>
         <tr>
@@ -121,11 +128,64 @@
         </tr>
       </tbody>
     </table>
-    
-    <div *ngIf="filteredProducts.length === 0" class="no-results">
-      <i class="pi pi-search"></i>
-      <p>Nenhum produto encontrado</p>
+  </div>
+
+  <!-- Cards -->
+  <div *ngIf="currentView === 'cards'" class="products-cards-container">
+    <div class="products-grid">
+      <div *ngFor="let product of getPaginatedProducts()" class="product-card">
+        <div class="card-header">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <span class="status-badge" [class]="getStatusClass(product.status)">
+            {{ getStatusText(product.status) }}
+          </span>
+        </div>
+        
+        <div class="card-body">
+          <div class="product-info">
+            <div class="info-item">
+              <span class="label">Categoria:</span>
+              <span class="value">{{ product.category }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">SKU:</span>
+              <span class="value sku">{{ product.sku }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Preço:</span>
+              <span class="value price">R$ {{ product.price | number:'1.2-2' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Estoque:</span>
+              <span class="value stock" [class]="product.stock < 5 ? 'low-stock' : ''">
+                {{ product.stock }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="label">Atualizado:</span>
+              <span class="value date">{{ product.lastUpdated | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="btn btn-ghost btn-sm" (click)="editProduct(product)">
+            <i class="pi pi-pencil"></i>
+            Editar
+          </button>
+          <button class="btn btn-ghost btn-sm text-error" (click)="deleteProduct(product)">
+            <i class="pi pi-trash"></i>
+            Excluir
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Estado vazio -->
+  <div *ngIf="filteredProducts.length === 0" class="no-results">
+    <i class="pi pi-search"></i>
+    <p>Nenhum produto encontrado</p>
   </div>
 
   <!-- Paginação -->

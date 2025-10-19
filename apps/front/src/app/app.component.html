@@ -1,12 +1,12 @@
-<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed" [class.sidebar-overlay]="isSidebarOverlay">
-  <app-header></app-header>
-  <app-sidebar></app-sidebar>
+<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed" [class.sidebar-overlay]="isSidebarOverlay" [class.login-page]="isLoginPage">
+  <app-header *ngIf="!isLoginPage"></app-header>
+  <app-sidebar *ngIf="!isLoginPage"></app-sidebar>
   
-  <main class="app-content" [class.sidebar-collapsed]="isSidebarCollapsed" [class.sidebar-overlay]="isSidebarOverlay">
+  <main class="app-content" [class.sidebar-collapsed]="isSidebarCollapsed" [class.sidebar-overlay]="isSidebarOverlay" [class.login-content]="isLoginPage">
     <router-outlet></router-outlet>
   </main>
   
-  <app-footer></app-footer>
+  <app-footer *ngIf="!isLoginPage"></app-footer>
   
   <!-- Global Dialog Component -->
   <app-dialog></app-dialog>

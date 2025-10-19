@@ -12,3 +12,5 @@ export { MultiSelectComponent } from './multi-select/multi-select.component';
 export { PaginationComponent } from './pagination/pagination.component';
 export { DataTableComponent } from './data-table/data-table.component';
 export { AcoesComponent } from './acoes/acoes.component';
+export { ViewToggleComponent } from './view-toggle/view-toggle.component';
+export { ViewMode } from '../services/view-preferences.service';

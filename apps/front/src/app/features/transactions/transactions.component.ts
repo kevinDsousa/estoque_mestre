@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService } from '../../core/services/dialog.service';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { ViewToggleComponent } from '../../core/components';
 
 interface Transaction {
   id: number;
@@ -18,7 +20,7 @@ interface Transaction {
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, MultiSelectComponent, PaginationComponent, ViewToggleComponent],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss'
 })
@@ -28,6 +30,12 @@ export class TransactionsComponent implements OnInit {
   searchTerm = '';
   selectedTypes: string[] = [];
   selectedStatus = '';
+  currentView: ViewMode = 'table';
+
+  constructor(
+    private dialogService: DialogService,
+    private viewPreferencesService: ViewPreferencesService
+  ) {}
   selectedDateRange = '';
   minAmount = '';
   maxAmount = '';
@@ -107,6 +115,8 @@ export class TransactionsComponent implements OnInit {
     this.filteredTransactions = [...this.transactions];
     this.initializeTypeOptions();
     this.updatePagination();
+    // Carrega a preferência salva
+    this.currentView = this.viewPreferencesService.getViewPreference('transactions');
   }
 
   private initializeTypeOptions(): void {
@@ -264,5 +274,11 @@ export class TransactionsComponent implements OnInit {
       transaction.status = 'cancelled';
       console.log('Transação cancelada:', transaction);
     }
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    // Salva a preferência no localStorage
+    this.viewPreferencesService.setViewPreference('transactions', view);
   }
 }

@@ -4,13 +4,17 @@
       <h1>Clientes</h1>
       <p class="subtitle">Gerencie sua base de clientes</p>
     </div>
-    <button class="btn btn-primary">
-      <i class="pi pi-plus"></i>
-      Novo Cliente
-    </button>
+    <div class="header-actions">
+      <app-view-toggle [currentView]="currentView" (viewChange)="onViewChange($event)"></app-view-toggle>
+      <button class="btn btn-primary">
+        <i class="pi pi-plus"></i>
+        Novo Cliente
+      </button>
+    </div>
   </div>
 
-  <div class="customers-grid">
+  <!-- Cards View -->
+  <div *ngIf="currentView === 'cards'" class="customers-grid">
     <div *ngFor="let customer of customers" class="customer-card">
       <div class="customer-header">
         <div class="customer-avatar">
@@ -62,5 +66,79 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Table View -->
+  <div *ngIf="currentView === 'table'" class="customers-table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Total Compras</th>
+          <th>Última Compra</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let customer of customers">
+          <td>
+            <div class="cell-content">
+              <strong>{{ customer.name }}</strong>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ customer.email }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ customer.phone }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              {{ customer.address }}
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="amount">R$ {{ customer.totalPurchases | number:'1.2-2' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="date">{{ customer.lastPurchase | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <span class="status-badge" [class]="customer.isActive ? 'active' : 'inactive'">
+                {{ customer.isActive ? 'Ativo' : 'Inativo' }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-content">
+              <div class="actions">
+                <button class="btn btn-ghost btn-sm" (click)="editCustomer(customer)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" (click)="viewHistory(customer)">
+                  <i class="pi pi-history"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" (click)="newSale(customer)">
+                  <i class="pi pi-plus"></i>
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

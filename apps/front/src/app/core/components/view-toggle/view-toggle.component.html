@@ -1,0 +1,21 @@
+<div [class]="getToggleClass()">
+  <button
+    type="button"
+    [class]="getButtonClass('cards')"
+    [disabled]="disabled"
+    (click)="onViewChange('cards')"
+    title="Visualizar em cards">
+    <i class="pi pi-th-large"></i>
+    <span class="btn-label">Cards</span>
+  </button>
+  
+  <button
+    type="button"
+    [class]="getButtonClass('table')"
+    [disabled]="disabled"
+    (click)="onViewChange('table')"
+    title="Visualizar em tabela">
+    <i class="pi pi-list"></i>
+    <span class="btn-label">Tabela</span>
+  </button>
+</div>

@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService } from '../../core/services/dialog.service';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { ViewToggleComponent } from '../../core/components';
 
 interface Product {
   id: number;
@@ -19,7 +21,7 @@ interface Product {
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, MultiSelectComponent, PaginationComponent, ViewToggleComponent],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
@@ -34,6 +36,7 @@ export class ProductsComponent implements OnInit {
   maxPrice = '';
   showAddModal = false;
   editingProduct: Product | null = null;
+  currentView: ViewMode = 'table';
   
   // Pagination
   paginationConfig: PaginationConfig = {
@@ -42,7 +45,10 @@ export class ProductsComponent implements OnInit {
     itemsPerPage: 10
   };
 
-  constructor(private dialogService: DialogService) {}
+  constructor(
+    private dialogService: DialogService,
+    private viewPreferencesService: ViewPreferencesService
+  ) {}
 
   categories = [
     'Eletrônicos',
@@ -75,6 +81,8 @@ export class ProductsComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
     this.initializeCategoryOptions();
+    // Carrega a preferência salva
+    this.currentView = this.viewPreferencesService.getViewPreference('products');
   }
 
   private initializeCategoryOptions(): void {
@@ -263,6 +271,12 @@ export class ProductsComponent implements OnInit {
     const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
     const endIndex = startIndex + this.paginationConfig.itemsPerPage;
     return this.filteredProducts.slice(startIndex, endIndex);
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    // Salva a preferência no localStorage
+    this.viewPreferencesService.setViewPreference('products', view);
   }
 
   getStatusClass(status: string): string {

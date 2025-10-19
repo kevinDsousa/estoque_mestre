@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogService } from '../../core/services/dialog.service';
+import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
+import { ViewToggleComponent } from '../../core/components';
 
 interface Supplier {
   id: number;
@@ -16,16 +18,23 @@ interface Supplier {
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ViewToggleComponent],
   templateUrl: './suppliers.component.html',
   styleUrl: './suppliers.component.scss'
 })
 export class SuppliersComponent implements OnInit {
   suppliers: Supplier[] = [];
+  currentView: ViewMode = 'cards';
 
-  constructor(private dialogService: DialogService) {}
+  constructor(
+    private dialogService: DialogService,
+    private viewPreferencesService: ViewPreferencesService
+  ) {}
 
   ngOnInit(): void {
+    // Carrega a preferência salva
+    this.currentView = this.viewPreferencesService.getViewPreference('suppliers');
+    
     this.suppliers = [
       {
         id: 1,
@@ -77,5 +86,11 @@ export class SuppliersComponent implements OnInit {
         console.log('Fornecedor excluído:', supplier);
       }
     });
+  }
+
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    // Salva a preferência no localStorage
+    this.viewPreferencesService.setViewPreference('suppliers', view);
   }
 }

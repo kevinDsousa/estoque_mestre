@@ -40,8 +40,11 @@
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-md: 16px;
+  --font-size-base: 16px;
   --font-size-lg: 18px;
   --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  --font-size-xxxl: 28px;
   
   /* Font weights */
   --font-weight-normal: 400;
@@ -131,6 +134,9 @@
   /* Enhanced borders for form controls in light mode */
   --border-soft-enhanced: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06);
   --border-soft-focus: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(14, 165, 233, 0.1);
+  
+  /* Subtle border for components */
+  --border-subtle: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 /* --------------------------------------------
@@ -205,6 +211,9 @@
   /* Enhanced borders for form controls in dark mode */
   --border-soft-enhanced: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
   --border-soft-focus: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(14, 165, 233, 0.2);
+  
+  /* Subtle border for components */
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* --------------------------------------------
@@ -227,6 +236,11 @@ body * {
 /* Override for specific elements that might have their own colors */
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-color);
+}
+
+/* Ensure h1 elements use the correct font size */
+h1 {
+  font-size: var(--font-size-xxl) !important;
 }
 
 p, span, div {

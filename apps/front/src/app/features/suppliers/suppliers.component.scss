@@ -1,6 +1,5 @@
 .suppliers {
-  padding: 2rem;
-  max-width: 1200px;
+  padding: var(--spacing-lg);
   margin: 0 auto;
 }
 
@@ -8,26 +7,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-lg);
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
 }
 
 .header-content h1 {
   color: var(--text-color);
-  margin: 0 0 0.5rem 0;
-  font-size: 2rem;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-xxl);
   font-weight: 600;
 }
 
 .subtitle {
   color: var(--text-color-secondary);
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: var(--border-radius-small);
@@ -49,14 +54,88 @@
 .suppliers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  gap: var(--spacing-lg);
+}
+
+// Tabela de fornecedores
+.suppliers-table-container {
+  background: var(--color-card);
+  border-radius: var(--border-radius-medium);
+  box-shadow: var(--border-soft);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+  thead {
+    background: var(--color-surface);
+    
+    th {
+      padding: var(--spacing-md) var(--spacing-lg);
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: var(--font-size-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: var(--border-soft-bottom);
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color var(--transition-fast);
+      
+      &:hover {
+        background: var(--color-surface-hover);
+      }
+      
+      &:not(:last-child) {
+        box-shadow: var(--border-soft-bottom);
+      }
+    }
+    
+    td {
+      padding: var(--spacing-md) var(--spacing-lg);
+      vertical-align: middle;
+    }
+  }
+}
+
+.cell-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  
+  strong {
+    font-weight: 600;
+    color: var(--text-color);
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
 }
 
 .supplier-card {
   background: var(--color-card);
   box-shadow: var(--border-soft);
   border-radius: var(--border-radius-medium);
-  padding: 1.5rem;
+  padding: var(--spacing-lg);
   box-shadow: var(--shadow-light);
   transition: box-shadow var(--transition-fast);
 }
@@ -69,7 +148,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .supplier-header h3 {
@@ -98,14 +177,14 @@
 }
 
 .supplier-info {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
   color: var(--text-color-secondary);
   font-size: 0.875rem;
 }
@@ -116,13 +195,13 @@
 }
 
 .supplier-stats {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .stat {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
   color: var(--text-color-secondary);
   font-size: 0.875rem;
 }
@@ -133,10 +212,10 @@
 
 .card-footer {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
   justify-content: flex-end;
   margin-top: auto;
-  padding-top: 1rem;
+  padding-top: var(--spacing-md);
   box-shadow: var(--border-soft-top);
 }
 
@@ -173,6 +252,11 @@
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .suppliers-grid {
