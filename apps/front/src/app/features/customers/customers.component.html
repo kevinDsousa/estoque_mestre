@@ -13,9 +13,21 @@
     </div>
   </div>
 
+  <!-- Controles da página -->
+  <div class="page-controls">
+    <input 
+      type="text" 
+      placeholder="Buscar clientes..."
+      class="form-control search-input"
+      [(ngModel)]="searchTerm"
+      (input)="filterCustomers()">
+  </div>
+
   <!-- Cards View -->
-  <div *ngIf="currentView === 'cards'" class="customers-grid">
-    <div *ngFor="let customer of customers" class="customer-card">
+  @if (currentView === 'cards') {
+    <div class="customers-grid">
+      @for (customer of getPaginatedCustomers(); track customer.id) {
+        <div class="customer-card">
       <div class="customer-header">
         <div class="customer-avatar">
           <i class="pi pi-user"></i>
@@ -66,10 +78,13 @@
         </button>
       </div>
     </div>
-  </div>
+      }
+    </div>
+  }
 
   <!-- Table View -->
-  <div *ngIf="currentView === 'table'" class="customers-table-container">
+  @if (currentView === 'table') {
+    <div class="customers-table-container">
     <table class="data-table">
       <thead>
         <tr>
@@ -84,7 +99,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let customer of customers">
+        @for (customer of getPaginatedCustomers(); track customer.id) {
+          <tr>
           <td>
             <div class="cell-content">
               <strong>{{ customer.name }}</strong>
@@ -137,8 +153,26 @@
               </div>
             </div>
           </td>
-        </tr>
+          </tr>
+        }
       </tbody>
     </table>
-  </div>
+    </div>
+  }
+
+  <!-- Paginação -->
+  @if (filteredCustomers.length > 0) {
+    <app-pagination
+      [config]="paginationConfig"
+      (pageChange)="onPageChange($event)"
+      (itemsPerPageChange)="onItemsPerPageChange($event)">
+    </app-pagination>
+  }
+
+  @if (filteredCustomers.length === 0) {
+    <div class="no-results">
+      <i class="pi pi-users"></i>
+      <p>Nenhum cliente encontrado</p>
+    </div>
+  }
 </div>

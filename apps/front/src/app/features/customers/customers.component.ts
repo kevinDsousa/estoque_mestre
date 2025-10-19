@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { ViewToggleComponent } from '../../core/components';
+import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 
 interface Customer {
   id: number;
@@ -17,13 +19,22 @@ interface Customer {
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, ViewToggleComponent],
+  imports: [CommonModule, FormsModule, ViewToggleComponent, PaginationComponent],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
 export class CustomersComponent implements OnInit {
   customers: Customer[] = [];
+  filteredCustomers: Customer[] = [];
+  searchTerm = '';
   currentView: ViewMode = 'cards';
+  
+  // Paginação
+  paginationConfig: PaginationConfig = {
+    currentPage: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  };
 
   constructor(private viewPreferencesService: ViewPreferencesService) {}
 
@@ -31,6 +42,10 @@ export class CustomersComponent implements OnInit {
     // Carrega a preferência salva
     this.currentView = this.viewPreferencesService.getViewPreference('customers');
     
+    this.loadCustomers();
+  }
+
+  private loadCustomers(): void {
     this.customers = [
       {
         id: 1,
@@ -63,6 +78,8 @@ export class CustomersComponent implements OnInit {
         isActive: true
       }
     ];
+    this.filteredCustomers = [...this.customers];
+    this.updatePagination();
   }
 
   editCustomer(customer: Customer): void {
@@ -84,5 +101,45 @@ export class CustomersComponent implements OnInit {
     this.currentView = view;
     // Salva a preferência no localStorage
     this.viewPreferencesService.setViewPreference('customers', view);
+  }
+
+  // Métodos de filtro e paginação
+  filterCustomers(): void {
+    this.filteredCustomers = this.customers.filter(customer =>
+      customer.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      customer.phone.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      customer.address.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+    this.updatePagination();
+  }
+
+  private updatePagination(): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      totalItems: this.filteredCustomers.length,
+      currentPage: 1 // Reset para primeira página quando filtrar
+    };
+  }
+
+  onPageChange(page: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      currentPage: page
+    };
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      itemsPerPage: itemsPerPage,
+      currentPage: 1
+    };
+  }
+
+  getPaginatedCustomers(): Customer[] {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    return this.filteredCustomers.slice(startIndex, endIndex);
   }
 }

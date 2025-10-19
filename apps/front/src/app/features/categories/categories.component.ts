@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { ViewToggleComponent } from '../../core/components';
+import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 
 interface Category {
   id: number;
@@ -17,7 +18,7 @@ interface Category {
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, ViewToggleComponent],
+  imports: [CommonModule, FormsModule, ViewToggleComponent, PaginationComponent],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.scss'
 })
@@ -28,6 +29,13 @@ export class CategoriesComponent implements OnInit {
   showAddModal = false;
   editingCategory: Category | null = null;
   currentView: ViewMode = 'cards';
+  
+  // Paginação
+  paginationConfig: PaginationConfig = {
+    currentPage: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  };
 
   constructor(
     private dialogService: DialogService,
@@ -38,6 +46,7 @@ export class CategoriesComponent implements OnInit {
     this.loadCategories();
     // Carrega a preferência salva
     this.currentView = this.viewPreferencesService.getViewPreference('categories');
+    this.updatePagination();
   }
 
   private loadCategories(): void {
@@ -82,6 +91,15 @@ export class CategoriesComponent implements OnInit {
     this.filteredCategories = this.categories.filter(category =>
       category.name.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
+    this.updatePagination();
+  }
+
+  private updatePagination(): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      totalItems: this.filteredCategories.length,
+      currentPage: 1 // Reset para primeira página quando filtrar
+    };
   }
 
   addCategory(): void {
@@ -141,5 +159,27 @@ export class CategoriesComponent implements OnInit {
     this.currentView = view;
     // Salva a preferência no localStorage
     this.viewPreferencesService.setViewPreference('categories', view);
+  }
+
+  // Métodos de paginação
+  onPageChange(page: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      currentPage: page
+    };
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      itemsPerPage: itemsPerPage,
+      currentPage: 1
+    };
+  }
+
+  getPaginatedCategories(): Category[] {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    return this.filteredCategories.slice(startIndex, endIndex);
   }
 }

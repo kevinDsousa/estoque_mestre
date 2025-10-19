@@ -29,6 +29,43 @@
   font-size: var(--font-size-base);
 }
 
+// Controles da página
+.page-controls {
+  margin-bottom: var(--spacing-xl);
+  
+  .search-input {
+    flex: 1;
+    min-width: 250px;
+    box-shadow: var(--border-soft-enhanced) !important;
+  }
+}
+
+// Form controls
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  box-shadow: var(--border-soft);
+  border-radius: var(--border-radius-small);
+  background: var(--color-background);
+  color: var(--text-color);
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+  }
+  
+  &[type="select"], select.form-control {
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+    appearance: none;
+  }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

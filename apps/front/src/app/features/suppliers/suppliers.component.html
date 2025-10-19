@@ -13,9 +13,21 @@
     </div>
   </div>
 
+  <!-- Controles da página -->
+  <div class="page-controls">
+    <input 
+      type="text" 
+      placeholder="Buscar fornecedores..."
+      class="form-control search-input"
+      [(ngModel)]="searchTerm"
+      (input)="filterSuppliers()">
+  </div>
+
   <!-- Cards View -->
-  <div *ngIf="currentView === 'cards'" class="suppliers-grid">
-    <div *ngFor="let supplier of suppliers" class="supplier-card">
+  @if (currentView === 'cards') {
+    <div class="suppliers-grid">
+      @for (supplier of getPaginatedSuppliers(); track supplier.id) {
+        <div class="supplier-card">
       <div class="supplier-header">
         <h3>{{ supplier.name }}</h3>
         <span class="status-badge" [class]="supplier.isActive ? 'active' : 'inactive'">
@@ -61,10 +73,13 @@
         </button>
       </div>
     </div>
-  </div>
+      }
+    </div>
+  }
 
   <!-- Table View -->
-  <div *ngIf="currentView === 'table'" class="suppliers-table-container">
+  @if (currentView === 'table') {
+    <div class="suppliers-table-container">
     <table class="data-table">
       <thead>
         <tr>
@@ -79,7 +94,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let supplier of suppliers">
+        @for (supplier of getPaginatedSuppliers(); track supplier.id) {
+          <tr>
           <td>
             <div class="cell-content">
               <strong>{{ supplier.name }}</strong>
@@ -132,8 +148,26 @@
               </div>
             </div>
           </td>
-        </tr>
+          </tr>
+        }
       </tbody>
     </table>
-  </div>
+    </div>
+  }
+
+  <!-- Paginação -->
+  @if (filteredSuppliers.length > 0) {
+    <app-pagination
+      [config]="paginationConfig"
+      (pageChange)="onPageChange($event)"
+      (itemsPerPageChange)="onItemsPerPageChange($event)">
+    </app-pagination>
+  }
+
+  @if (filteredSuppliers.length === 0) {
+    <div class="no-results">
+      <i class="pi pi-building"></i>
+      <p>Nenhum fornecedor encontrado</p>
+    </div>
+  }
 </div>

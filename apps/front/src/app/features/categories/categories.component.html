@@ -23,8 +23,10 @@
   </div>
 
   <!-- Cards View -->
-  <div *ngIf="currentView === 'cards'" class="categories-grid">
-    <div *ngFor="let category of filteredCategories" class="category-card">
+  @if (currentView === 'cards') {
+    <div class="categories-grid">
+      @for (category of getPaginatedCategories(); track category.id) {
+        <div class="category-card">
       <div class="category-header">
         <h3>{{ category.name }}</h3>
         <span class="status-badge" [class]="getStatusClass(category.isActive)">
@@ -53,10 +55,13 @@
         </button>
       </div>
     </div>
-  </div>
+      }
+    </div>
+  }
 
   <!-- Table View -->
-  <div *ngIf="currentView === 'table'" class="categories-table-container">
+  @if (currentView === 'table') {
+    <div class="categories-table-container">
     <table class="data-table">
       <thead>
         <tr>
@@ -69,7 +74,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let category of filteredCategories">
+        @for (category of getPaginatedCategories(); track category.id) {
+          <tr>
           <td>
             <div class="cell-content">
               <strong>{{ category.name }}</strong>
@@ -109,18 +115,32 @@
               </div>
             </div>
           </td>
-        </tr>
+          </tr>
+        }
       </tbody>
     </table>
-  </div>
+    </div>
+  }
 
-  <div *ngIf="filteredCategories.length === 0" class="no-results">
-    <i class="pi pi-tags"></i>
-    <p>Nenhuma categoria encontrada</p>
-  </div>
+  <!-- Paginação -->
+  @if (filteredCategories.length > 0) {
+    <app-pagination
+      [config]="paginationConfig"
+      (pageChange)="onPageChange($event)"
+      (itemsPerPageChange)="onItemsPerPageChange($event)">
+    </app-pagination>
+  }
+
+  @if (filteredCategories.length === 0) {
+    <div class="no-results">
+      <i class="pi pi-tags"></i>
+      <p>Nenhuma categoria encontrada</p>
+    </div>
+  }
 
   <!-- Modal -->
-  <div *ngIf="showAddModal" class="modal-overlay" (click)="closeModal()">
+  @if (showAddModal) {
+    <div class="modal-overlay" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ editingCategory?.id === 0 ? 'Nova Categoria' : 'Editar Categoria' }}</h3>
@@ -166,5 +186,6 @@
         </button>
       </div>
     </div>
-  </div>
+    </div>
+  }
 </div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 
 interface ReportTemplate {
   id: string;
@@ -44,18 +45,27 @@ interface QuickStats {
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss'
 })
 export class ReportsComponent implements OnInit, OnDestroy {
   reportTypes: ReportType[] = [];
   reportTemplates: ReportTemplate[] = [];
+  filteredReportTypes: ReportType[] = [];
   quickStats: QuickStats | null = null;
   loading = true;
   error: string | null = null;
   selectedPeriod = 'month';
   selectedReportType = '';
+  searchTerm = '';
+
+  // Paginação
+  paginationConfig: PaginationConfig = {
+    currentPage: 1,
+    totalItems: 0,
+    itemsPerPage: 12
+  };
 
   private destroy$ = new Subject<void>();
 
@@ -181,6 +191,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: any) => {
           this.reportTemplates = response.templates || [];
+          this.filteredReportTypes = [...this.reportTypes];
+          this.updatePagination();
           this.loading = false;
         },
         error: (error) => {
@@ -216,7 +228,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   getReportsByCategory(): { [key: string]: ReportType[] } {
-    return this.reportTypes.reduce((acc, report) => {
+    return this.filteredReportTypes.reduce((acc, report) => {
       if (!acc[report.category]) {
         acc[report.category] = [];
       }
@@ -271,5 +283,44 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   getAbsValue(value: number): number {
     return Math.abs(value);
+  }
+
+  // Métodos de filtro e paginação
+  filterReports(): void {
+    this.filteredReportTypes = this.reportTypes.filter(report =>
+      report.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      report.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      report.category.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+    this.updatePagination();
+  }
+
+  private updatePagination(): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      totalItems: this.filteredReportTypes.length,
+      currentPage: 1 // Reset para primeira página quando filtrar
+    };
+  }
+
+  onPageChange(page: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      currentPage: page
+    };
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.paginationConfig = {
+      ...this.paginationConfig,
+      itemsPerPage: itemsPerPage,
+      currentPage: 1
+    };
+  }
+
+  getPaginatedReports(): ReportType[] {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    return this.filteredReportTypes.slice(startIndex, endIndex);
   }
 }

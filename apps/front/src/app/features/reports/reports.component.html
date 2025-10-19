@@ -104,6 +104,16 @@
       </div>
     }
 
+    <!-- Controles da página -->
+    <div class="page-controls">
+      <input 
+        type="text" 
+        placeholder="Buscar relatórios..."
+        class="form-control search-input"
+        [(ngModel)]="searchTerm"
+        (input)="filterReports()">
+    </div>
+
     <!-- Tipos de Relatórios -->
     <div class="reports-categories">
       @for (category of getReportsByCategory() | keyvalue; track category.key) {
@@ -173,6 +183,22 @@
         </div>
       }
     </div>
+
+    <!-- Paginação -->
+    @if (filteredReportTypes.length > 0) {
+      <app-pagination
+        [config]="paginationConfig"
+        (pageChange)="onPageChange($event)"
+        (itemsPerPageChange)="onItemsPerPageChange($event)">
+      </app-pagination>
+    }
+
+    @if (filteredReportTypes.length === 0) {
+      <div class="no-results">
+        <i class="pi pi-chart-bar"></i>
+        <p>Nenhum relatório encontrado</p>
+      </div>
+    }
 
     <!-- Relatório Selecionado -->
     @if (selectedReportType) {
