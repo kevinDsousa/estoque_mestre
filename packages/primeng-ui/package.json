@@ -1,0 +1,38 @@
+{
+  "name": "@estoque-mestre/primeng-ui",
+  "version": "1.0.0",
+  "description": "PrimeNG UI Components Library for Estoque Mestre",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [
+    "angular",
+    "primeng",
+    "ui",
+    "components",
+    "estoque-mestre"
+  ],
+  "author": "Estoque Mestre Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0",
+    "@angular/forms": "^18.0.0",
+    "@angular/router": "^18.0.0",
+    "primeng": "^18.0.0",
+    "primeicons": "^7.0.0",
+    "primeflex": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@estoque-mestre/models": "workspace:*"
+  }
+}

@@ -1,0 +1,429 @@
+// ============================================
+// Estoque Mestre - PrimeNG Custom Theme
+// ============================================
+
+@import '../styles/variables.scss';
+
+// ============================================
+// PrimeNG Theme Overrides
+// ============================================
+
+// Override PrimeNG default variables
+:root {
+  // Primary Colors
+  --p-primary-color: #{$primary-500};
+  --p-primary-color-text: #{$primaryTextColor};
+  --p-primary-color-contrast: #{$primary-700};
+  
+  // Secondary Colors
+  --p-secondary-color: #{$secondary-500};
+  --p-secondary-color-text: #{$secondaryTextColor};
+  --p-secondary-color-contrast: #{$secondary-700};
+  
+  // Surface Colors
+  --p-surface-0: #{$surfaceBgColor};
+  --p-surface-50: #{$gray-50};
+  --p-surface-100: #{$gray-100};
+  --p-surface-200: #{$gray-200};
+  --p-surface-300: #{$gray-300};
+  --p-surface-400: #{$gray-400};
+  --p-surface-500: #{$gray-500};
+  --p-surface-600: #{$gray-600};
+  --p-surface-700: #{$gray-700};
+  --p-surface-800: #{$gray-800};
+  --p-surface-900: #{$gray-900};
+  
+  // Text Colors
+  --p-text-color: #{$textColor};
+  --p-text-color-secondary: #{$textSecondaryColor};
+  --p-text-muted-color: #{$textMutedColor};
+  
+  // Border Colors
+  --p-border-color: #{$borderColor};
+  --p-border-focus-color: #{$borderFocusColor};
+  
+  // Shadow
+  --p-shadow: 0 1px 3px 0 #{$shadowColor}, 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --p-shadow-focus: 0 0 0 3px #{$shadowFocusColor};
+  
+  // Border Radius
+  --p-border-radius: #{$border-radius-md};
+  --p-border-radius-sm: #{$border-radius-sm};
+  --p-border-radius-lg: #{$border-radius-lg};
+  
+  // Spacing
+  --p-spacing-1: #{$spacer-1};
+  --p-spacing-2: #{$spacer-2};
+  --p-spacing-3: #{$spacer-3};
+  --p-spacing-4: #{$spacer-4};
+  --p-spacing-5: #{$spacer-5};
+  --p-spacing-6: #{$spacer-6};
+  
+  // Font
+  --p-font-family: #{$font-family-primary};
+  --p-font-size: #{$font-size-base};
+  --p-font-weight-normal: #{$font-weight-normal};
+  --p-font-weight-medium: #{$font-weight-medium};
+  --p-font-weight-semibold: #{$font-weight-semibold};
+}
+
+// ============================================
+// Global Styles
+// ============================================
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--p-font-family);
+  font-size: var(--p-font-size);
+  font-weight: var(--p-font-weight-normal);
+  line-height: $line-height-normal;
+  color: var(--p-text-color);
+  background-color: var(--p-surface-0);
+  margin: 0;
+  padding: 0;
+}
+
+// ============================================
+// Button Customizations
+// ============================================
+
+.p-button {
+  border-radius: var(--p-border-radius);
+  font-weight: var(--p-font-weight-medium);
+  transition: all $transition-fast;
+  
+  &.p-button-primary {
+    background: var(--p-primary-color);
+    border-color: var(--p-primary-color);
+    
+    &:hover {
+      background: var(--p-primary-color-contrast);
+      border-color: var(--p-primary-color-contrast);
+    }
+    
+    &:focus {
+      box-shadow: var(--p-shadow-focus);
+    }
+  }
+  
+  &.p-button-secondary {
+    background: var(--p-secondary-color);
+    border-color: var(--p-secondary-color);
+    
+    &:hover {
+      background: var(--p-secondary-color-contrast);
+      border-color: var(--p-secondary-color-contrast);
+    }
+  }
+  
+  &.p-button-outlined {
+    background: transparent;
+    color: var(--p-primary-color);
+    border-color: var(--p-primary-color);
+    
+    &:hover {
+      background: var(--p-primary-color);
+      color: var(--p-primary-color-text);
+    }
+  }
+  
+  &.p-button-text {
+    background: transparent;
+    color: var(--p-primary-color);
+    border-color: transparent;
+    
+    &:hover {
+      background: var(--p-surface-100);
+    }
+  }
+}
+
+// ============================================
+// Input Customizations
+// ============================================
+
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-calendar input,
+.p-inputnumber input {
+  border-radius: var(--p-border-radius);
+  border: 1px solid var(--p-border-color);
+  transition: all $transition-fast;
+  
+  &:focus {
+    border-color: var(--p-border-focus-color);
+    box-shadow: var(--p-shadow-focus);
+    outline: none;
+  }
+  
+  &.p-invalid {
+    border-color: $error-500;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    }
+  }
+}
+
+// ============================================
+// Card Customizations
+// ============================================
+
+.p-card {
+  border-radius: var(--p-border-radius-lg);
+  box-shadow: var(--p-shadow);
+  border: 1px solid var(--p-border-color);
+  
+  .p-card-header {
+    background: var(--p-surface-50);
+    border-bottom: 1px solid var(--p-border-color);
+    font-weight: var(--p-font-weight-semibold);
+  }
+  
+  .p-card-content {
+    padding: var(--p-spacing-6);
+  }
+  
+  .p-card-footer {
+    background: var(--p-surface-50);
+    border-top: 1px solid var(--p-border-color);
+  }
+}
+
+// ============================================
+// Table Customizations
+// ============================================
+
+.p-datatable {
+  .p-datatable-header {
+    background: var(--p-surface-50);
+    border-bottom: 1px solid var(--p-border-color);
+    font-weight: var(--p-font-weight-semibold);
+  }
+  
+  .p-datatable-thead > tr > th {
+    background: var(--p-surface-50);
+    border-bottom: 1px solid var(--p-border-color);
+    font-weight: var(--p-font-weight-medium);
+    color: var(--p-text-color);
+  }
+  
+  .p-datatable-tbody > tr {
+    transition: background-color $transition-fast;
+    
+    &:hover {
+      background: var(--p-surface-50);
+    }
+    
+    &.p-datatable-row-selected {
+      background: rgba(0, 102, 204, 0.1);
+    }
+  }
+  
+  .p-datatable-tbody > tr > td {
+    border-bottom: 1px solid var(--p-border-color);
+  }
+}
+
+// ============================================
+// Dialog/Modal Customizations
+// ============================================
+
+.p-dialog {
+  border-radius: var(--p-border-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  .p-dialog-header {
+    background: var(--p-surface-50);
+    border-bottom: 1px solid var(--p-border-color);
+    font-weight: var(--p-font-weight-semibold);
+  }
+  
+  .p-dialog-content {
+    padding: var(--p-spacing-6);
+  }
+  
+  .p-dialog-footer {
+    background: var(--p-surface-50);
+    border-top: 1px solid var(--p-border-color);
+  }
+}
+
+.p-overlaypanel {
+  border-radius: var(--p-border-radius-lg);
+  box-shadow: var(--p-shadow);
+  border: 1px solid var(--p-border-color);
+}
+
+// ============================================
+// Menu Customizations
+// ============================================
+
+.p-menu {
+  border-radius: var(--p-border-radius);
+  box-shadow: var(--p-shadow);
+  border: 1px solid var(--p-border-color);
+  
+  .p-menuitem-link {
+    transition: background-color $transition-fast;
+    
+    &:hover {
+      background: var(--p-surface-100);
+    }
+    
+    &.p-menuitem-link-active {
+      background: var(--p-primary-color);
+      color: var(--p-primary-color-text);
+    }
+  }
+}
+
+.p-menubar {
+  border-radius: var(--p-border-radius);
+  border: 1px solid var(--p-border-color);
+  
+  .p-menubar-root-list {
+    border-radius: var(--p-border-radius);
+  }
+}
+
+// ============================================
+// Toast Customizations
+// ============================================
+
+.p-toast {
+  .p-toast-message {
+    border-radius: var(--p-border-radius);
+    box-shadow: var(--p-shadow);
+    
+    &.p-toast-message-success {
+      background: $success-50;
+      border-left: 4px solid $success-500;
+      color: $success-800;
+    }
+    
+    &.p-toast-message-error {
+      background: $error-50;
+      border-left: 4px solid $error-500;
+      color: $error-800;
+    }
+    
+    &.p-toast-message-warn {
+      background: $warning-50;
+      border-left: 4px solid $warning-500;
+      color: $warning-800;
+    }
+    
+    &.p-toast-message-info {
+      background: $info-50;
+      border-left: 4px solid $info-500;
+      color: $info-800;
+    }
+  }
+}
+
+// ============================================
+// Progress Bar Customizations
+// ============================================
+
+.p-progressbar {
+  border-radius: var(--p-border-radius);
+  background: var(--p-surface-200);
+  
+  .p-progressbar-value {
+    background: var(--p-primary-color);
+    border-radius: var(--p-border-radius);
+  }
+}
+
+// ============================================
+// Badge Customizations
+// ============================================
+
+.p-badge {
+  border-radius: var(--p-border-radius-full);
+  font-weight: var(--p-font-weight-medium);
+  
+  &.p-badge-primary {
+    background: var(--p-primary-color);
+    color: var(--p-primary-color-text);
+  }
+  
+  &.p-badge-secondary {
+    background: var(--p-secondary-color);
+    color: var(--p-secondary-color-text);
+  }
+  
+  &.p-badge-success {
+    background: $success-500;
+    color: white;
+  }
+  
+  &.p-badge-warning {
+    background: $warning-500;
+    color: white;
+  }
+  
+  &.p-badge-danger {
+    background: $error-500;
+    color: white;
+  }
+}
+
+// ============================================
+// Utility Classes
+// ============================================
+
+.text-primary { color: var(--p-primary-color) !important; }
+.text-secondary { color: var(--p-secondary-color) !important; }
+.text-success { color: $success-600 !important; }
+.text-warning { color: $warning-600 !important; }
+.text-error { color: $error-600 !important; }
+.text-muted { color: var(--p-text-muted-color) !important; }
+
+.bg-primary { background-color: var(--p-primary-color) !important; }
+.bg-secondary { background-color: var(--p-secondary-color) !important; }
+.bg-success { background-color: $success-50 !important; }
+.bg-warning { background-color: $warning-50 !important; }
+.bg-error { background-color: $error-50 !important; }
+
+.border-primary { border-color: var(--p-primary-color) !important; }
+.border-secondary { border-color: var(--p-secondary-color) !important; }
+.border-success { border-color: $success-500 !important; }
+.border-warning { border-color: $warning-500 !important; }
+.border-error { border-color: $error-500 !important; }
+
+// ============================================
+// Responsive Utilities
+// ============================================
+
+@media (max-width: $breakpoint-sm) {
+  .p-dialog {
+    margin: var(--p-spacing-4);
+    width: calc(100% - var(--p-spacing-8));
+  }
+  
+  .p-card .p-card-content {
+    padding: var(--p-spacing-4);
+  }
+}
+
+// ============================================
+// Dark Mode Support (Future Enhancement)
+// ============================================
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --p-surface-0: #{$gray-900};
+    --p-surface-50: #{$gray-800};
+    --p-surface-100: #{$gray-700};
+    --p-surface-200: #{$gray-600};
+    --p-text-color: #{$gray-100};
+    --p-text-color-secondary: #{$gray-300};
+    --p-border-color: #{$gray-700};
+  }
+}

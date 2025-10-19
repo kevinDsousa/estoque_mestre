@@ -1,0 +1,19 @@
+// ============================================
+// PrimeNG Styles for Estoque Mestre Frontend
+// ============================================
+
+// Import our custom variables first
+@use '@estoque-mestre/primeng-ui/src/styles/variables.scss';
+
+// Import our custom theme
+@use '@estoque-mestre/primeng-ui/src/themes/estoque-mestre.scss';
+
+// Import PrimeNG base styles
+@import 'primeng/resources/themes/lara-light-blue/theme.css';
+@import 'primeng/resources/primeng.css';
+
+// Import PrimeIcons
+@import 'primeicons/primeicons.css';
+
+// Import PrimeFlex
+@import 'primeflex/primeflex.css';

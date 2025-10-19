@@ -1,0 +1,299 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+// PrimeNG Components
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputMaskModule } from 'primeng/inputmask';
+import { PasswordModule } from 'primeng/password';
+import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { CalendarModule } from 'primeng/calendar';
+import { CheckboxModule } from 'primeng/checkbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { ToggleButtonModule } from 'primeng/togglebutton';
+import { SliderModule } from 'primeng/slider';
+import { RatingModule } from 'primeng/rating';
+import { FileUploadModule } from 'primeng/fileupload';
+import { EditorModule } from 'primeng/editor';
+
+// Data Display
+import { TableModule } from 'primeng/table';
+import { DataViewModule } from 'primeng/dataview';
+import { TreeModule } from 'primeng/tree';
+import { TreeTableModule } from 'primeng/treetable';
+import { OrganizationChartModule } from 'primeng/organizationchart';
+import { TagModule } from 'primeng/tag';
+import { BadgeModule } from 'primeng/badge';
+import { ChipModule } from 'primeng/chip';
+import { AvatarModule } from 'primeng/avatar';
+import { AvatarGroupModule } from 'primeng/avatargroup';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DividerModule } from 'primeng/divider';
+
+// Panel
+import { PanelModule } from 'primeng/panel';
+import { CardModule } from 'primeng/card';
+import { AccordionModule } from 'primeng/accordion';
+import { TabViewModule } from 'primeng/tabview';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { ToolbarModule } from 'primeng/toolbar';
+import { SplitterModule } from 'primeng/splitter';
+
+// Overlay
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { TooltipModule } from 'primeng/tooltip';
+import { SidebarModule } from 'primeng/sidebar';
+import { DynamicDialog } from 'primeng/dynamicdialog';
+
+// Menu
+import { MenuModule } from 'primeng/menu';
+import { MenubarModule } from 'primeng/menubar';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ContextMenuModule } from 'primeng/contextmenu';
+import { DockModule } from 'primeng/dock';
+import { MegaMenuModule } from 'primeng/megamenu';
+import { PanelMenuModule } from 'primeng/panelmenu';
+import { StepsModule } from 'primeng/steps';
+import { TabMenuModule } from 'primeng/tabmenu';
+import { TieredMenuModule } from 'primeng/tieredmenu';
+
+// Chart
+import { ChartModule } from 'primeng/chart';
+
+// Messages
+import { MessageModule } from 'primeng/message';
+import { MessagesModule } from 'primeng/messages';
+import { ToastModule } from 'primeng/toast';
+
+// Media
+import { CarouselModule } from 'primeng/carousel';
+import { GalleriaModule } from 'primeng/galleria';
+import { ImageModule } from 'primeng/image';
+
+// Misc
+import { BlockUIModule } from 'primeng/blockui';
+import { DeferModule } from 'primeng/defer';
+import { FocusTrapModule } from 'primeng/focustrap';
+import { RippleModule } from 'primeng/ripple';
+import { StyleClassModule } from 'primeng/styleclass';
+
+// Custom Components
+import { EstoqueToastComponent } from '../components/estoque-toast/estoque-toast.component';
+
+/**
+ * Módulo principal do PrimeNG para Estoque Mestre
+ * 
+ * Este módulo importa todos os componentes do PrimeNG necessários
+ * para o sistema Estoque Mestre, organizados por categoria.
+ * 
+ * @example
+ * ```typescript
+ * import { EstoqueMestrePrimeNGModule } from '@estoque-mestre/primeng-ui';
+ * 
+ * @NgModule({
+ *   imports: [
+ *     EstoqueMestrePrimeNGModule
+ *   ]
+ * })
+ * export class AppModule { }
+ * ```
+ */
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    
+    // Form Controls
+    ButtonModule,
+    InputTextModule,
+    InputTextarea,
+    InputNumberModule,
+    InputMaskModule,
+    PasswordModule,
+    DropdownModule,
+    MultiSelectModule,
+    AutoCompleteModule,
+    CalendarModule,
+    CheckboxModule,
+    RadioButtonModule,
+    ToggleButtonModule,
+    SliderModule,
+    RatingModule,
+    FileUploadModule,
+    EditorModule,
+    
+    // Data Display
+    TableModule,
+    DataViewModule,
+    TreeModule,
+    TreeTableModule,
+    OrganizationChartModule,
+    TagModule,
+    BadgeModule,
+    ChipModule,
+    AvatarModule,
+    AvatarGroupModule,
+    SkeletonModule,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    DividerModule,
+    
+    // Panel
+    PanelModule,
+    CardModule,
+    AccordionModule,
+    TabViewModule,
+    ScrollPanelModule,
+    ToolbarModule,
+    SplitterModule,
+    
+    // Overlay
+    DialogModule,
+    ConfirmDialogModule,
+    ConfirmPopupModule,
+    OverlayPanelModule,
+    TooltipModule,
+    SidebarModule,
+    DynamicDialog,
+    
+    // Menu
+    MenuModule,
+    MenubarModule,
+    BreadcrumbModule,
+    ContextMenuModule,
+    DockModule,
+    MegaMenuModule,
+    PanelMenuModule,
+    StepsModule,
+    TabMenuModule,
+    TieredMenuModule,
+    
+    // Chart
+    ChartModule,
+    
+    // Messages
+    MessageModule,
+    MessagesModule,
+    ToastModule,
+    
+    // Media
+    CarouselModule,
+    GalleriaModule,
+    ImageModule,
+    
+    // Misc
+    BlockUIModule,
+    DeferModule,
+    FocusTrapModule,
+    RippleModule,
+    StyleClassModule,
+    
+    // PrimeFlex
+  ],
+  exports: [
+    // Form Controls
+    ButtonModule,
+    InputTextModule,
+    InputTextarea,
+    InputNumberModule,
+    InputMaskModule,
+    PasswordModule,
+    DropdownModule,
+    MultiSelectModule,
+    AutoCompleteModule,
+    CalendarModule,
+    CheckboxModule,
+    RadioButtonModule,
+    ToggleButtonModule,
+    SliderModule,
+    RatingModule,
+    FileUploadModule,
+    EditorModule,
+    
+    // Data Display
+    TableModule,
+    DataViewModule,
+    TreeModule,
+    TreeTableModule,
+    OrganizationChartModule,
+    TagModule,
+    BadgeModule,
+    ChipModule,
+    AvatarModule,
+    AvatarGroupModule,
+    SkeletonModule,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    DividerModule,
+    
+    // Panel
+    PanelModule,
+    CardModule,
+    AccordionModule,
+    TabViewModule,
+    ScrollPanelModule,
+    ToolbarModule,
+    SplitterModule,
+    
+    // Overlay
+    DialogModule,
+    ConfirmDialogModule,
+    ConfirmPopupModule,
+    OverlayPanelModule,
+    TooltipModule,
+    SidebarModule,
+    DynamicDialog,
+    
+    // Menu
+    MenuModule,
+    MenubarModule,
+    BreadcrumbModule,
+    ContextMenuModule,
+    DockModule,
+    MegaMenuModule,
+    PanelMenuModule,
+    StepsModule,
+    TabMenuModule,
+    TieredMenuModule,
+    
+    // Chart
+    ChartModule,
+    
+    // Messages
+    MessageModule,
+    MessagesModule,
+    ToastModule,
+    
+    // Media
+    CarouselModule,
+    GalleriaModule,
+    ImageModule,
+    
+    // Misc
+    BlockUIModule,
+    DeferModule,
+    FocusTrapModule,
+    RippleModule,
+    StyleClassModule,
+    
+    // PrimeFlex
+    
+    // Custom Components
+    EstoqueToastComponent,
+  ],
+  providers: [
+    // ConfirmationService será fornecido pelo módulo que usar
+  ]
+})
+export class EstoqueMestrePrimeNGModule {}

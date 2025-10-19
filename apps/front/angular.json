@@ -24,7 +24,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/styles/primeng.scss"
             ]
           },
           "configurations": {
@@ -78,7 +79,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/styles/primeng.scss"
             ]
           }
         }

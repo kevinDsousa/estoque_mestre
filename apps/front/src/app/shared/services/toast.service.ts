@@ -1,81 +1,139 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { EstoqueToastService } from '@estoque-mestre/primeng-ui';
 
-export interface ToastMessage {
-  id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  title: string;
-  message: string;
-  duration?: number;
-  timestamp: number;
-}
-
+/**
+ * Serviço de toast para o frontend
+ * 
+ * Wrapper do EstoqueToastService com métodos específicos do frontend
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ToastService {
-  private toasts = signal<ToastMessage[]>([]);
-  private activeToasts = new Set<string>(); // Para evitar duplicatas
+  private estoqueToastService = inject(EstoqueToastService);
 
-  getToasts() {
-    return this.toasts.asReadonly();
+  /**
+   * Mostra um toast de sucesso
+   */
+  success(title: string, message: string, duration?: number): void {
+    this.estoqueToastService.success(title, message, duration);
   }
 
-  show(message: Omit<ToastMessage, 'id' | 'timestamp'>) {
-    // Cria uma chave única baseada no tipo, título e mensagem
-    const toastKey = `${message.type}-${message.title}-${message.message}`;
-    
-    // Verifica se já existe um toast ativo com a mesma chave
-    if (this.activeToasts.has(toastKey)) {
-      console.warn('Toast duplicado ignorado:', toastKey);
-      return;
-    }
-
-    const toast: ToastMessage = {
-      ...message,
-      id: this.generateId(),
-      timestamp: Date.now()
-    };
-
-    // Adiciona à lista de toasts ativos
-    this.activeToasts.add(toastKey);
-    
-    // Adiciona o toast
-    this.toasts.update(current => [...current, toast]);
-
-    // Remove automaticamente após a duração especificada
-    const duration = message.duration || 5000;
-    setTimeout(() => {
-      this.remove(toast.id);
-      this.activeToasts.delete(toastKey);
-    }, duration);
+  /**
+   * Mostra um toast de erro
+   */
+  error(title: string, message: string, duration?: number): void {
+    this.estoqueToastService.error(title, message, duration);
   }
 
-  success(title: string, message: string, duration?: number) {
-    this.show({ type: 'success', title, message, duration });
+  /**
+   * Mostra um toast de aviso
+   */
+  warning(title: string, message: string, duration?: number): void {
+    this.estoqueToastService.warning(title, message, duration);
   }
 
-  error(title: string, message: string, duration?: number) {
-    this.show({ type: 'error', title, message, duration });
+  /**
+   * Mostra um toast de informação
+   */
+  info(title: string, message: string, duration?: number): void {
+    this.estoqueToastService.info(title, message, duration);
   }
 
-  warning(title: string, message: string, duration?: number) {
-    this.show({ type: 'warning', title, message, duration });
+  /**
+   * Limpa todos os toasts
+   */
+  clear(): void {
+    this.estoqueToastService.clear();
   }
 
-  info(title: string, message: string, duration?: number) {
-    this.show({ type: 'info', title, message, duration });
+  /**
+   * Métodos específicos do frontend
+   */
+
+  /**
+   * Toast para operações de autenticação
+   */
+  loginSuccess(userName: string): void {
+    this.estoqueToastService.userLoggedIn(userName);
   }
 
-  remove(id: string) {
-    this.toasts.update(current => current.filter(toast => toast.id !== id));
+  loginError(message: string): void {
+    this.error('Erro no Login', message);
   }
 
-  clear() {
-    this.toasts.set([]);
-    this.activeToasts.clear();
+  logoutSuccess(): void {
+    this.estoqueToastService.userLoggedOut();
   }
 
-  private generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
+  /**
+   * Toast para operações de formulário
+   */
+  formSaved(formName: string): void {
+    this.success('Formulário Salvo', `${formName} foi salvo com sucesso`);
+  }
+
+  formError(formName: string, error: string): void {
+    this.error('Erro no Formulário', `Erro ao salvar ${formName}: ${error}`);
+  }
+
+  validationError(field: string, message: string): void {
+    this.estoqueToastService.validationError(field, message);
+  }
+
+  /**
+   * Toast para operações de API
+   */
+  apiSuccess(operation: string): void {
+    this.success('Operação Concluída', `${operation} realizada com sucesso`);
+  }
+
+  apiError(operation: string, error: string): void {
+    this.error('Erro na Operação', `Falha ao ${operation}: ${error}`);
+  }
+
+  /**
+   * Toast para operações de arquivo
+   */
+  fileUploaded(fileName: string): void {
+    this.estoqueToastService.fileUploaded(fileName);
+  }
+
+  fileUploadFailed(fileName: string, error: string): void {
+    this.estoqueToastService.fileUploadFailed(fileName, error);
+  }
+
+  fileDeleted(fileName: string): void {
+    this.estoqueToastService.fileDeleted(fileName);
+  }
+
+  /**
+   * Toast para operações de produto
+   */
+  productCreated(productName: string): void {
+    this.estoqueToastService.productCreated(productName);
+  }
+
+  productUpdated(productName: string): void {
+    this.estoqueToastService.productUpdated(productName);
+  }
+
+  productDeleted(productName: string): void {
+    this.estoqueToastService.productDeleted(productName);
+  }
+
+  /**
+   * Toast para operações de estoque
+   */
+  stockUpdated(productName: string, quantity: number): void {
+    this.estoqueToastService.stockUpdated(productName, quantity);
+  }
+
+  lowStockWarning(productName: string, quantity: number): void {
+    this.estoqueToastService.lowStockWarning(productName, quantity);
+  }
+
+  outOfStock(productName: string): void {
+    this.estoqueToastService.outOfStock(productName);
   }
 }

@@ -1,19 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastService, ToastMessage } from '../../services/toast.service';
-import { ToastComponent } from '../toast/toast.component';
+import { EstoqueToastComponent } from '@estoque-mestre/primeng-ui';
 
 @Component({
   selector: 'app-toast-container',
   standalone: true,
-  imports: [CommonModule, ToastComponent],
-  templateUrl: './toast-container.component.html',
-  styleUrl: './toast-container.component.css'
+  imports: [CommonModule, EstoqueToastComponent],
+  template: `
+    <estoque-toast 
+      position="top-right"
+      [life]="5000"
+      [closable]="true">
+    </estoque-toast>
+  `
 })
-export class ToastContainerComponent {
-  constructor(public toastService: ToastService) {}
-
-  onCloseToast(id: string) {
-    this.toastService.remove(id);
-  }
-}
+export class ToastContainerComponent {}
