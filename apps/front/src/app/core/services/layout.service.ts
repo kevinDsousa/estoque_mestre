@@ -339,6 +339,13 @@ export class LayoutService {
         permission: 'canViewReports'
       },
       {
+        id: 'profile',
+        label: 'Meu Perfil',
+        icon: 'pi pi-user',
+        route: '/profile',
+        visible: true
+      },
+      {
         id: 'subscription',
         label: 'Minha Assinatura',
         icon: 'pi pi-credit-card',

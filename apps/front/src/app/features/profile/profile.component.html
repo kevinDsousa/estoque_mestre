@@ -1,4 +1,205 @@
 <div class="profile">
-  <h1>Perfil</h1>
-  <p>Página de perfil em desenvolvimento</p>
+  <div class="profile-header">
+    <h1>Meu Perfil</h1>
+    <p>Gerencie suas informações pessoais e configurações da conta</p>
+  </div>
+
+  <div class="profile-content">
+    <!-- Informações Pessoais -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>
+          <i class="pi pi-user"></i>
+          Informações Pessoais
+        </h2>
+        @if (!isEditing) {
+          <button class="btn btn-primary" (click)="toggleEdit()">
+            <i class="pi pi-pencil"></i>
+            Editar
+          </button>
+        }
+      </div>
+
+      <div class="section-content">
+        <div class="profile-info">
+          <div class="avatar-section">
+            <div class="avatar">
+              @if (profile.avatar) {
+                <img [src]="profile.avatar" [alt]="profile.name">
+              } @else {
+                <i class="pi pi-user"></i>
+              }
+            </div>
+            @if (isEditing) {
+              <button class="btn btn-ghost btn-sm">
+                <i class="pi pi-camera"></i>
+                Alterar Foto
+              </button>
+            }
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Nome Completo</label>
+              @if (isEditing) {
+                <input type="text" [(ngModel)]="profile.name" class="form-control">
+              } @else {
+                <span>{{ profile.name }}</span>
+              }
+            </div>
+
+            <div class="info-item">
+              <label>Email</label>
+              @if (isEditing) {
+                <input type="email" [(ngModel)]="profile.email" class="form-control">
+              } @else {
+                <span>{{ profile.email }}</span>
+              }
+            </div>
+
+            <div class="info-item">
+              <label>Telefone</label>
+              @if (isEditing) {
+                <input type="tel" [(ngModel)]="profile.phone" class="form-control">
+              } @else {
+                <span>{{ profile.phone }}</span>
+              }
+            </div>
+
+            <div class="info-item">
+              <label>Cargo</label>
+              <span>{{ profile.role }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Departamento</label>
+              <span>{{ profile.department }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Data de Admissão</label>
+              <span>{{ formatDate(profile.joinDate) }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Último Login</label>
+              <span>{{ formatDate(profile.lastLogin) }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Status</label>
+              <span class="status-badge" [class.active]="profile.isActive">
+                {{ profile.isActive ? 'Ativo' : 'Inativo' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        @if (isEditing) {
+          <div class="edit-actions">
+            <button class="btn btn-ghost" (click)="cancelEdit()">
+              <i class="pi pi-times"></i>
+              Cancelar
+            </button>
+            <button class="btn btn-primary" (click)="saveProfile()">
+              <i class="pi pi-check"></i>
+              Salvar Alterações
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Configurações de Conta -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>
+          <i class="pi pi-cog"></i>
+          Configurações da Conta
+        </h2>
+      </div>
+
+      <div class="section-content">
+        <div class="settings-grid">
+          <div class="setting-item">
+            <h3>Segurança</h3>
+            <p>Gerencie sua senha e configurações de segurança</p>
+            <button class="btn btn-primary" (click)="toggleChangePassword()">
+              <i class="pi pi-key"></i>
+              Alterar Senha
+            </button>
+          </div>
+
+          <div class="setting-item">
+            <h3>Configurações</h3>
+            <p>Acesse as configurações gerais do sistema</p>
+            <a routerLink="/configuracoes" class="btn btn-primary">
+              <i class="pi pi-cog"></i>
+              Ir para Configurações
+            </a>
+          </div>
+        </div>
+
+        <!-- Alterar Senha -->
+        @if (showChangePassword) {
+          <div class="change-password">
+            <h3>Alterar Senha</h3>
+            <div class="form-group">
+              <label>Senha Atual</label>
+              <input type="password" [(ngModel)]="currentPassword" class="form-control" placeholder="Digite sua senha atual">
+            </div>
+            <div class="form-group">
+              <label>Nova Senha</label>
+              <input type="password" [(ngModel)]="newPassword" class="form-control" placeholder="Digite sua nova senha">
+            </div>
+            <div class="form-group">
+              <label>Confirmar Nova Senha</label>
+              <input type="password" [(ngModel)]="confirmPassword" class="form-control" placeholder="Confirme sua nova senha">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-ghost" (click)="toggleChangePassword()">
+                <i class="pi pi-times"></i>
+                Cancelar
+              </button>
+              <button class="btn btn-primary" (click)="changePassword()">
+                <i class="pi pi-check"></i>
+                Alterar Senha
+              </button>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- Histórico de Atividades -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>
+          <i class="pi pi-history"></i>
+          Histórico de Atividades
+        </h2>
+      </div>
+
+      <div class="section-content">
+        <div class="activity-list">
+          @for (activity of activityLogs; track activity.id) {
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="pi pi-circle-fill"></i>
+              </div>
+              <div class="activity-content">
+                <div class="activity-header">
+                  <h4>{{ activity.action }}</h4>
+                  <span class="activity-time">{{ formatDate(activity.timestamp) }}</span>
+                </div>
+                <p>{{ activity.description }}</p>
+                <span class="activity-ip">IP: {{ activity.ipAddress }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
