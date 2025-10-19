@@ -1,0 +1,159 @@
+<div [class]="getFilterClass()">
+  <!-- Filter Items -->
+  <div class="filter-items">
+    <div 
+      *ngFor="let filter of filters" 
+      [class]="getFilterItemClass(filter)"
+      class="filter-container">
+      
+      <!-- Filter Label -->
+      <label *ngIf="showLabels" class="filter-label">
+        {{ filter.label }}
+        <span *ngIf="filter.required" class="required-indicator">*</span>
+      </label>
+
+      <!-- Select Filter -->
+      <div *ngIf="filter.type === 'select'" class="filter-control">
+        <p-dropdown 
+          [(ngModel)]="values[filter.key]"
+          (onChange)="onFilterValueChange(filter.key, $event.value)"
+          [options]="filter.options"
+          [placeholder]="filter.placeholder || 'Selecione...'"
+          [showClear]="filter.showClear"
+          class="filter-dropdown">
+        </p-dropdown>
+        
+        <button 
+          *ngIf="isFilterActive(filter)"
+          pButton 
+          icon="pi pi-times" 
+          class="p-button-text p-button-sm clear-filter-button"
+          (click)="onClearFilterValue(filter.key)"
+          pTooltip="Limpar filtro">
+        </button>
+      </div>
+
+      <!-- Multi Select Filter -->
+      <div *ngIf="filter.type === 'multiselect'" class="filter-control">
+        <p-multiSelect 
+          [(ngModel)]="values[filter.key]"
+          (onChange)="onFilterValueChange(filter.key, $event.value)"
+          [options]="filter.options"
+          [placeholder]="filter.placeholder || 'Selecione...'"
+          [showClear]="filter.showClear"
+          class="filter-multiselect">
+        </p-multiSelect>
+        
+        <button 
+          *ngIf="isFilterActive(filter)"
+          pButton 
+          icon="pi pi-times" 
+          class="p-button-text p-button-sm clear-filter-button"
+          (click)="onClearFilterValue(filter.key)"
+          pTooltip="Limpar filtro">
+        </button>
+      </div>
+
+      <!-- Checkbox Filter -->
+      <div *ngIf="filter.type === 'checkbox'" class="filter-control checkbox-control">
+        <div class="checkbox-options">
+          <div 
+            *ngFor="let option of filter.options" 
+            class="checkbox-option">
+            <p-checkbox 
+              [(ngModel)]="option.checked"
+              (onChange)="onCheckboxChange(filter, option)"
+              [disabled]="option.disabled"
+              [binary]="true"
+              class="filter-checkbox">
+            </p-checkbox>
+            <label class="checkbox-label">
+              {{ option.label }}
+              <span *ngIf="showCounts && option.count !== undefined" class="option-count">
+                ({{ option.count }})
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radio Filter -->
+      <div *ngIf="filter.type === 'radio'" class="filter-control radio-control">
+        <div class="radio-options">
+          <div 
+            *ngFor="let option of filter.options" 
+            class="radio-option">
+            <p-radioButton 
+              [(ngModel)]="values[filter.key]"
+              (onChange)="onFilterValueChange(filter.key, option.value)"
+              [value]="option.value"
+              [disabled]="option.disabled"
+              class="filter-radio">
+            </p-radioButton>
+            <label class="radio-label">
+              {{ option.label }}
+              <span *ngIf="showCounts && option.count !== undefined" class="option-count">
+                ({{ option.count }})
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slider Filter -->
+      <div *ngIf="filter.type === 'slider'" class="filter-control slider-control">
+        <div class="slider-container">
+          <p-slider 
+            [(ngModel)]="values[filter.key]"
+            (onChange)="onFilterValueChange(filter.key, $event.value)"
+            [min]="filter.min || 0"
+            [max]="filter.max || 100"
+            [step]="filter.step || 1"
+            class="filter-slider">
+          </p-slider>
+          <div class="slider-value">{{ values[filter.key] || filter.min || 0 }}</div>
+        </div>
+        
+        <button 
+          *ngIf="isFilterActive(filter)"
+          pButton 
+          icon="pi pi-times" 
+          class="p-button-text p-button-sm clear-filter-button"
+          (click)="onClearFilterValue(filter.key)"
+          pTooltip="Limpar filtro">
+        </button>
+      </div>
+
+      <!-- Chips Filter -->
+      <div *ngIf="filter.type === 'chips'" class="filter-control chips-control">
+        <div class="chips-container">
+          <p-chip 
+            *ngFor="let option of filter.options" 
+            [label]="option.label"
+            [removable]="true"
+            [class]="isChipSelected(filter, option) ? 'selected' : ''"
+            (onRemove)="onChipRemove(filter, option)"
+            (click)="onChipClick(filter, option)"
+            class="filter-chip">
+          </p-chip>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear All Button -->
+  <div *ngIf="showClearAll && hasActiveFilters()" class="filter-actions">
+    <button 
+      pButton 
+      label="Limpar Todos" 
+      icon="pi pi-times"
+      class="p-button-outlined p-button-sm clear-all-button"
+      (click)="onClearAllFilters()">
+    </button>
+    
+    <span class="active-count">
+      {{ getActiveFiltersCount() }} filtro(s) ativo(s)
+    </span>
+  </div>
+</div>
+

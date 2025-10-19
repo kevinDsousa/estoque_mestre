@@ -389,6 +389,9 @@ importers:
       primeng:
         specifier: ^18.0.0
         version: 18.0.2(1969c26a9c886973e6c3b42c376b6f32)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
     devDependencies:
       '@types/node':
         specifier: ^20.0.0

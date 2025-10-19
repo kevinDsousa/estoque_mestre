@@ -1,0 +1,238 @@
+.estoque-search {
+  width: 100%;
+  
+  &.advanced-open {
+    .search-bar {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
+
+.search-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+  
+  &:focus-within {
+    border-color: var(--p-primary-color);
+    box-shadow: 0 0 0 1px var(--p-primary-color);
+  }
+}
+
+.search-input-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--p-text-color);
+  
+  &::placeholder {
+    color: var(--p-text-color-secondary);
+  }
+}
+
+.clear-button {
+  position: absolute;
+  right: 0.5rem;
+  color: var(--p-text-color-secondary);
+  
+  &:hover {
+    color: var(--p-text-color);
+  }
+}
+
+.advanced-toggle {
+  position: relative;
+  white-space: nowrap;
+  
+  .filter-badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: var(--p-primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.advanced-filters {
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-surface-border);
+  border-top: none;
+  border-bottom-left-radius: var(--p-border-radius);
+  border-bottom-right-radius: var(--p-border-radius);
+  overflow: hidden;
+}
+
+:host ::ng-deep .filters-card {
+  .p-card-body {
+    padding: 1.5rem;
+  }
+  
+  .p-card-content {
+    padding: 0;
+  }
+}
+
+.filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--p-text-color);
+  
+  &.required::after {
+    content: ' *';
+    color: var(--p-red-500);
+  }
+}
+
+.field-input {
+  width: 100%;
+}
+
+:host ::ng-deep .field-dropdown,
+:host ::ng-deep .field-multiselect,
+:host ::ng-deep .field-calendar {
+  width: 100%;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--p-surface-border);
+}
+
+.apply-button {
+  background: var(--p-primary-color);
+  border-color: var(--p-primary-color);
+}
+
+.clear-filters-button {
+  color: var(--p-text-color-secondary);
+  border-color: var(--p-surface-border);
+  
+  &:hover {
+    background: var(--p-surface-100);
+    border-color: var(--p-surface-300);
+  }
+}
+
+/* Size Variations */
+.size-small {
+  .search-bar {
+    padding: 0.5rem;
+  }
+  
+  .search-input {
+    font-size: 0.75rem;
+  }
+  
+  :host ::ng-deep .filters-card .p-card-body {
+    padding: 1rem;
+  }
+  
+  .filters-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+.size-large {
+  .search-bar {
+    padding: 1rem;
+  }
+  
+  .search-input {
+    font-size: 1rem;
+  }
+  
+  :host ::ng-deep .filters-card .p-card-body {
+    padding: 2rem;
+  }
+  
+  .filters-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  
+  .advanced-toggle {
+    align-self: flex-end;
+  }
+  
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-bar {
+    padding: 0.5rem;
+  }
+  
+  :host ::ng-deep .filters-card .p-card-body {
+    padding: 1rem;
+  }
+  
+  .filters-content {
+    gap: 1rem;
+  }
+}
+

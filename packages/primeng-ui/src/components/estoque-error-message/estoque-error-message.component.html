@@ -1,0 +1,114 @@
+<div [class]="getMessageClass()">
+  <!-- Inline Message -->
+  <p-message 
+    *ngIf="inline"
+    [severity]="error.severity"
+    [closable]="closable"
+    [dismissible]="dismissible"
+    (onClose)="onCloseHandler()"
+    styleClass="inline-message">
+    
+    <ng-template pTemplate>
+      <div class="message-content">
+        <div class="message-header" *ngIf="error.title">
+          <h4 class="message-title">{{ error.title }}</h4>
+        </div>
+        
+        <div class="message-body">
+          <p class="message-text">{{ error.message }}</p>
+          
+          <!-- Details Toggle -->
+          <button 
+            *ngIf="hasDetails()"
+            class="details-toggle"
+            (click)="toggleDetails()"
+            [class.expanded]="showDetails">
+            <i class="pi pi-chevron-down"></i>
+            <span>{{ showDetails ? 'Ocultar' : 'Mostrar' }} detalhes</span>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </p-message>
+
+  <!-- Card Message -->
+  <p-card 
+    *ngIf="!inline"
+    styleClass="error-card"
+    [class]="'severity-' + error.severity">
+    
+    <ng-template pTemplate="header" *ngIf="error.title || closable">
+      <div class="card-header">
+        <div class="header-content">
+          <i *ngIf="showIcon" [class]="getSeverityIcon()" [style.color]="getSeverityColor()"></i>
+          <h3 *ngIf="error.title" class="card-title">{{ error.title }}</h3>
+        </div>
+        
+        <button 
+          *ngIf="closable"
+          class="close-button"
+          (click)="onCloseHandler()"
+          type="button">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </ng-template>
+
+    <div class="card-content">
+      <div class="message-body">
+        <p class="message-text">{{ error.message }}</p>
+        
+        <!-- Error Details -->
+        <div class="error-details" *ngIf="showDetails && hasDetails()">
+          <div class="detail-item" *ngIf="error.code">
+            <span class="detail-label">Código:</span>
+            <span class="detail-value">{{ error.code }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="error.source">
+            <span class="detail-label">Origem:</span>
+            <span class="detail-value">{{ error.source }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="error.component">
+            <span class="detail-label">Componente:</span>
+            <span class="detail-value">{{ error.component }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="error.timestamp">
+            <span class="detail-label">Data/Hora:</span>
+            <span class="detail-value">{{ formatTimestamp() }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="error.details">
+            <span class="detail-label">Detalhes:</span>
+            <div class="detail-value details-text">{{ error.details }}</div>
+          </div>
+        </div>
+        
+        <!-- Details Toggle -->
+        <button 
+          *ngIf="hasDetails()"
+          class="details-toggle"
+          (click)="toggleDetails()"
+          [class.expanded]="showDetails">
+          <i class="pi pi-chevron-down"></i>
+          <span>{{ showDetails ? 'Ocultar' : 'Mostrar' }} detalhes</span>
+        </button>
+      </div>
+      
+      <!-- Actions -->
+      <div class="message-actions" *ngIf="error.actions && error.actions.length > 0">
+        <p-button 
+          *ngFor="let action of error.actions"
+          [label]="action.label"
+          [icon]="action.icon"
+          [severity]="action.severity || 'secondary'"
+          size="small"
+          (onClick)="onActionHandler(action)">
+        </p-button>
+      </div>
+    </div>
+  </p-card>
+</div>
+

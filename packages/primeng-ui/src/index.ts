@@ -18,6 +18,9 @@ export { EstoqueChartComponent } from './components/estoque-chart/estoque-chart.
 export { EstoqueConfirmDialogComponent } from './components/estoque-confirm-dialog/estoque-confirm-dialog.component';
 export { EstoqueLoadingComponent } from './components/estoque-loading/estoque-loading.component';
 export { EstoqueMetricCardComponent } from './components/estoque-metric-card/estoque-metric-card.component';
+export { EstoqueErrorMessageComponent } from './components/estoque-error-message/estoque-error-message.component';
+export { EstoqueSearchComponent } from './components/estoque-search/estoque-search.component';
+export { EstoqueFilterComponent } from './components/estoque-filter/estoque-filter.component';
 
 // Services
 export { EstoqueToastService } from './services/estoque-toast.service';
@@ -34,3 +37,6 @@ export type { ChartType, ChartData, ChartDataset, ChartOptions, ChartPeriod, Est
 export type { ConfirmDialogData, EstoqueConfirmDialogInputs, EstoqueConfirmDialogOutputs } from './components/estoque-confirm-dialog/estoque-confirm-dialog.component';
 export type { LoadingType, LoadingSize, EstoqueLoadingInputs } from './components/estoque-loading/estoque-loading.component';
 export type { MetricData, EstoqueMetricCardInputs, EstoqueMetricCardOutputs } from './components/estoque-metric-card/estoque-metric-card.component';
+export type { ErrorSeverity, ErrorSize, ErrorMessageData, ErrorAction, EstoqueErrorMessageInputs, EstoqueErrorMessageOutputs } from './components/estoque-error-message/estoque-error-message.component';
+export type { SearchField, SearchCriteria, EstoqueSearchInputs, EstoqueSearchOutputs } from './components/estoque-search/estoque-search.component';
+export type { FilterOption, FilterConfig, FilterValue, EstoqueFilterInputs, EstoqueFilterOutputs } from './components/estoque-filter/estoque-filter.component';

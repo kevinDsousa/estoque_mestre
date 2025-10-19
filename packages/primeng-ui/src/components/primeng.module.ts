@@ -97,6 +97,9 @@ import { EstoqueChartComponent } from '../components/estoque-chart/estoque-chart
 import { EstoqueConfirmDialogComponent } from '../components/estoque-confirm-dialog/estoque-confirm-dialog.component';
 import { EstoqueLoadingComponent } from '../components/estoque-loading/estoque-loading.component';
 import { EstoqueMetricCardComponent } from '../components/estoque-metric-card/estoque-metric-card.component';
+import { EstoqueErrorMessageComponent } from '../components/estoque-error-message/estoque-error-message.component';
+import { EstoqueSearchComponent } from '../components/estoque-search/estoque-search.component';
+import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-filter.component';
 
 /**
  * Módulo principal do PrimeNG para Estoque Mestre
@@ -307,6 +310,9 @@ import { EstoqueMetricCardComponent } from '../components/estoque-metric-card/es
     EstoqueConfirmDialogComponent,
     EstoqueLoadingComponent,
     EstoqueMetricCardComponent,
+    EstoqueErrorMessageComponent,
+    EstoqueSearchComponent,
+    EstoqueFilterComponent,
   ],
   providers: [
     // ConfirmationService será fornecido pelo módulo que usar
