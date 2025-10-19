@@ -1,72 +1,75 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  private isRefreshing = false;
-  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+let isRefreshing = false;
+const refreshTokenSubject = new BehaviorSubject<any>(null);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+export const AuthInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<any> => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Add auth token to requests
-    const authReq = this.addTokenToRequest(req);
+  // Add auth token to requests
+  const authReq = addTokenToRequest(req, authService);
 
-    return next.handle(authReq).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          return this.handle401Error(authReq, next);
-        }
+  return next(authReq).pipe(
+    catchError((error: any) => {
+      if (error.status === 401) {
+        return handle401Error(authReq, next, authService, router);
+      }
+      return throwError(() => error);
+    })
+  );
+};
+
+function addTokenToRequest(request: HttpRequest<any>, authService: AuthService): HttpRequest<any> {
+  const token = authService.getToken();
+  
+  if (token) {
+    return request.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+  
+  return request;
+}
+
+function handle401Error(
+  request: HttpRequest<any>, 
+  next: HttpHandlerFn, 
+  authService: AuthService, 
+  router: Router
+): Observable<any> {
+  if (!isRefreshing) {
+    isRefreshing = true;
+    refreshTokenSubject.next(null);
+
+    return authService.refreshToken().pipe(
+      switchMap((response: any) => {
+        isRefreshing = false;
+        refreshTokenSubject.next(response.accessToken);
+        return next(addTokenToRequest(request, authService));
+      }),
+      catchError((error) => {
+        isRefreshing = false;
+        authService.logout();
+        router.navigate(['/login']);
         return throwError(() => error);
       })
     );
   }
 
-  private addTokenToRequest(request: HttpRequest<any>): HttpRequest<any> {
-    const token = this.authService.getToken();
-    
-    if (token) {
-      return request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-    
-    return request;
-  }
-
-  private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-      this.refreshTokenSubject.next(null);
-
-      return this.authService.refreshToken().pipe(
-        switchMap((response: any) => {
-          this.isRefreshing = false;
-          this.refreshTokenSubject.next(response.accessToken);
-          return next.handle(this.addTokenToRequest(request));
-        }),
-        catchError((error) => {
-          this.isRefreshing = false;
-          this.authService.logout();
-          this.router.navigate(['/login']);
-          return throwError(() => error);
-        })
-      );
-    }
-
-    return this.refreshTokenSubject.pipe(
-      filter(token => token !== null),
-      take(1),
-      switchMap(() => next.handle(this.addTokenToRequest(request)))
-    );
-  }
+  return refreshTokenSubject.pipe(
+    filter(token => token !== null),
+    take(1),
+    switchMap(() => next(addTokenToRequest(request, authService)))
+  );
 }

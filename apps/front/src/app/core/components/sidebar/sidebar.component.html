@@ -1,0 +1,92 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed" [class.overlay]="isOverlay">
+  <div class="sidebar-header">
+    @if (!isCollapsed) {
+      <div class="sidebar-logo">
+        <i class="pi pi-box"></i>
+        <span>Estoque Mestre</span>
+      </div>
+    } @else {
+      <div class="sidebar-logo-collapsed">
+        <i class="pi pi-box"></i>
+      </div>
+    }
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul class="sidebar-menu">
+      @for (item of visibleItems; track item.id) {
+        <li class="sidebar-item">
+          @if (item.route) {
+            <a 
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="sidebar-link"
+              [class.has-children]="item.children && item.children.length > 0">
+              @if (item.icon) {
+                <i [class]="item.icon"></i>
+              }
+              @if (!isCollapsed) {
+                <span class="sidebar-label">{{ item.label }}</span>
+              }
+              @if (item.badge && !isCollapsed) {
+                <span class="sidebar-badge">{{ item.badge.text }}</span>
+              }
+            </a>
+          }
+          
+          @if (item.children && item.children.length > 0) {
+            <div 
+              class="sidebar-submenu"
+              [class.expanded]="item.expanded">
+              <div class="sidebar-submenu-header" (click)="toggleSubmenu(item)">
+                @if (item.icon) {
+                  <i [class]="item.icon"></i>
+                }
+                @if (!isCollapsed) {
+                  <span class="sidebar-label">{{ item.label }}</span>
+                }
+                @if (!isCollapsed) {
+                  <i class="pi pi-chevron-right sidebar-chevron"></i>
+                }
+              </div>
+              @if (item.expanded && !isCollapsed) {
+                <ul class="sidebar-submenu-list">
+                  @for (child of item.children; track child.id) {
+                    <li class="sidebar-submenu-item">
+                      <a 
+                        [routerLink]="child.route"
+                        routerLinkActive="active"
+                        class="sidebar-submenu-link">
+                        @if (child.icon) {
+                          <i [class]="child.icon"></i>
+                        }
+                        <span>{{ child.label }}</span>
+                        @if (child.badge) {
+                          <span class="sidebar-badge">{{ child.badge.text }}</span>
+                        }
+                      </a>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  </nav>
+
+  @if (!isCollapsed) {
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">{{ user?.firstName || 'Usuário' }}</div>
+          <div class="sidebar-user-role">{{ user?.role || 'Usuário' }}</div>
+        </div>
+      </div>
+    </div>
+  }
+</aside>

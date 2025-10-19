@@ -3,29 +3,7 @@ import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  timestamp: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-export interface ApiError {
-  message: string;
-  status: number;
-  timestamp: string;
-  path?: string;
-  details?: any;
-}
+import { ApiResponse, PaginatedResponse, ApiError } from '../interfaces/api.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -235,7 +213,7 @@ export class ApiService {
       message: errorMessage,
       status: error.status,
       timestamp: new Date().toISOString(),
-      path: error.url,
+      path: error.url || undefined,
       details: errorDetails
     };
 

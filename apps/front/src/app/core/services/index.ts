@@ -27,6 +27,13 @@ export { PaymentService } from './payment.service';
 export { ValidationService } from './validation.service';
 export { ReportsService } from './reports.service';
 
+// Theme and Settings Services
+export { ThemeService } from './theme.service';
+export { SettingsService } from './settings.service';
+export { LanguageService } from './language.service';
+export { LayoutService } from './layout.service';
+export { BreadcrumbService } from './breadcrumb.service';
+
 // Types and Interfaces
 export type { ApiResponse, PaginatedResponse, ApiError } from './api.service';
 export type { AuthUser, LoginResponse, AuthState } from './auth.service';
@@ -42,3 +49,5 @@ export type { ImageFilters, ImageUploadResult, ImageVariant } from './image.serv
 export type { PaymentFilters, PaymentStats, PaymentMethod, PaymentIntent } from './payment.service';
 export type { ValidationRule, ValidationResult } from './validation.service';
 export type { ReportFilters, ReportData, DashboardData, AnalyticsData } from './reports.service';
+// Re-export interfaces from the interfaces folder
+export * from '../interfaces';

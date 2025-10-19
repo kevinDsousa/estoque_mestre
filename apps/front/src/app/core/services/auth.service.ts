@@ -4,58 +4,39 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { StorageService } from './storage.service';
-import { 
-  LoginRequest, 
-  UserResponse, 
-  CreateUserRequest, 
+import {
+  LoginRequest,
+  RegisterRequest,
+  UserResponse,
+  CreateUserRequest,
   UpdateUserRequest,
   ChangePasswordRequest,
   ResetPasswordRequest,
   ConfirmResetPasswordRequest,
-  UpdateProfileRequest
-} from '@estoque-mestre/models';
+  UpdateProfileRequest,
+  AuthUser,
+  LoginResponse,
+  AuthState,
+  RefreshTokenResponse
+} from '../interfaces/auth.interface';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  companyId?: string;
-  profile: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    avatar?: string;
-  };
-  permissions: {
-    canCreateUsers: boolean;
-    canDeleteUsers: boolean;
-    canManageProducts: boolean;
-    canManageCategories: boolean;
-    canManageInventory: boolean;
-    canViewReports: boolean;
-    canManageCompany: boolean;
-    canManageSuppliers: boolean;
-    canManageCustomers: boolean;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Re-export interfaces for external use
+export {
+  LoginRequest,
+  RegisterRequest,
+  UserResponse,
+  CreateUserRequest,
+  UpdateUserRequest,
+  ChangePasswordRequest,
+  ResetPasswordRequest,
+  ConfirmResetPasswordRequest,
+  UpdateProfileRequest,
+  AuthUser,
+  LoginResponse,
+  AuthState,
+  RefreshTokenResponse
+} from '../interfaces/auth.interface';
 
-export interface LoginResponse {
-  user: AuthUser;
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
-
-export interface AuthState {
-  isAuthenticated: boolean;
-  user: AuthUser | null;
-  token: string | null;
-  refreshToken: string | null;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -69,7 +50,8 @@ export class AuthService {
     isAuthenticated: false,
     user: null,
     token: null,
-    refreshToken: null
+    refreshToken: null,
+    expiresAt: null
   });
 
   public authState$ = this.authStateSubject.asObservable();
@@ -95,7 +77,8 @@ export class AuthService {
         isAuthenticated: true,
         user: JSON.parse(user),
         token,
-        refreshToken
+        refreshToken,
+        expiresAt: null
       });
     }
   }
@@ -292,7 +275,8 @@ export class AuthService {
       isAuthenticated: true,
       user: response.user,
       token: response.accessToken,
-      refreshToken: response.refreshToken
+      refreshToken: response.refreshToken,
+      expiresAt: Date.now() + (response.expiresIn * 1000)
     });
   }
 
@@ -308,7 +292,8 @@ export class AuthService {
       isAuthenticated: false,
       user: null,
       token: null,
-      refreshToken: null
+      refreshToken: null,
+      expiresAt: null
     });
   }
 

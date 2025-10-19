@@ -1,0 +1,95 @@
+<header class="header">
+  <div class="header-left">
+    <button 
+      class="sidebar-toggle"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="isCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'">
+      <i class="pi pi-bars"></i>
+    </button>
+    
+    @if (showBreadcrumb) {
+      <div class="header-breadcrumb">
+        <app-breadcrumb></app-breadcrumb>
+      </div>
+    }
+  </div>
+
+  @if (showSearch) {
+    <div class="header-center">
+      <div class="header-search">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          placeholder="Pesquisar..."
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()">
+      </div>
+    </div>
+  }
+
+  <div class="header-right">
+    <div class="header-actions">
+      <button 
+        class="header-action-btn"
+        [attr.aria-label]="'Notificações'"
+        (click)="toggleNotifications()">
+        <i class="pi pi-bell"></i>
+        @if (notificationCount > 0) {
+          <span class="notification-badge">{{ notificationCount }}</span>
+        }
+      </button>
+
+      <app-theme-toggle></app-theme-toggle>
+
+      @if (user) {
+        <div class="header-user">
+          <div class="user-menu" [class.open]="userMenuOpen">
+            <button 
+              class="user-menu-trigger"
+              (click)="toggleUserMenu()"
+              [attr.aria-label]="'Menu do usuário'">
+              <div class="user-avatar">
+                <i class="pi pi-user"></i>
+              </div>
+              @if (!isCollapsed) {
+                <span class="user-name">{{ user.firstName || 'Usuário' }}</span>
+              }
+              <i class="pi pi-chevron-down user-chevron"></i>
+            </button>
+
+            @if (userMenuOpen) {
+              <div class="user-menu-dropdown">
+                <div class="user-menu-header">
+                  <div class="user-info">
+                    <div class="user-name">{{ user.firstName }} {{ user.lastName }}</div>
+                    <div class="user-email">{{ user.email }}</div>
+                    <div class="user-role">{{ user.role }}</div>
+                  </div>
+                </div>
+                
+                <div class="user-menu-divider"></div>
+                
+                <div class="user-menu-items">
+                  <a routerLink="/profile" class="user-menu-item" (click)="closeUserMenu()">
+                    <i class="pi pi-user"></i>
+                    <span>Perfil</span>
+                  </a>
+                  <a routerLink="/settings" class="user-menu-item" (click)="closeUserMenu()">
+                    <i class="pi pi-cog"></i>
+                    <span>Configurações</span>
+                  </a>
+                  <div class="user-menu-divider"></div>
+                  <button class="user-menu-item logout" (click)="logout()">
+                    <i class="pi pi-sign-out"></i>
+                    <span>Sair</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</header>

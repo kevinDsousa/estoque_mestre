@@ -1,0 +1,23 @@
+<div class="theme-toggle">
+  <button 
+    class="theme-toggle-btn"
+    (click)="toggleTheme()"
+    [title]="getToggleTitle()"
+    [attr.aria-label]="getToggleTitle()">
+    <i [class]="getToggleIcon()"></i>
+    <span class="theme-toggle-label">{{ getToggleLabel() }}</span>
+  </button>
+  
+  @if (showOptions) {
+    <div class="theme-options">
+      @for (mode of availableModes; track mode.value) {
+        <div class="theme-option" 
+             [class.active]="currentMode === mode.value"
+             (click)="setThemeMode(mode.value)">
+          <i [class]="getModeIcon(mode.value)"></i>
+          <span>{{ mode.label }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

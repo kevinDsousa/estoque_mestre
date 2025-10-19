@@ -1,0 +1,34 @@
+@if (breadcrumbs.length > 0) {
+  <nav class="breadcrumb">
+    <ol class="breadcrumb-list">
+      @for (breadcrumb of breadcrumbs; track breadcrumb.label; let last = $last) {
+        <li class="breadcrumb-item">
+          @if (!last && breadcrumb.url && !breadcrumb.disabled) {
+            <a 
+              [routerLink]="breadcrumb.url"
+              [queryParams]="breadcrumb.queryParams"
+              [fragment]="breadcrumb.fragment"
+              class="breadcrumb-link">
+              @if (breadcrumb.icon) {
+                <i [class]="breadcrumb.icon"></i>
+              }
+              <span>{{ breadcrumb.label }}</span>
+            </a>
+          } @else {
+            <span 
+              class="breadcrumb-current"
+              [class.disabled]="breadcrumb.disabled">
+              @if (breadcrumb.icon) {
+                <i [class]="breadcrumb.icon"></i>
+              }
+              <span>{{ breadcrumb.label }}</span>
+            </span>
+          }
+          @if (!last) {
+            <i class="breadcrumb-separator pi pi-angle-right"></i>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+}
