@@ -28,6 +28,41 @@ export const routes: Routes = [
     data: { breadcrumb: { label: 'Perfil', icon: 'pi pi-user' } }
   },
   {
+    path: 'produtos',
+    loadComponent: () => import('./features/products/products.component').then(m => m.ProductsComponent),
+    data: { breadcrumb: { label: 'Produtos', icon: 'pi pi-box' } }
+  },
+  {
+    path: 'categorias',
+    loadComponent: () => import('./features/categories/categories.component').then(m => m.CategoriesComponent),
+    data: { breadcrumb: { label: 'Categorias', icon: 'pi pi-tags' } }
+  },
+  {
+    path: 'fornecedores',
+    loadComponent: () => import('./features/suppliers/suppliers.component').then(m => m.SuppliersComponent),
+    data: { breadcrumb: { label: 'Fornecedores', icon: 'pi pi-building' } }
+  },
+  {
+    path: 'clientes',
+    loadComponent: () => import('./features/customers/customers.component').then(m => m.CustomersComponent),
+    data: { breadcrumb: { label: 'Clientes', icon: 'pi pi-users' } }
+  },
+  {
+    path: 'transacoes',
+    loadComponent: () => import('./features/transactions/transactions.component').then(m => m.TransactionsComponent),
+    data: { breadcrumb: { label: 'Transações', icon: 'pi pi-credit-card' } }
+  },
+  {
+    path: 'relatorios',
+    loadComponent: () => import('./features/reports/reports.component').then(m => m.ReportsComponent),
+    data: { breadcrumb: { label: 'Relatórios', icon: 'pi pi-chart-bar' } }
+  },
+  {
+    path: 'configuracoes',
+    loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent),
+    data: { breadcrumb: { label: 'Configurações', icon: 'pi pi-cog' } }
+  },
+  {
     path: 'not-found',
     loadComponent: () => import('./features/errors/not-found/not-found.component').then(m => m.NotFoundComponent),
     data: { breadcrumb: { label: 'Não Encontrado', icon: 'pi pi-exclamation-triangle' } }

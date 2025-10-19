@@ -28,10 +28,10 @@
   height: 40px;
   border: none;
   background-color: transparent;
-  color: var(--color-text);
+  color: var(--text-color);
   cursor: pointer;
   border-radius: var(--border-radius-small);
-  transition: background-color var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .sidebar-toggle:hover {
@@ -40,10 +40,13 @@
 
 .sidebar-toggle i {
   font-size: 18px;
+  color: inherit;
 }
 
 .header-breadcrumb {
   flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .header-center {
@@ -63,6 +66,7 @@
   left: 12px;
   color: var(--color-text-secondary);
   font-size: 14px;
+  transition: color var(--transition-fast);
 }
 
 .search-input {
@@ -100,10 +104,10 @@
   height: 40px;
   border: none;
   background-color: transparent;
-  color: var(--color-text);
+  color: var(--text-color);
   cursor: pointer;
   border-radius: var(--border-radius-small);
-  transition: background-color var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   position: relative;
 }
 
@@ -113,6 +117,7 @@
 
 .header-action-btn i {
   font-size: 18px;
+  color: inherit;
 }
 
 .notification-badge {
@@ -166,6 +171,8 @@
 
 .user-avatar i {
   font-size: 14px;
+  color: white;
+  transition: color var(--transition-fast);
 }
 
 .user-name {
@@ -175,7 +182,8 @@
 
 .user-chevron {
   font-size: 12px;
-  transition: transform var(--transition-fast);
+  color: var(--color-text);
+  transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
 .user-menu.open .user-chevron {
@@ -259,6 +267,12 @@
   font-size: 16px;
   width: 16px;
   text-align: center;
+  color: var(--color-text);
+  transition: color var(--transition-fast);
+}
+
+.user-menu-item.logout i {
+  color: var(--color-error);
 }
 
 @media (max-width: 768px) {

@@ -60,6 +60,7 @@
 /* --------------------------------------------
 // Light Theme (Default)
 // -------------------------------------------- */
+[data-mode="light"],
 .light-theme {
   /* Primary Colors */
   --primary-50: #e0f2fe;
@@ -122,6 +123,7 @@
 /* --------------------------------------------
 // Dark Theme
 // -------------------------------------------- */
+[data-mode="dark"],
 .dark-theme {
   /* Primary Colors */
   --primary-50: #082f49;
@@ -149,11 +151,11 @@
   --surface-900: #f9fafb;
 
   /* Text Colors */
-  --text-color: var(--surface-50);
-  --text-color-secondary: var(--surface-300);
+  --text-color: var(--surface-800);
+  --text-color-secondary: var(--surface-400);
 
   /* Border Color */
-  --border-color: var(--surface-600);
+  --border-color: var(--surface-200);
 
   /* Component Colors */
   --color-primary: var(--primary-500);
@@ -189,6 +191,68 @@ body {
   background-color: var(--color-background);
   color: var(--text-color);
   transition: background-color var(--transition-duration), color var(--transition-duration);
+  min-height: 100vh;
+}
+
+/* Ensure text colors are properly applied */
+body,
+body * {
+  color: inherit;
+}
+
+/* Override for specific elements that might have their own colors */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+}
+
+p, span, div {
+  color: var(--text-color);
+}
+
+/* Ensure header icons use correct text color */
+.header .sidebar-toggle,
+.header .header-action-btn,
+.header .theme-toggle-btn {
+  color: var(--text-color) !important;
+}
+
+.header .sidebar-toggle i,
+.header .header-action-btn i,
+.header .theme-toggle-btn i {
+  color: inherit !important;
+}
+
+/* Ensure breadcrumb icons use correct text color */
+.breadcrumb-link,
+.breadcrumb-current {
+  color: var(--text-color) !important;
+}
+
+.breadcrumb-link i,
+.breadcrumb-current i {
+  color: inherit !important;
+}
+
+/* Ensure sidebar text uses correct colors */
+.sidebar-user-name,
+.sidebar-user-role,
+.sidebar-logo,
+.sidebar-link,
+.sidebar-submenu-header,
+.sidebar-submenu-link {
+  color: var(--text-color) !important;
+}
+
+.sidebar-link,
+.sidebar-submenu-header,
+.sidebar-submenu-link {
+  color: var(--text-color-secondary) !important;
+}
+
+.sidebar-link:hover,
+.sidebar-submenu-header:hover,
+.sidebar-submenu-link:hover {
+  color: var(--text-color) !important;
 }
 
 /* Apply light theme by default */

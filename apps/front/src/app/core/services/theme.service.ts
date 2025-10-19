@@ -165,15 +165,35 @@ export class ThemeService {
 
     // Apply CSS custom properties
     const root = document.documentElement;
+    const body = document.body;
     
-    // Set color scheme
+    // Set color scheme on root
     root.setAttribute('data-theme', theme.colorScheme);
     root.setAttribute('data-mode', isDark ? 'dark' : 'light');
+
+    // Apply theme classes to body
+    body.classList.remove('light-theme', 'dark-theme');
+    body.classList.add(isDark ? 'dark-theme' : 'light-theme');
+    
+    // Debug log
+    console.log('Theme applied:', {
+      isDark,
+      theme: theme.colorScheme,
+      bodyClasses: body.className,
+      rootAttributes: {
+        'data-theme': root.getAttribute('data-theme'),
+        'data-mode': root.getAttribute('data-mode')
+      }
+    });
 
     // Set CSS custom properties
     Object.entries(colors).forEach(([key, value]) => {
       root.style.setProperty(`--color-${key}`, value);
     });
+    
+    // Also set text color variables for compatibility
+    root.style.setProperty('--text-color', colors.text);
+    root.style.setProperty('--text-color-secondary', colors.textSecondary);
 
     // Set primary and accent colors
     root.style.setProperty('--color-primary', theme.primaryColor);

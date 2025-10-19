@@ -145,50 +145,54 @@ export interface TranslationKeys {
   providedIn: 'root'
 })
 export class LanguageService {
-  private currentLanguageSubject = new BehaviorSubject<Language>(this.getDefaultLanguage());
-  public currentLanguage$ = this.currentLanguageSubject.asObservable();
+  private currentLanguageSubject: BehaviorSubject<Language>;
+  public currentLanguage$: Observable<Language>;
 
   private readonly STORAGE_KEY = APP_CONSTANTS.STORAGE_KEYS.LANGUAGE;
-  private readonly AVAILABLE_LANGUAGES: Language[] = [
-    {
-      code: 'pt-BR',
-      name: 'Português (Brasil)',
-      nativeName: 'Português',
-      flag: '🇧🇷',
-      dateFormat: 'dd/MM/yyyy',
-      timeFormat: 'HH:mm',
-      currency: 'BRL',
-      currencySymbol: 'R$',
-      numberFormat: 'pt-BR',
-      translations: this.getPortugueseTranslations()
-    },
-    {
-      code: 'en-US',
-      name: 'English (US)',
-      nativeName: 'English',
-      flag: '🇺🇸',
-      dateFormat: 'MM/dd/yyyy',
-      timeFormat: 'h:mm a',
-      currency: 'USD',
-      currencySymbol: '$',
-      numberFormat: 'en-US',
-      translations: this.getEnglishTranslations()
-    },
-    {
-      code: 'es-ES',
-      name: 'Español',
-      nativeName: 'Español',
-      flag: '🇪🇸',
-      dateFormat: 'dd/MM/yyyy',
-      timeFormat: 'HH:mm',
-      currency: 'EUR',
-      currencySymbol: '€',
-      numberFormat: 'es-ES',
-      translations: this.getSpanishTranslations()
-    }
-  ];
+  private readonly AVAILABLE_LANGUAGES: Language[];
 
   constructor(private storageService: StorageService) {
+    this.AVAILABLE_LANGUAGES = [
+      {
+        code: 'pt-BR',
+        name: 'Português (Brasil)',
+        nativeName: 'Português',
+        flag: '🇧🇷',
+        dateFormat: 'dd/MM/yyyy',
+        timeFormat: 'HH:mm',
+        currency: 'BRL',
+        currencySymbol: 'R$',
+        numberFormat: 'pt-BR',
+        translations: this.getPortugueseTranslations()
+      },
+      {
+        code: 'en-US',
+        name: 'English (US)',
+        nativeName: 'English',
+        flag: '🇺🇸',
+        dateFormat: 'MM/dd/yyyy',
+        timeFormat: 'h:mm a',
+        currency: 'USD',
+        currencySymbol: '$',
+        numberFormat: 'en-US',
+        translations: this.getEnglishTranslations()
+      },
+      {
+        code: 'es-ES',
+        name: 'Español',
+        nativeName: 'Español',
+        flag: '🇪🇸',
+        dateFormat: 'dd/MM/yyyy',
+        timeFormat: 'HH:mm',
+        currency: 'EUR',
+        currencySymbol: '€',
+        numberFormat: 'es-ES',
+        translations: this.getSpanishTranslations()
+      }
+    ];
+    
+    this.currentLanguageSubject = new BehaviorSubject<Language>(this.getDefaultLanguage());
+    this.currentLanguage$ = this.currentLanguageSubject.asObservable();
     this.initializeLanguage();
   }
 

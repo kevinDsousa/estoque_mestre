@@ -60,6 +60,7 @@ export class App implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(theme => {
         // Theme is applied automatically by the service
+        console.log('Theme initialized:', theme);
       });
 
     // Initialize language

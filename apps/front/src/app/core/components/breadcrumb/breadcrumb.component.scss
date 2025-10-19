@@ -1,5 +1,5 @@
 .breadcrumb {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .breadcrumb-list {
@@ -21,9 +21,9 @@
 .breadcrumb-link {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 4px 8px;
-  color: var(--color-text-secondary);
+  color: var(--text-color-secondary);
   text-decoration: none;
   border-radius: var(--border-radius-small);
   transition: all var(--transition-fast);
@@ -38,20 +38,20 @@
 .breadcrumb-current {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 4px 8px;
-  color: var(--color-text);
+  color: var(--text-color);
   font-weight: 500;
   font-size: 14px;
 }
 
 .breadcrumb-current.disabled {
-  color: var(--color-text-secondary);
+  color: var(--text-color-secondary);
   cursor: not-allowed;
 }
 
 .breadcrumb-separator {
-  color: var(--color-text-secondary);
+  color: var(--text-color-secondary);
   font-size: 12px;
   margin: 0 4px;
 }
@@ -59,6 +59,8 @@
 .breadcrumb-link i,
 .breadcrumb-current i {
   font-size: 14px;
+  color: inherit;
+  transition: color var(--transition-fast);
 }
 
 @media (max-width: 768px) {
