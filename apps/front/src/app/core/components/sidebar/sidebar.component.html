@@ -87,6 +87,16 @@
           <div class="sidebar-user-role">{{ user?.role || 'Usuário' }}</div>
         </div>
       </div>
+      <button class="sidebar-logout-btn" (click)="logout()" title="Sair">
+        <i class="pi pi-sign-out"></i>
+        <span>Sair</span>
+      </button>
+    </div>
+  } @else {
+    <div class="sidebar-footer-collapsed">
+      <button class="sidebar-logout-btn-collapsed" (click)="logout()" title="Sair">
+        <i class="pi pi-sign-out"></i>
+      </button>
     </div>
   }
 </aside>

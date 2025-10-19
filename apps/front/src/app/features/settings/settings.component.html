@@ -1,0 +1,89 @@
+<div class="settings">
+  <div class="settings-header">
+    <div class="header-content">
+      <h1>Configurações</h1>
+      <p class="subtitle">Configure o sistema conforme suas necessidades</p>
+    </div>
+  </div>
+
+  <div class="settings-container">
+    <div class="settings-sidebar">
+      <div class="sidebar-section">
+        <h3>Seções</h3>
+        <nav class="settings-nav">
+          <button 
+            *ngFor="let section of settingsSections"
+            class="nav-item"
+            [class.active]="activeSection === section.id"
+            (click)="setActiveSection(section.id)">
+            <i [class]="section.icon"></i>
+            <span>{{ section.title }}</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <div class="settings-content">
+      <div *ngIf="getActiveSection()" class="section-content">
+        <div class="section-header">
+          <div class="section-icon">
+            <i [class]="getActiveSection()!.icon"></i>
+          </div>
+          <div class="section-info">
+            <h2>{{ getActiveSection()!.title }}</h2>
+            <p>{{ getActiveSection()!.description }}</p>
+          </div>
+        </div>
+
+        <div class="settings-form">
+          <div *ngFor="let setting of getActiveSection()!.settings" class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">{{ setting.name }}</label>
+              <p class="setting-description">{{ setting.description }}</p>
+            </div>
+            <div class="setting-control">
+              <input 
+                *ngIf="setting.type === 'text'"
+                type="text"
+                [(ngModel)]="setting.value"
+                class="form-control">
+              
+              <input 
+                *ngIf="setting.type === 'number'"
+                type="number"
+                [(ngModel)]="setting.value"
+                class="form-control">
+              
+              <select 
+                *ngIf="setting.type === 'select'"
+                [(ngModel)]="setting.value"
+                class="form-control">
+                <option *ngFor="let option of setting.options" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              
+              <label *ngIf="setting.type === 'boolean'" class="checkbox-label">
+                <input 
+                  type="checkbox"
+                  [(ngModel)]="setting.value">
+                <span class="checkbox-custom"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button class="btn btn-secondary" (click)="resetSettings()">
+            <i class="pi pi-refresh"></i>
+            Redefinir
+          </button>
+          <button class="btn btn-primary" (click)="saveSettings()">
+            <i class="pi pi-save"></i>
+            Salvar Configurações
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

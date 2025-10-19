@@ -8,7 +8,8 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid var(--color-border);
+  border: none;
+  box-shadow: var(--border-soft-enhanced);
   border-radius: var(--border-radius-small);
   background-color: var(--color-background);
   color: var(--text-color);
@@ -19,7 +20,7 @@
 
 .theme-toggle-btn:hover {
   background-color: var(--color-surface);
-  border-color: var(--color-primary);
+  box-shadow: var(--border-soft-focus);
 }
 
 .theme-toggle-btn i {
@@ -37,7 +38,7 @@
   right: 0;
   margin-top: 4px;
   background-color: var(--color-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--border-radius-medium);
   box-shadow: var(--shadow-medium);
   z-index: var(--z-index-dropdown);

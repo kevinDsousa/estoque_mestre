@@ -58,4 +58,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   toggleSubmenu(item: SidebarItem): void {
     this.layoutService.toggleSidebarItemExpansion(item.id);
   }
+
+  logout(): void {
+    this.authService.logout();
+  }
 }

@@ -1,4 +1,118 @@
-<div class="login">
-  <h1>Login</h1>
-  <p>Página de login em desenvolvimento</p>
+<div class="login-container">
+  <!-- Background Pattern -->
+  <div class="login-background">
+    <div class="pattern-overlay"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo">
+        <i class="pi pi-box"></i>
+        <h1>Estoque Mestre</h1>
+      </div>
+      <p class="subtitle">Faça login para acessar sua conta</p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <div class="input-wrapper">
+          <i class="pi pi-envelope input-icon"></i>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="Digite seu email"
+            [class.error]="isFieldInvalid('email')"
+            autocomplete="email">
+        </div>
+        <div *ngIf="isFieldInvalid('email')" class="field-error">
+          {{ getFieldError('email') }}
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <div class="input-wrapper">
+          <i class="pi pi-lock input-icon"></i>
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Digite sua senha"
+            [class.error]="isFieldInvalid('password')"
+            autocomplete="current-password">
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+            <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+          </button>
+        </div>
+        <div *ngIf="isFieldInvalid('password')" class="field-error">
+          {{ getFieldError('password') }}
+        </div>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="form-options">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" formControlName="rememberMe">
+          <span class="checkmark"></span>
+          Lembrar de mim
+        </label>
+        <a href="#" class="forgot-password">Esqueceu a senha?</a>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="isLoading || loginForm.invalid">
+        <i *ngIf="isLoading" class="pi pi-spin pi-spinner"></i>
+        <i *ngIf="!isLoading" class="pi pi-sign-in"></i>
+        {{ isLoading ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>Não tem uma conta? <a routerLink="/register">Criar conta</a></p>
+    </div>
+  </div>
+
+  <!-- Features Preview -->
+  <div class="features-preview">
+    <h3>Gerencie seu estoque com eficiência</h3>
+    <div class="features-grid">
+      <div class="feature-item">
+        <i class="pi pi-box"></i>
+        <span>Controle de Produtos</span>
+      </div>
+      <div class="feature-item">
+        <i class="pi pi-chart-line"></i>
+        <span>Relatórios Avançados</span>
+      </div>
+      <div class="feature-item">
+        <i class="pi pi-users"></i>
+        <span>Gestão de Clientes</span>
+      </div>
+      <div class="feature-item">
+        <i class="pi pi-building"></i>
+        <span>Fornecedores</span>
+      </div>
+    </div>
+  </div>
 </div>

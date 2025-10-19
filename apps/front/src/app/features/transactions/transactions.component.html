@@ -1,0 +1,62 @@
+<div class="transactions">
+  <div class="transactions-header">
+    <div class="header-content">
+      <h1>Transações</h1>
+      <p class="subtitle">Histórico de vendas, compras e movimentações</p>
+    </div>
+    <button class="btn btn-primary">
+      <i class="pi pi-plus"></i>
+      Nova Transação
+    </button>
+  </div>
+
+  <div class="transactions-table-container">
+    <table class="transactions-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tipo</th>
+          <th>Cliente/Fornecedor</th>
+          <th>Valor</th>
+          <th>Itens</th>
+          <th>Data</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let transaction of transactions">
+          <td class="transaction-id">#{{ transaction.id }}</td>
+          <td>
+            <span class="type-badge" [class]="'type-' + transaction.type">
+              {{ getTypeText(transaction.type) }}
+            </span>
+          </td>
+          <td class="customer">{{ transaction.customer }}</td>
+          <td class="amount">R$ {{ transaction.amount | number:'1.2-2' }}</td>
+          <td class="items">{{ transaction.items }} itens</td>
+          <td class="date">{{ transaction.date | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="status-badge" [class]="getStatusClass(transaction.status)">
+              {{ getStatusText(transaction.status) }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn btn-ghost btn-sm" (click)="viewTransaction(transaction)">
+              <i class="pi pi-eye"></i>
+              Ver
+            </button>
+            <button class="btn btn-ghost btn-sm" (click)="editTransaction(transaction)">
+              <i class="pi pi-pencil"></i>
+              Editar
+            </button>
+            <button class="btn btn-ghost btn-sm text-error" (click)="cancelTransaction(transaction)">
+              <i class="pi pi-times"></i>
+              Cancelar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

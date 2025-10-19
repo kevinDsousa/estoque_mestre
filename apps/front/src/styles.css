@@ -55,6 +55,8 @@
   --z-index-tooltip: 1100;
   --z-index-toast: 1200;
   --z-index-fixed: 1030;
+  --z-index-header: 1040;
+  --z-index-sidebar: 1020;
 }
 
 /* --------------------------------------------
@@ -118,6 +120,17 @@
   --shadow-1: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-3: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Soft borders as shadows */
+  --border-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --border-soft-bottom: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --border-soft-top: 0 -1px 3px rgba(0, 0, 0, 0.05);
+  --border-soft-right: 1px 0 3px rgba(0, 0, 0, 0.05);
+  --border-soft-left: -1px 0 3px rgba(0, 0, 0, 0.05);
+  
+  /* Enhanced borders for form controls in light mode */
+  --border-soft-enhanced: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --border-soft-focus: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 /* --------------------------------------------
@@ -181,6 +194,17 @@
   --shadow-1: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
   --shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
   --shadow-3: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  
+  /* Soft borders as shadows */
+  --border-soft: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --border-soft-bottom: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --border-soft-top: 0 -1px 3px rgba(0, 0, 0, 0.15);
+  --border-soft-right: 1px 0 3px rgba(0, 0, 0, 0.15);
+  --border-soft-left: -1px 0 3px rgba(0, 0, 0, 0.15);
+  
+  /* Enhanced borders for form controls in dark mode */
+  --border-soft-enhanced: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --border-soft-focus: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(14, 165, 233, 0.2);
 }
 
 /* --------------------------------------------
@@ -231,6 +255,243 @@ p, span, div {
 .breadcrumb-link i,
 .breadcrumb-current i {
   color: inherit !important;
+}
+
+/* ============================================
+// Global Modal Styles
+// ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal);
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  background: var(--color-card);
+  border-radius: var(--border-radius-medium);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-heavy);
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  box-shadow: var(--border-soft-bottom);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-header);
+  
+  h3 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+  }
+  
+  .btn-close {
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-small);
+    transition: all var(--transition-fast);
+    
+    &:hover {
+      background: var(--color-surface);
+      color: var(--text-color);
+    }
+    
+    i {
+      font-size: var(--font-size-md);
+    }
+  }
+}
+
+.modal-body {
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  flex: 1;
+  
+  .form-group {
+    margin-bottom: var(--spacing-md);
+    
+    label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-color);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-sm);
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      cursor: pointer;
+      
+      input[type="checkbox"] {
+        margin: 0;
+      }
+    }
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.modal-footer {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  box-shadow: var(--border-soft-top);
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+  background: var(--color-header);
+  
+  .btn {
+    min-width: 100px;
+  }
+  
+  .btn-primary {
+    background: var(--color-primary) !important;
+    color: white !important;
+    box-shadow: var(--border-soft), 0 0 0 2px var(--color-primary) !important;
+    
+    &:hover {
+      background: var(--color-primary-dark) !important;
+      border-color: var(--color-primary-dark) !important;
+    }
+  }
+  
+  .btn-secondary {
+    background: var(--color-secondary) !important;
+    color: var(--text-color) !important;
+    box-shadow: var(--border-soft) !important;
+    
+    &:hover {
+      background: var(--color-surface) !important;
+    }
+  }
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-md);
+  }
+}
+
+/* ============================================
+// Soft Border Utilities (Replace 1px borders)
+// ============================================ */
+
+/* Replace border: 1px solid with soft shadow */
+.border-soft {
+  border: none !important;
+  box-shadow: var(--border-soft) !important;
+}
+
+/* Replace border-bottom: 1px solid with soft shadow */
+.border-soft-bottom {
+  border-bottom: none !important;
+  box-shadow: var(--border-soft-bottom) !important;
+}
+
+/* Replace border-top: 1px solid with soft shadow */
+.border-soft-top {
+  border-top: none !important;
+  box-shadow: var(--border-soft-top) !important;
+}
+
+/* Replace border-right: 1px solid with soft shadow */
+.border-soft-right {
+  border-right: none !important;
+  box-shadow: var(--border-soft-right) !important;
+}
+
+/* Replace border-left: 1px solid with soft shadow */
+.border-soft-left {
+  border-left: none !important;
+  box-shadow: var(--border-soft-left) !important;
+}
+
+/* Form controls with enhanced borders */
+.form-control {
+  border: none !important;
+  box-shadow: var(--border-soft-enhanced) !important;
+  
+  &:focus {
+    box-shadow: var(--border-soft-focus) !important;
+  }
+}
+
+/* Cards with soft borders */
+.card {
+  border: none !important;
+  box-shadow: var(--border-soft) !important;
+}
+
+/* Tables with soft borders */
+.table {
+  border: none !important;
+  box-shadow: var(--border-soft) !important;
+  
+  th, td {
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: var(--border-soft-bottom) !important;
+  }
+}
+
+/* Improve select dropdown spacing */
+select.form-control,
+.form-control[type="select"] {
+  padding-right: 2.5rem !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 0.75rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1rem !important;
+  appearance: none !important;
+  box-shadow: var(--border-soft-enhanced) !important;
 }
 
 /* Ensure sidebar text uses correct colors */

@@ -1,0 +1,387 @@
+.subscription {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.subscription-header {
+  margin-bottom: var(--spacing-xl);
+  
+  .header-content {
+    h1 {
+      font-size: var(--font-size-xxxl);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .subtitle {
+      font-size: var(--font-size-lg);
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+.loading-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  p {
+    font-size: var(--font-size-lg);
+    color: var(--text-color-secondary);
+  }
+}
+
+.error-state i {
+  color: var(--color-error);
+}
+
+// Botões
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  
+  &.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: var(--border-soft), 0 0 0 2px var(--color-primary);
+    
+    &:hover {
+      background: var(--color-primary-dark);
+      border-color: var(--color-primary-dark);
+    }
+  }
+  
+  &.btn-secondary {
+    background: var(--color-surface);
+    color: var(--text-color);
+    box-shadow: var(--border-soft);
+    
+    &:hover {
+      background: var(--color-border);
+    }
+  }
+  
+  &.btn-outline {
+    background: transparent;
+    color: var(--color-primary);
+    box-shadow: var(--border-soft), 0 0 0 2px var(--color-primary);
+    
+    &:hover {
+      background: var(--color-primary);
+      color: white;
+    }
+  }
+}
+
+// Informações da assinatura atual
+.current-subscription {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-medium);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-light);
+  
+  .subscription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    
+    h2 {
+      font-size: var(--font-size-xxl);
+      color: var(--text-color);
+      margin: 0;
+    }
+    
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius-small);
+      font-size: 0.875rem;
+      font-weight: 500;
+      
+      &.active {
+        background: var(--color-success-light);
+        color: var(--color-success);
+      }
+      
+      &.inactive {
+        background: var(--color-error-light);
+        color: var(--color-error);
+      }
+      
+      &.pending {
+        background: var(--color-warning-light);
+        color: var(--color-warning);
+      }
+    }
+  }
+  
+  .subscription-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    
+    .detail-item {
+      .label {
+        font-size: var(--font-size-sm);
+        color: var(--text-color-secondary);
+        margin-bottom: var(--spacing-xs);
+      }
+      
+      .value {
+        font-size: var(--font-size-md);
+        color: var(--text-color);
+        font-weight: 500;
+      }
+    }
+  }
+  
+  .subscription-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+  }
+}
+
+// Planos disponíveis
+.available-plans {
+  h2 {
+    font-size: var(--font-size-xxl);
+    color: var(--text-color);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+  }
+  
+  .plan-card {
+    background: var(--color-card);
+    box-shadow: var(--border-soft);
+    border-radius: var(--border-radius-medium);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-light);
+    transition: all var(--transition-normal);
+    position: relative;
+    
+    &:hover {
+      box-shadow: var(--shadow-medium);
+      transform: translateY(-2px);
+    }
+    
+    &.recommended {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+      
+      &::before {
+        content: 'Recomendado';
+        position: absolute;
+        top: -1px;
+        right: 1rem;
+        background: var(--color-primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0 0 var(--border-radius-small) var(--border-radius-small);
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+    }
+    
+    .plan-header {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+      
+      h3 {
+        font-size: var(--font-size-xl);
+        color: var(--text-color);
+        margin: 0 0 var(--spacing-sm) 0;
+      }
+      
+      .plan-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin-bottom: var(--spacing-xs);
+        
+        .currency {
+          font-size: 1.25rem;
+          vertical-align: top;
+        }
+        
+        .period {
+          font-size: var(--font-size-sm);
+          color: var(--text-color-secondary);
+          font-weight: 400;
+        }
+      }
+      
+      .plan-description {
+        color: var(--text-color-secondary);
+        font-size: var(--font-size-sm);
+      }
+    }
+    
+    .plan-features {
+      margin-bottom: var(--spacing-xl);
+      
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+        li {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-sm) 0;
+          color: var(--text-color);
+          
+          i {
+            color: var(--color-success);
+            font-size: var(--font-size-sm);
+          }
+        }
+      }
+    }
+    
+    .plan-actions {
+      text-align: center;
+    }
+  }
+}
+
+// Histórico de pagamentos
+.payment-history {
+  margin-top: var(--spacing-xxl);
+  
+  h2 {
+    font-size: var(--font-size-xxl);
+    color: var(--text-color);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .history-table {
+    background: var(--color-card);
+    box-shadow: var(--border-soft);
+    border-radius: var(--border-radius-medium);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      
+      th, td {
+        padding: var(--spacing-md);
+        text-align: left;
+        box-shadow: var(--border-soft-bottom);
+        color: var(--text-color);
+      }
+      
+      th {
+        background: var(--color-surface);
+        font-weight: 600;
+        font-size: var(--font-size-sm);
+        color: var(--text-color-secondary);
+        text-transform: uppercase;
+      }
+      
+      tr:last-child td {
+        border-bottom: none;
+      }
+      
+      tbody tr:hover {
+        background: var(--color-surface-hover);
+      }
+    }
+  }
+}
+
+// Badges de status
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-small);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  
+  &.paid {
+    background: var(--color-success-light);
+    color: var(--color-success);
+  }
+  
+  &.pending {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+  }
+  
+  &.failed {
+    background: var(--color-error-light);
+    color: var(--color-error);
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .subscription {
+    padding: var(--spacing-md);
+  }
+  
+  .current-subscription {
+    .subscription-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+    }
+    
+    .subscription-details {
+      grid-template-columns: 1fr;
+    }
+    
+    .subscription-actions {
+      flex-direction: column;
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+  
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-history .history-table {
+    overflow-x: auto;
+    
+    table {
+      min-width: 600px;
+    }
+  }
+}

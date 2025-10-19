@@ -1,0 +1,107 @@
+<div class="categories">
+  <div class="categories-header">
+    <div class="header-content">
+      <h1>Categorias</h1>
+      <p class="subtitle">Organize seus produtos por categorias</p>
+    </div>
+    <button class="btn btn-primary" (click)="addCategory()">
+      <i class="pi pi-plus"></i>
+      Nova Categoria
+    </button>
+  </div>
+
+  <div class="page-controls">
+    <input 
+      type="text" 
+      placeholder="Buscar categorias..."
+      class="form-control search-input"
+      [(ngModel)]="searchTerm"
+      (input)="filterCategories()">
+  </div>
+
+  <div class="categories-grid">
+    <div *ngFor="let category of filteredCategories" class="category-card">
+      <div class="category-header">
+        <h3>{{ category.name }}</h3>
+        <span class="status-badge" [class]="getStatusClass(category.isActive)">
+          {{ getStatusText(category.isActive) }}
+        </span>
+      </div>
+      <p class="category-description">{{ category.description }}</p>
+      <div class="category-stats">
+        <span>
+          <i class="pi pi-box"></i>
+          {{ category.productCount }} produtos
+        </span>
+        <span>
+          <i class="pi pi-calendar"></i>
+          {{ category.createdAt | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-ghost btn-sm" (click)="editCategory(category)">
+          <i class="pi pi-pencil"></i>
+          Editar
+        </button>
+        <button class="btn btn-ghost btn-sm text-error" (click)="deleteCategory(category)">
+          <i class="pi pi-trash"></i>
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="filteredCategories.length === 0" class="no-results">
+    <i class="pi pi-tags"></i>
+    <p>Nenhuma categoria encontrada</p>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showAddModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingCategory?.id === 0 ? 'Nova Categoria' : 'Editar Categoria' }}</h3>
+        <button class="btn-close" (click)="closeModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label>Nome da Categoria</label>
+            <input 
+              type="text" 
+              [(ngModel)]="editingCategory!.name"
+              name="name"
+              class="form-control"
+              placeholder="Digite o nome da categoria">
+          </div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea 
+              [(ngModel)]="editingCategory!.description"
+              name="description"
+              class="form-control"
+              rows="3"
+              placeholder="Descreva a categoria"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="editingCategory!.isActive"
+                name="isActive">
+              <span>Categoria ativa</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="saveCategory()">
+          {{ editingCategory?.id === 0 ? 'Criar Categoria' : 'Salvar Alterações' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

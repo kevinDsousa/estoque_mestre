@@ -1,0 +1,66 @@
+<div class="customers">
+  <div class="customers-header">
+    <div class="header-content">
+      <h1>Clientes</h1>
+      <p class="subtitle">Gerencie sua base de clientes</p>
+    </div>
+    <button class="btn btn-primary">
+      <i class="pi pi-plus"></i>
+      Novo Cliente
+    </button>
+  </div>
+
+  <div class="customers-grid">
+    <div *ngFor="let customer of customers" class="customer-card">
+      <div class="customer-header">
+        <div class="customer-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        <div class="customer-info">
+          <h3>{{ customer.name }}</h3>
+          <span class="status-badge" [class]="customer.isActive ? 'active' : 'inactive'">
+            {{ customer.isActive ? 'Ativo' : 'Inativo' }}
+          </span>
+        </div>
+      </div>
+      <div class="customer-details">
+        <div class="detail-item">
+          <i class="pi pi-envelope"></i>
+          <span>{{ customer.email }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="pi pi-phone"></i>
+          <span>{{ customer.phone }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="pi pi-map-marker"></i>
+          <span>{{ customer.address }}</span>
+        </div>
+      </div>
+      <div class="customer-stats">
+        <div class="stat">
+          <i class="pi pi-shopping-cart"></i>
+          <span>R$ {{ customer.totalPurchases | number:'1.2-2' }}</span>
+        </div>
+        <div class="stat">
+          <i class="pi pi-calendar"></i>
+          <span>{{ customer.lastPurchase | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-ghost btn-sm" (click)="editCustomer(customer)">
+          <i class="pi pi-pencil"></i>
+          Editar
+        </button>
+        <button class="btn btn-ghost btn-sm" (click)="viewHistory(customer)">
+          <i class="pi pi-history"></i>
+          Histórico
+        </button>
+        <button class="btn btn-ghost btn-sm" (click)="newSale(customer)">
+          <i class="pi pi-plus"></i>
+          Nova Venda
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

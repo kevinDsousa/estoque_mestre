@@ -1,0 +1,207 @@
+<div class="products">
+  <div class="products-header">
+    <div class="header-content">
+      <h1>Produtos</h1>
+      <p class="subtitle">Gerencie seu catálogo de produtos</p>
+    </div>
+    <button class="btn btn-primary" (click)="addProduct()">
+      <i class="pi pi-plus"></i>
+      Adicionar Produto
+    </button>
+  </div>
+
+  <!-- Controles da página -->
+  <div class="page-controls">
+    <!-- Primeira linha de filtros -->
+    <div class="filters-row">
+      <input 
+        type="text" 
+        placeholder="Buscar por nome ou SKU..."
+        class="form-control search-input"
+        [(ngModel)]="searchTerm"
+        (input)="filterProducts()">
+      
+      <select 
+        [(ngModel)]="selectedCategory" 
+        (change)="filterProducts()"
+        class="form-control category-select">
+        <option value="">Todas as categorias</option>
+        <option *ngFor="let category of categories" [value]="category">
+          {{ category }}
+        </option>
+      </select>
+
+      <select 
+        [(ngModel)]="selectedStatus" 
+        (change)="filterProducts()"
+        class="form-control status-select">
+        <option *ngFor="let status of statusOptions" [value]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+
+      <button 
+        type="button" 
+        class="btn btn-secondary clear-filters-btn"
+        (click)="clearFilters()">
+        <i class="pi pi-filter-slash"></i>
+        Limpar Filtros
+      </button>
+    </div>
+
+    <!-- Segunda linha de filtros -->
+    <div class="filters-row">
+      <select 
+        [(ngModel)]="selectedStockFilter" 
+        (change)="filterProducts()"
+        class="form-control stock-select">
+        <option *ngFor="let stock of stockFilterOptions" [value]="stock.value">
+          {{ stock.label }}
+        </option>
+      </select>
+
+      <div class="price-range">
+        <input 
+          type="number" 
+          placeholder="Preço mínimo"
+          class="form-control price-input"
+          [(ngModel)]="minPrice"
+          (input)="filterProducts()">
+        <span class="price-separator">até</span>
+        <input 
+          type="number" 
+          placeholder="Preço máximo"
+          class="form-control price-input"
+          [(ngModel)]="maxPrice"
+          (input)="filterProducts()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de Produtos -->
+  <div class="products-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>SKU</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+          <th>Status</th>
+          <th>Última Atualização</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of filteredProducts">
+          <td class="product-name">
+            <strong>{{ product.name }}</strong>
+          </td>
+          <td>{{ product.category }}</td>
+          <td class="sku">{{ product.sku }}</td>
+          <td class="price">R$ {{ product.price | number:'1.2-2' }}</td>
+          <td class="stock">
+            <span [class]="product.stock < 5 ? 'low-stock' : ''">
+              {{ product.stock }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [class]="getStatusClass(product.status)">
+              {{ getStatusText(product.status) }}
+            </span>
+          </td>
+          <td class="date">{{ product.lastUpdated | date:'dd/MM/yyyy' }}</td>
+          <td class="actions">
+            <button class="btn btn-ghost btn-sm" (click)="editProduct(product)">
+              <i class="pi pi-pencil"></i>
+              Editar
+            </button>
+            <button class="btn btn-ghost btn-sm text-error" (click)="deleteProduct(product)">
+              <i class="pi pi-trash"></i>
+              Excluir
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="filteredProducts.length === 0" class="no-results">
+      <i class="pi pi-search"></i>
+      <p>Nenhum produto encontrado</p>
+    </div>
+  </div>
+
+  <!-- Modal de Adicionar/Editar Produto -->
+  <div *ngIf="showAddModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingProduct ? 'Editar Produto' : 'Adicionar Produto' }}</h3>
+        <button class="btn-close" (click)="closeModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label>Nome do Produto</label>
+            <input 
+              type="text" 
+              [(ngModel)]="editingProduct!.name"
+              name="name"
+              class="form-control"
+              placeholder="Digite o nome do produto">
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select 
+              [(ngModel)]="editingProduct!.category"
+              name="category"
+              class="form-control">
+              <option value="">Selecione uma categoria</option>
+              <option *ngFor="let category of categories" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>SKU</label>
+              <input 
+                type="text" 
+                [(ngModel)]="editingProduct!.sku"
+                name="sku"
+                class="form-control"
+                placeholder="Código do produto">
+            </div>
+            <div class="form-group">
+              <label>Preço</label>
+              <input 
+                type="number" 
+                [(ngModel)]="editingProduct!.price"
+                name="price"
+                class="form-control"
+                step="0.01"
+                placeholder="0.00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Estoque</label>
+            <input 
+              type="number" 
+              [(ngModel)]="editingProduct!.stock"
+              name="stock"
+              class="form-control"
+              placeholder="Quantidade em estoque">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="saveProduct()">
+          {{ editingProduct ? 'Salvar Alterações' : 'Adicionar Produto' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

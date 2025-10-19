@@ -1,0 +1,61 @@
+<div class="suppliers">
+  <div class="suppliers-header">
+    <div class="header-content">
+      <h1>Fornecedores</h1>
+      <p class="subtitle">Gerencie seus fornecedores e parceiros</p>
+    </div>
+    <button class="btn btn-primary">
+      <i class="pi pi-plus"></i>
+      Novo Fornecedor
+    </button>
+  </div>
+
+  <div class="suppliers-grid">
+    <div *ngFor="let supplier of suppliers" class="supplier-card">
+      <div class="supplier-header">
+        <h3>{{ supplier.name }}</h3>
+        <span class="status-badge" [class]="supplier.isActive ? 'active' : 'inactive'">
+          {{ supplier.isActive ? 'Ativo' : 'Inativo' }}
+        </span>
+      </div>
+      <div class="supplier-info">
+        <div class="info-item">
+          <i class="pi pi-user"></i>
+          <span>{{ supplier.contact }}</span>
+        </div>
+        <div class="info-item">
+          <i class="pi pi-envelope"></i>
+          <span>{{ supplier.email }}</span>
+        </div>
+        <div class="info-item">
+          <i class="pi pi-phone"></i>
+          <span>{{ supplier.phone }}</span>
+        </div>
+        <div class="info-item">
+          <i class="pi pi-map-marker"></i>
+          <span>{{ supplier.address }}</span>
+        </div>
+      </div>
+      <div class="supplier-stats">
+        <div class="stat">
+          <i class="pi pi-box"></i>
+          <span>{{ supplier.productCount }} produtos</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-ghost btn-sm" (click)="editSupplier(supplier)">
+          <i class="pi pi-pencil"></i>
+          Editar
+        </button>
+        <button class="btn btn-ghost btn-sm" (click)="viewProducts(supplier)">
+          <i class="pi pi-eye"></i>
+          Ver Produtos
+        </button>
+        <button class="btn btn-ghost btn-sm text-error" (click)="deleteSupplier(supplier)">
+          <i class="pi pi-trash"></i>
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

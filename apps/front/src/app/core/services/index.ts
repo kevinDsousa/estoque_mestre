@@ -9,6 +9,7 @@ export { ApiService } from './api.service';
 export { AuthService } from './auth.service';
 export { StorageService } from './storage.service';
 export { NotificationService } from './notification.service';
+export { DialogService } from './dialog.service';
 
 // Business Services
 export { ProductService } from './product.service';

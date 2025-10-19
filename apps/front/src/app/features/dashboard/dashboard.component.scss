@@ -1,8 +1,228 @@
 .dashboard {
-  padding: 20px;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-h1 {
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.dashboard-subtitle {
+  color: var(--text-color-secondary);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--color-card);
+  box-shadow: var(--border-soft);
+  border-radius: var(--border-radius-medium);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-light);
+  transition: box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.stat-content h3 {
+  color: var(--text-color);
+  margin: 0 0 0.25rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stat-content p {
+  color: var(--text-color-secondary);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-card {
+  background: var(--color-card);
+  box-shadow: var(--border-soft);
+  border-radius: var(--border-radius-medium);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-light);
+  transition: box-shadow var(--transition-fast);
+}
+
+.info-card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.card-header h3 {
+  color: var(--text-color);
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.warning-icon {
+  color: var(--color-warning);
+  font-size: 1.25rem;
+}
+
+.pending-icon {
+  color: var(--color-info);
+  font-size: 1.25rem;
+}
+
+.revenue-icon {
+  color: var(--color-success);
+  font-size: 1.25rem;
+}
+
+.card-content {
+  text-align: center;
+}
+
+.warning-number,
+.pending-number,
+.revenue-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.warning-number {
+  color: var(--color-warning);
+}
+
+.pending-number {
+  color: var(--color-info);
+}
+
+.revenue-number {
+  color: var(--color-success);
+}
+
+.card-content p {
+  color: var(--text-color-secondary);
+  margin-bottom: 1rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.recent-activities {
+  background: var(--color-card);
+  box-shadow: var(--border-soft);
+  border-radius: var(--border-radius-medium);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-light);
+}
+
+.activities-list {
+  margin-top: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  box-shadow: var(--border-soft-bottom);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-primary);
-  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.activity-content p {
+  color: var(--text-color);
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.activity-time {
+  color: var(--text-color-secondary);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,6 +1,36 @@
 <div class="not-found">
-  <h1>404</h1>
-  <h2>Página não encontrada</h2>
-  <p>A página que você está procurando não existe.</p>
-  <a routerLink="/dashboard" class="btn-primary">Voltar ao Dashboard</a>
+  <div class="not-found-content">
+    <div class="error-icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    
+    <div class="error-code">404</div>
+    
+    <h1 class="error-title">Página não encontrada</h1>
+    
+    <p class="error-description">
+      A página que você está procurando não existe ou foi movida.
+    </p>
+    
+    <div class="error-actions">
+      <a routerLink="/dashboard" class="btn btn-primary">
+        <i class="pi pi-home"></i>
+        Voltar ao Dashboard
+      </a>
+      <button class="btn btn-secondary" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i>
+        Voltar
+      </button>
+    </div>
+    
+    <div class="error-suggestions">
+      <h3>Você pode tentar:</h3>
+      <ul>
+        <li><a routerLink="/dashboard">Ir para o Dashboard</a></li>
+        <li><a routerLink="/produtos">Ver Produtos</a></li>
+        <li><a routerLink="/relatorios">Acessar Relatórios</a></li>
+        <li><a routerLink="/configuracoes">Configurações</a></li>
+      </ul>
+    </div>
+  </div>
 </div>

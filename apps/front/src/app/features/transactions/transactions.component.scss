@@ -1,0 +1,198 @@
+.transactions {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-content h1 {
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: var(--text-color-secondary);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.transactions-table-container {
+  background: var(--color-card);
+  box-shadow: var(--border-soft);
+  border-radius: var(--border-radius-medium);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table th {
+  background: var(--color-surface);
+  color: var(--text-color);
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  box-shadow: var(--border-soft-bottom);
+  font-size: 0.875rem;
+}
+
+.transactions-table td {
+  padding: 1rem;
+  box-shadow: var(--border-soft-bottom);
+  color: var(--text-color);
+  font-size: 0.875rem;
+}
+
+.transactions-table tbody tr:hover {
+  background: var(--color-surface);
+}
+
+.transaction-id {
+  font-family: monospace;
+  color: var(--text-color-secondary);
+}
+
+.type-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.type-sale {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.type-purchase {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-info);
+}
+
+.type-return {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.customer {
+  font-weight: 500;
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.items {
+  color: var(--text-color-secondary);
+}
+
+.date {
+  color: var(--text-color-secondary);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.status-pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-color-secondary);
+  border: none;
+  
+  &:hover {
+    background: var(--color-surface-hover);
+    color: var(--text-color);
+  }
+  
+  &.text-error {
+    color: var(--color-error);
+    
+    &:hover {
+      background: var(--color-error-light);
+    }
+  }
+}
+
+.btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .transactions {
+    padding: 1rem;
+  }
+
+  .transactions-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .transactions-table-container {
+    overflow-x: auto;
+  }
+
+  .transactions-table {
+    min-width: 800px;
+  }
+}

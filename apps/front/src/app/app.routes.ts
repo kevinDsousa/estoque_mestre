@@ -63,6 +63,11 @@ export const routes: Routes = [
     data: { breadcrumb: { label: 'Configurações', icon: 'pi pi-cog' } }
   },
   {
+    path: 'assinatura',
+    loadComponent: () => import('./features/subscription/subscription.component').then(m => m.SubscriptionComponent),
+    data: { breadcrumb: { label: 'Minha Assinatura', icon: 'pi pi-credit-card' } }
+  },
+  {
     path: 'not-found',
     loadComponent: () => import('./features/errors/not-found/not-found.component').then(m => m.NotFoundComponent),
     data: { breadcrumb: { label: 'Não Encontrado', icon: 'pi pi-exclamation-triangle' } }

@@ -1,4 +1,124 @@
 <div class="dashboard">
-  <h1>Dashboard</h1>
-  <p>Bem-vindo ao Estoque Mestre!</p>
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p class="dashboard-subtitle">Visão geral do seu estoque</p>
+  </div>
+
+  <!-- Estatísticas Principais -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-box"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.totalProducts }}</h3>
+        <p>Total de Produtos</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-tags"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.totalCategories }}</h3>
+        <p>Categorias</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-building"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.totalSuppliers }}</h3>
+        <p>Fornecedores</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.totalCustomers }}</h3>
+        <p>Clientes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards de Informações -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="card-header">
+        <h3>Produtos com Estoque Baixo</h3>
+        <i class="pi pi-exclamation-triangle warning-icon"></i>
+      </div>
+      <div class="card-content">
+        <div class="warning-number">{{ stats.lowStockProducts }}</div>
+        <p>Produtos precisam de reposição</p>
+        <button class="btn btn-primary">Ver Produtos</button>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-header">
+        <h3>Pedidos Pendentes</h3>
+        <i class="pi pi-clock pending-icon"></i>
+      </div>
+      <div class="card-content">
+        <div class="pending-number">{{ stats.pendingOrders }}</div>
+        <p>Pedidos aguardando processamento</p>
+        <button class="btn btn-primary">Ver Pedidos</button>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-header">
+        <h3>Receita Mensal</h3>
+        <i class="pi pi-chart-line revenue-icon"></i>
+      </div>
+      <div class="card-content">
+        <div class="revenue-number">R$ {{ stats.monthlyRevenue | number:'1.2-2' }}</div>
+        <p>Receita do mês atual</p>
+        <button class="btn btn-primary">Ver Relatórios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Atividades Recentes -->
+  <div class="recent-activities">
+    <div class="card-header">
+      <h3>Atividades Recentes</h3>
+    </div>
+    <div class="activities-list">
+      <div class="activity-item">
+        <div class="activity-icon">
+          <i class="pi pi-plus"></i>
+        </div>
+        <div class="activity-content">
+          <p><strong>Novo produto adicionado:</strong> Notebook Dell Inspiron 15</p>
+          <span class="activity-time">Há 2 horas</span>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon">
+          <i class="pi pi-shopping-cart"></i>
+        </div>
+        <div class="activity-content">
+          <p><strong>Venda realizada:</strong> Mouse sem fio Logitech</p>
+          <span class="activity-time">Há 4 horas</span>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon">
+          <i class="pi pi-truck"></i>
+        </div>
+        <div class="activity-content">
+          <p><strong>Entrada de estoque:</strong> 50 unidades de teclados</p>
+          <span class="activity-time">Ontem</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

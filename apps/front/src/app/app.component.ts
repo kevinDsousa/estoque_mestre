@@ -7,6 +7,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { HeaderComponent } from './core/components/header/header.component';
 import { SidebarComponent } from './core/components/sidebar/sidebar.component';
 import { FooterComponent } from './core/components/footer/footer.component';
+import { DialogComponent } from './core/components/dialog/dialog.component';
 
 // Core services
 import { ThemeService } from './core/services/theme.service';
@@ -23,7 +24,8 @@ import { AuthService } from './core/services/auth.service';
     RouterOutlet,
     HeaderComponent,
     SidebarComponent,
-    FooterComponent
+    FooterComponent,
+    DialogComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

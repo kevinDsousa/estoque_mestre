@@ -7,3 +7,4 @@ export { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 export { SidebarComponent } from './sidebar/sidebar.component';
 export { HeaderComponent } from './header/header.component';
 export { FooterComponent } from './footer/footer.component';
+export { DialogComponent } from './dialog/dialog.component';

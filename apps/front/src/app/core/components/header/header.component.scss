@@ -5,8 +5,8 @@
   right: 0;
   height: 64px;
   background-color: var(--color-header);
-  border-bottom: 1px solid var(--color-border);
-  z-index: var(--z-index-fixed);
+  box-shadow: var(--border-soft-bottom);
+  z-index: var(--z-index-header);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -31,7 +31,8 @@
   color: var(--text-color);
   cursor: pointer;
   border-radius: var(--border-radius-small);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: all var(--transition-fast);
+  box-shadow: none;
 }
 
 .sidebar-toggle:hover {
@@ -72,17 +73,19 @@
 .search-input {
   width: 100%;
   padding: 8px 12px 8px 36px;
-  border: 1px solid var(--color-border);
+  border: none;
+  box-shadow: var(--border-soft-enhanced);
   border-radius: var(--border-radius-medium);
   background-color: var(--color-background);
   color: var(--color-text);
   font-size: 14px;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  box-shadow: var(--border-soft-focus);
+  background-color: var(--color-surface);
 }
 
 .header-right {
@@ -107,8 +110,9 @@
   color: var(--text-color);
   cursor: pointer;
   border-radius: var(--border-radius-small);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: all var(--transition-fast);
   position: relative;
+  box-shadow: none;
 }
 
 .header-action-btn:hover {
@@ -151,7 +155,8 @@
   color: var(--color-text);
   cursor: pointer;
   border-radius: var(--border-radius-small);
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
+  box-shadow: none;
 }
 
 .user-menu-trigger:hover {
@@ -196,7 +201,7 @@
   right: 0;
   margin-top: 8px;
   background-color: var(--color-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--border-radius-medium);
   box-shadow: var(--shadow-medium);
   z-index: var(--z-index-dropdown);

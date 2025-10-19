@@ -1,0 +1,173 @@
+<div class="subscription">
+  <div class="subscription-header">
+    <div class="header-content">
+      <h1>Minha Assinatura</h1>
+      <p class="subtitle">Gerencie sua assinatura e planos</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Carregando informações da assinatura...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <i class="pi pi-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="loadSubscriptionData()">
+        <i class="pi pi-refresh"></i>
+        Tentar Novamente
+      </button>
+    </div>
+  } @else {
+    <!-- Assinatura Atual -->
+    @if (currentSubscription) {
+      <div class="current-subscription">
+        <div class="subscription-card">
+          <div class="card-header">
+            <div class="plan-info">
+              <h2>{{ planName }}</h2>
+              <p>{{ planDescription }}</p>
+            </div>
+            <div class="status-badges">
+              <span class="status-badge" [class]="getStatusClass(currentSubscription.status)">
+                {{ getStatusText(currentSubscription.status) }}
+              </span>
+              <span class="payment-badge" [class]="getPaymentStatusClass(currentSubscription.paymentStatus)">
+                {{ getPaymentStatusText(currentSubscription.paymentStatus) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="subscription-details">
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Valor</div>
+                <div class="detail-value">{{ formatPrice(currentSubscription.amount, currentSubscription.currency) }}</div>
+                <div class="detail-subtitle">{{ currentSubscription.interval === 'month' ? 'por mês' : 'por ano' }}</div>
+              </div>
+
+              <div class="detail-item">
+                <div class="detail-label">Período Atual</div>
+                <div class="detail-value">{{ formatDate(currentSubscription.currentPeriodStart) }}</div>
+                <div class="detail-subtitle">até {{ formatDate(currentSubscription.currentPeriodEnd) }}</div>
+              </div>
+
+              @if (currentSubscription.nextBillingDate) {
+                <div class="detail-item">
+                  <div class="detail-label">Próxima Cobrança</div>
+                  <div class="detail-value">{{ formatDate(currentSubscription.nextBillingDate) }}</div>
+                  <div class="detail-subtitle">{{ formatPrice(currentSubscription.amount, currentSubscription.currency) }}</div>
+                </div>
+              }
+
+              @if (isTrialActive()) {
+                <div class="detail-item trial-info">
+                  <div class="detail-label">Período de Teste</div>
+                  <div class="detail-value">{{ getTrialDaysRemaining() }} dias restantes</div>
+                  <div class="detail-subtitle">Termina em {{ formatDate(currentSubscription.trialEnd!) }}</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="subscription-actions">
+            <button class="btn btn-secondary" (click)="viewBillingHistory()">
+              <i class="pi pi-history"></i>
+              Histórico de Cobrança
+            </button>
+            <button class="btn btn-primary" (click)="upgradePlan()">
+              <i class="pi pi-arrow-up"></i>
+              Alterar Plano
+            </button>
+            @if (currentSubscription.status === 'ACTIVE' && !currentSubscription.cancelAtPeriodEnd) {
+              <button class="btn btn-danger" (click)="cancelSubscription()">
+                <i class="pi pi-times"></i>
+                Cancelar Assinatura
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- Sem Assinatura -->
+      <div class="no-subscription">
+        <div class="no-subscription-content">
+          <i class="pi pi-credit-card"></i>
+          <h3>Nenhuma Assinatura Ativa</h3>
+          <p>Você ainda não possui uma assinatura ativa. Escolha um plano para começar a usar todos os recursos do sistema.</p>
+          <button class="btn btn-primary" (click)="upgradePlan()">
+            <i class="pi pi-plus"></i>
+            Escolher Plano
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Planos Disponíveis -->
+    @if (availablePlans.length > 0) {
+      <div class="available-plans">
+        <h3>Planos Disponíveis</h3>
+        <div class="plans-grid">
+          @for (plan of availablePlans; track plan.id) {
+            <div class="plan-card" [class.popular]="plan.isPopular" [class.recommended]="plan.isRecommended">
+              @if (plan.isPopular) {
+                <div class="plan-badge popular">Mais Popular</div>
+              }
+              @if (plan.isRecommended) {
+                <div class="plan-badge recommended">Recomendado</div>
+              }
+              
+              <div class="plan-header">
+                <h4>{{ plan.name }}</h4>
+                <p>{{ plan.description }}</p>
+              </div>
+
+              <div class="plan-pricing">
+                <div class="price">
+                  <span class="currency">R$</span>
+                  <span class="amount">{{ formatPrice(plan.monthlyPrice) }}</span>
+                  <span class="period">/mês</span>
+                </div>
+                @if (plan.yearlyPrice) {
+                  <div class="yearly-price">
+                    R$ {{ formatPrice(plan.yearlyPrice) }}/ano
+                    <span class="discount">(Economize {{ calculateDiscount(plan.yearlyPrice, plan.monthlyPrice) }}%)</span>
+                  </div>
+                }
+              </div>
+
+              <div class="plan-features">
+                <ul>
+                  @for (feature of getPlanFeatures(plan.features); track feature) {
+                    <li>
+                      <i class="pi pi-check"></i>
+                      {{ feature }}
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <div class="plan-actions">
+                @if (plan.trialDays > 0) {
+                  <div class="trial-info">
+                    <i class="pi pi-clock"></i>
+                    {{ plan.trialDays }} dias grátis
+                  </div>
+                }
+                <button class="btn btn-outline" [class.btn-primary]="plan.isRecommended">
+                  @if (currentSubscription?.planId === plan.id) {
+                    Plano Atual
+                  } @else {
+                    Escolher Plano
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

@@ -294,7 +294,7 @@ export class LayoutService {
         id: 'products',
         label: 'Produtos',
         icon: 'pi pi-box',
-        route: '/products',
+        route: '/produtos',
         visible: true,
         permission: 'canManageProducts'
       },
@@ -302,7 +302,7 @@ export class LayoutService {
         id: 'categories',
         label: 'Categorias',
         icon: 'pi pi-tags',
-        route: '/categories',
+        route: '/categorias',
         visible: true,
         permission: 'canManageCategories'
       },
@@ -310,7 +310,7 @@ export class LayoutService {
         id: 'suppliers',
         label: 'Fornecedores',
         icon: 'pi pi-building',
-        route: '/suppliers',
+        route: '/fornecedores',
         visible: true,
         permission: 'canManageSuppliers'
       },
@@ -318,15 +318,15 @@ export class LayoutService {
         id: 'customers',
         label: 'Clientes',
         icon: 'pi pi-users',
-        route: '/customers',
+        route: '/clientes',
         visible: true,
         permission: 'canManageCustomers'
       },
       {
         id: 'transactions',
         label: 'Transações',
-        icon: 'pi pi-shopping-cart',
-        route: '/transactions',
+        icon: 'pi pi-credit-card',
+        route: '/transacoes',
         visible: true,
         permission: 'canManageInventory'
       },
@@ -334,15 +334,23 @@ export class LayoutService {
         id: 'reports',
         label: 'Relatórios',
         icon: 'pi pi-chart-bar',
-        route: '/reports',
+        route: '/relatorios',
         visible: true,
         permission: 'canViewReports'
+      },
+      {
+        id: 'subscription',
+        label: 'Minha Assinatura',
+        icon: 'pi pi-credit-card',
+        route: '/assinatura',
+        visible: true,
+        role: ['ADMIN', 'SUPER_ADMIN']
       },
       {
         id: 'settings',
         label: 'Configurações',
         icon: 'pi pi-cog',
-        route: '/settings',
+        route: '/configuracoes',
         visible: true,
         role: ['ADMIN', 'SUPER_ADMIN']
       }
