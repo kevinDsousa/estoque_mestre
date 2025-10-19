@@ -1,0 +1,44 @@
+<p-dialog 
+  [visible]="visible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '450px' }"
+  styleClass="estoque-confirm-dialog"
+  (onHide)="onHideHandler()">
+  
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <i [class]="getIconClass()" [ngClass]="getSeverityClass()"></i>
+      <span class="dialog-title">{{ data.title }}</span>
+    </div>
+  </ng-template>
+
+  <div class="dialog-content">
+    <p class="dialog-message">{{ data.message }}</p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button 
+        *ngIf="data.showCancel"
+        [label]="data.cancelText || 'Cancelar'"
+        icon="pi pi-times"
+        [text]="true"
+        severity="secondary"
+        (onClick)="onCancelHandler()"
+        [disabled]="loading || disabled">
+      </p-button>
+
+      <p-button 
+        [label]="data.confirmText || 'Confirmar'"
+        [icon]="getIconClass()"
+        [severity]="getButtonSeverity()"
+        (onClick)="onConfirmHandler()"
+        [loading]="loading"
+        [disabled]="disabled">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

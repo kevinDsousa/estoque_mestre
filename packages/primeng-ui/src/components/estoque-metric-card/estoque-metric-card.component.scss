@@ -1,0 +1,226 @@
+.estoque-metric-card {
+  position: relative;
+  transition: all 0.3s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--p-shadow-4);
+    }
+  }
+  
+  &.loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+
+:host ::ng-deep .metric-card {
+  .p-card-body {
+    padding: 1.5rem;
+  }
+  
+  .p-card-content {
+    padding: 0;
+  }
+}
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.metric-title {
+  flex: 1;
+  
+  h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--p-text-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.metric-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--p-text-color-secondary);
+}
+
+.metric-icon {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.metric-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.value-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+  line-height: 1;
+}
+
+.value-unit {
+  font-size: 0.875rem;
+  color: var(--p-text-color-secondary);
+  font-weight: 500;
+}
+
+.metric-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-change {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  
+  &.change-increase {
+    color: var(--p-green-600);
+  }
+  
+  &.change-decrease {
+    color: var(--p-red-600);
+  }
+  
+  &.change-neutral {
+    color: var(--p-text-color-secondary);
+  }
+}
+
+.metric-trend {
+  .trend-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    
+    &.trend-up {
+      background: var(--p-green-100);
+      color: var(--p-green-600);
+    }
+    
+    &.trend-down {
+      background: var(--p-red-100);
+      color: var(--p-red-600);
+    }
+    
+    &.trend-neutral {
+      background: var(--p-surface-200);
+      color: var(--p-text-color-secondary);
+    }
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--p-border-radius);
+  
+  .loading-spinner {
+    font-size: 1.5rem;
+    color: var(--p-primary-color);
+  }
+}
+
+/* Size Variations */
+.size-small {
+  .value-number {
+    font-size: 1.5rem;
+  }
+  
+  .metric-icon {
+    font-size: 1.25rem;
+  }
+  
+  :host ::ng-deep .metric-card .p-card-body {
+    padding: 1rem;
+  }
+}
+
+.size-large {
+  .value-number {
+    font-size: 2.5rem;
+  }
+  
+  .metric-icon {
+    font-size: 2rem;
+  }
+  
+  :host ::ng-deep .metric-card .p-card-body {
+    padding: 2rem;
+  }
+}
+
+/* Variant Styles */
+.variant-outlined {
+  :host ::ng-deep .metric-card {
+    border: 2px solid var(--p-surface-border);
+    background: transparent;
+  }
+}
+
+.variant-elevated {
+  :host ::ng-deep .metric-card {
+    box-shadow: var(--p-shadow-2);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .metric-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .metric-icon {
+    align-self: flex-end;
+  }
+  
+  .value-number {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .metric-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .value-number {
+    font-size: 1.5rem;
+  }
+}

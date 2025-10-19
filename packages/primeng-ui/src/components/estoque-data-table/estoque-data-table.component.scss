@@ -1,0 +1,261 @@
+.estoque-data-table {
+  width: 100%;
+  background: var(--p-surface-card);
+  border-radius: var(--p-border-radius);
+  overflow: hidden;
+  box-shadow: var(--p-shadow-1);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--p-surface-50);
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.table-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--p-text-color-secondary);
+  font-size: 0.875rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.global-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  
+  i {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--p-text-color-secondary);
+    z-index: 1;
+  }
+  
+  input {
+    padding-left: 2.5rem;
+    width: 300px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.estoque-table {
+  width: 100%;
+  
+  .p-datatable-thead > tr > th {
+    background: var(--p-surface-100);
+    color: var(--p-text-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--p-surface-border);
+    padding: 1rem 0.75rem;
+  }
+  
+  .p-datatable-tbody > tr > td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--p-surface-border);
+    vertical-align: middle;
+  }
+  
+  .p-datatable-tbody > tr:hover {
+    background: var(--p-primary-50);
+  }
+  
+  .p-datatable-tbody > tr.p-highlight {
+    background: var(--p-primary-100);
+  }
+}
+
+.column-filter {
+  .filter-input,
+  .filter-dropdown {
+    width: 100%;
+    min-width: 120px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-content,
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  
+  h4 {
+    margin: 0;
+    color: var(--p-text-color);
+    font-weight: 500;
+  }
+  
+  p {
+    margin: 0;
+    color: var(--p-text-color-secondary);
+    font-size: 0.875rem;
+  }
+}
+
+.loading-content {
+  p {
+    margin-top: 1rem;
+  }
+}
+
+/* Custom cell classes */
+.cell-number {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+.cell-currency {
+  text-align: right;
+  font-weight: 500;
+  color: var(--p-green-600);
+}
+
+.cell-date {
+  font-size: 0.875rem;
+  color: var(--p-text-color-secondary);
+}
+
+.cell-boolean {
+  text-align: center;
+  
+  &.true {
+    color: var(--p-green-600);
+    font-weight: 500;
+  }
+  
+  &.false {
+    color: var(--p-red-500);
+    font-weight: 500;
+  }
+}
+
+.cell-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--p-border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  
+  &.active {
+    background: var(--p-green-100);
+    color: var(--p-green-700);
+  }
+  
+  &.inactive {
+    background: var(--p-red-100);
+    color: var(--p-red-700);
+  }
+  
+  &.pending {
+    background: var(--p-orange-100);
+    color: var(--p-orange-700);
+  }
+}
+
+/* Paginator customization */
+:host ::ng-deep .p-paginator {
+  background: var(--p-surface-50);
+  border-top: 1px solid var(--p-surface-border);
+  padding: 1rem 1.5rem;
+  
+  .p-paginator-pages .p-paginator-page {
+    border-radius: var(--p-border-radius-sm);
+  }
+  
+  .p-paginator-pages .p-paginator-page.p-highlight {
+    background: var(--p-primary-color);
+    color: white;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .header-right {
+    justify-content: space-between;
+  }
+  
+  .global-filter input {
+    width: 100%;
+    min-width: 200px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .estoque-table {
+    min-width: 600px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-header {
+    padding: 1rem;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .table-title {
+    font-size: 1.125rem;
+  }
+  
+  .global-filter input {
+    min-width: 150px;
+  }
+}

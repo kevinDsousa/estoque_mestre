@@ -1,0 +1,112 @@
+<div class="estoque-layout">
+  <!-- Sidebar -->
+  <p-sidebar 
+    [(visible)]="sidebarVisible"
+    [modal]="false"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    position="left"
+    [style]="{ width: '280px' }"
+    styleClass="estoque-sidebar">
+    
+    <!-- Logo e Título -->
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="pi pi-box" style="font-size: 2rem; color: var(--p-primary-color);"></i>
+        <span class="logo-text">Estoque Mestre</span>
+      </div>
+    </div>
+
+    <!-- Menu de Navegação -->
+    <div class="sidebar-menu">
+      <p-menu 
+        [model]="menuItems"
+        styleClass="vertical-menu"
+        [style]="{ width: '100%', border: 'none' }">
+      </p-menu>
+    </div>
+
+    <!-- Footer do Sidebar -->
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <p-avatar 
+          [image]="userProfile?.avatar"
+          [label]="getInitials(userProfile?.name)"
+          shape="circle"
+          size="normal"
+          styleClass="user-avatar">
+        </p-avatar>
+        <div class="user-info">
+          <div class="user-name">{{ userProfile?.name }}</div>
+          <div class="user-role">{{ userProfile?.role }}</div>
+          <div class="user-company">{{ userProfile?.company }}</div>
+        </div>
+      </div>
+    </div>
+  </p-sidebar>
+
+  <!-- Main Content Area -->
+  <div class="main-content" [class.sidebar-collapsed]="!sidebarVisible">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-left">
+        <p-button 
+          icon="pi pi-bars"
+          [text]="true"
+          [rounded]="true"
+          size="small"
+          (onClick)="toggleSidebar()"
+          pTooltip="Alternar Menu"
+          tooltipPosition="bottom">
+        </p-button>
+        
+        <div class="breadcrumb">
+          <ng-content select="[slot=breadcrumb]"></ng-content>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Notificações -->
+        <p-button 
+          icon="pi pi-bell"
+          [text]="true"
+          [rounded]="true"
+          size="small"
+          (onClick)="onNotificationsClickHandler()"
+          pTooltip="Notificações"
+          tooltipPosition="bottom">
+          <p-badge 
+            *ngIf="notificationCount > 0"
+            [value]="notificationCount"
+            severity="danger"
+            size="small">
+          </p-badge>
+        </p-button>
+
+        <!-- Perfil do Usuário -->
+        <div class="user-menu" #userMenu>
+          <p-button 
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            (onClick)="toggleUserMenu()"
+            pTooltip="Menu do Usuário"
+            tooltipPosition="bottom">
+            <p-avatar 
+              [image]="userProfile?.avatar"
+              [label]="getInitials(userProfile?.name)"
+              shape="circle"
+              size="small">
+            </p-avatar>
+            <i class="pi pi-chevron-down ml-2"></i>
+          </p-button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <ng-content></ng-content>
+    </main>
+  </div>
+</div>

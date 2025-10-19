@@ -1,0 +1,50 @@
+<div [class]="getLoadingClass()">
+  <!-- Spinner Loading -->
+  <div class="loading-spinner" *ngIf="type === 'spinner'">
+    <p-progressSpinner 
+      [style]="{ width: getSpinnerSize(), height: getSpinnerSize() }"
+      strokeWidth="3"
+      fill="transparent"
+      animationDuration="1s">
+    </p-progressSpinner>
+    <p class="loading-message" *ngIf="showMessage && message">{{ message }}</p>
+  </div>
+
+  <!-- Skeleton Loading -->
+  <div class="loading-skeleton" *ngIf="type === 'skeleton'">
+    <div class="skeleton-content">
+      <p-skeleton 
+        [height]="getSkeletonHeight()" 
+        styleClass="mb-3">
+      </p-skeleton>
+      <p-skeleton 
+        [height]="getSkeletonHeight()" 
+        [width]="'75%'" 
+        styleClass="mb-3">
+      </p-skeleton>
+      <p-skeleton 
+        [height]="getSkeletonHeight()" 
+        [width]="'50%'">
+      </p-skeleton>
+    </div>
+    <p class="loading-message" *ngIf="showMessage && message">{{ message }}</p>
+  </div>
+
+  <!-- Dots Loading -->
+  <div class="loading-dots" *ngIf="type === 'dots'">
+    <div class="dots-container">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <p class="loading-message" *ngIf="showMessage && message">{{ message }}</p>
+  </div>
+
+  <!-- Pulse Loading -->
+  <div class="loading-pulse" *ngIf="type === 'pulse'">
+    <div class="pulse-container">
+      <div class="pulse-circle"></div>
+    </div>
+    <p class="loading-message" *ngIf="showMessage && message">{{ message }}</p>
+  </div>
+</div>

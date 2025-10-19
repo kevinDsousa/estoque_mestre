@@ -1,0 +1,304 @@
+<div class="estoque-product-form">
+  <!-- Progress Steps -->
+  <div class="form-progress">
+    <div class="progress-steps">
+      <div class="step" 
+           *ngFor="let step of [1,2,3,4]; let i = index"
+           [class.active]="currentStep === step"
+           [class.completed]="currentStep > step"
+           [class.valid]="isStepValid(step)"
+           (click)="goToStep(step)">
+        <div class="step-number">
+          <i class="pi pi-check" *ngIf="currentStep > step"></i>
+          <span *ngIf="currentStep <= step">{{ step }}</span>
+        </div>
+        <div class="step-label">
+          <span *ngIf="step === 1">Dados Básicos</span>
+          <span *ngIf="step === 2">Preços</span>
+          <span *ngIf="step === 3">Estoque</span>
+          <span *ngIf="step === 4">Imagens</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <form [formGroup]="productForm" (ngSubmit)="submitForm()">
+    
+    <!-- Step 1: Dados Básicos -->
+    <div class="form-step" *ngIf="currentStep === 1">
+      <p-card header="Dados Básicos do Produto" styleClass="form-card">
+        <div class="form-grid">
+          <!-- Nome do Produto -->
+          <div class="form-field full-width">
+            <label for="name">Nome do Produto *</label>
+            <input 
+              id="name"
+              type="text" 
+              pInputText 
+              formControlName="name"
+              placeholder="Digite o nome do produto"
+              [class.p-invalid]="isFieldInvalid('name')">
+            <small class="p-error" *ngIf="isFieldInvalid('name')">
+              {{ getFieldError('name') }}
+            </small>
+          </div>
+
+          <!-- SKU -->
+          <div class="form-field">
+            <label for="sku">SKU *</label>
+            <input 
+              id="sku"
+              type="text" 
+              pInputText 
+              formControlName="sku"
+              placeholder="Ex: PROD-001"
+              [class.p-invalid]="isFieldInvalid('sku')">
+            <small class="p-error" *ngIf="isFieldInvalid('sku')">
+              {{ getFieldError('sku') }}
+            </small>
+          </div>
+
+          <!-- Código de Barras -->
+          <div class="form-field">
+            <label for="barcode">Código de Barras</label>
+            <input 
+              id="barcode"
+              type="text" 
+              pInputText 
+              formControlName="barcode"
+              placeholder="Ex: 1234567890123">
+          </div>
+
+          <!-- Categoria -->
+          <div class="form-field full-width">
+            <label for="categoryId">Categoria *</label>
+            <p-dropdown 
+              id="categoryId"
+              formControlName="categoryId"
+              [options]="categories"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Selecione uma categoria"
+              [class.p-invalid]="isFieldInvalid('categoryId')"
+              [filter]="true"
+              filterBy="name">
+            </p-dropdown>
+            <small class="p-error" *ngIf="isFieldInvalid('categoryId')">
+              {{ getFieldError('categoryId') }}
+            </small>
+          </div>
+
+          <!-- Marca -->
+          <div class="form-field">
+            <label for="brand">Marca</label>
+            <input 
+              id="brand"
+              type="text" 
+              pInputText 
+              formControlName="brand"
+              placeholder="Ex: Toyota">
+          </div>
+
+          <!-- Modelo -->
+          <div class="form-field">
+            <label for="model">Modelo</label>
+            <input 
+              id="model"
+              type="text" 
+              pInputText 
+              formControlName="model"
+              placeholder="Ex: Corolla">
+          </div>
+
+          <!-- Descrição -->
+          <div class="form-field full-width">
+            <label for="description">Descrição</label>
+            <textarea 
+              id="description"
+              pInputTextarea 
+              formControlName="description"
+              placeholder="Descreva o produto..."
+              rows="3">
+            </textarea>
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Step 2: Preços -->
+    <div class="form-step" *ngIf="currentStep === 2">
+      <p-card header="Preços e Valores" styleClass="form-card">
+        <div class="form-grid">
+          <!-- Preço de Custo -->
+          <div class="form-field">
+            <label for="costPrice">Preço de Custo *</label>
+            <p-inputNumber 
+              id="costPrice"
+              formControlName="costPrice"
+              mode="currency"
+              currency="BRL"
+              locale="pt-BR"
+              placeholder="0,00"
+              [class.p-invalid]="isFieldInvalid('costPrice')">
+            </p-inputNumber>
+            <small class="p-error" *ngIf="isFieldInvalid('costPrice')">
+              {{ getFieldError('costPrice') }}
+            </small>
+          </div>
+
+          <!-- Preço de Venda -->
+          <div class="form-field">
+            <label for="sellingPrice">Preço de Venda *</label>
+            <p-inputNumber 
+              id="sellingPrice"
+              formControlName="sellingPrice"
+              mode="currency"
+              currency="BRL"
+              locale="pt-BR"
+              placeholder="0,00"
+              [class.p-invalid]="isFieldInvalid('sellingPrice')">
+            </p-inputNumber>
+            <small class="p-error" *ngIf="isFieldInvalid('sellingPrice')">
+              {{ getFieldError('sellingPrice') }}
+            </small>
+          </div>
+
+          <!-- Margem de Lucro (calculada) -->
+          <div class="form-field">
+            <label>Margem de Lucro</label>
+            <div class="calculated-field">
+              {{ calculateProfitMargin() }}%
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Step 3: Estoque -->
+    <div class="form-step" *ngIf="currentStep === 3">
+      <p-card header="Controle de Estoque" styleClass="form-card">
+        <div class="form-grid">
+          <!-- Estoque Atual -->
+          <div class="form-field">
+            <label for="currentStock">Estoque Atual *</label>
+            <p-inputNumber 
+              id="currentStock"
+              formControlName="currentStock"
+              placeholder="0"
+              [min]="0"
+              [class.p-invalid]="isFieldInvalid('currentStock')">
+            </p-inputNumber>
+            <small class="p-error" *ngIf="isFieldInvalid('currentStock')">
+              {{ getFieldError('currentStock') }}
+            </small>
+          </div>
+
+          <!-- Estoque Mínimo -->
+          <div class="form-field">
+            <label for="minStock">Estoque Mínimo *</label>
+            <p-inputNumber 
+              id="minStock"
+              formControlName="minStock"
+              placeholder="0"
+              [min]="0"
+              [class.p-invalid]="isFieldInvalid('minStock')">
+            </p-inputNumber>
+            <small class="p-error" *ngIf="isFieldInvalid('minStock')">
+              {{ getFieldError('minStock') }}
+            </small>
+          </div>
+
+          <!-- Estoque Máximo -->
+          <div class="form-field">
+            <label for="maxStock">Estoque Máximo</label>
+            <p-inputNumber 
+              id="maxStock"
+              formControlName="maxStock"
+              placeholder="Opcional"
+              [min]="0">
+            </p-inputNumber>
+          </div>
+
+          <!-- Status -->
+          <div class="form-field full-width">
+            <div class="checkbox-group">
+              <p-checkbox 
+                formControlName="isActive"
+                [binary]="true"
+                inputId="isActive">
+                <label for="isActive">Produto Ativo</label>
+              </p-checkbox>
+              
+              <p-checkbox 
+                formControlName="isLowStock"
+                [binary]="true"
+                inputId="isLowStock">
+                <label for="isLowStock">Estoque Baixo</label>
+              </p-checkbox>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Step 4: Imagens -->
+    <div class="form-step" *ngIf="currentStep === 4 && showImages">
+      <p-card header="Imagens do Produto" styleClass="form-card">
+        <div class="image-upload-section">
+          <estoque-image-upload
+            [maxFiles]="5"
+            [maxFileSize]="10485760"
+            [acceptedTypes]="['image/jpeg', 'image/png', 'image/webp']"
+            [disabled]="disabled"
+            (onUpload)="onImageUploadHandler($event)">
+          </estoque-image-upload>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <div class="action-buttons">
+        <p-button 
+          label="Cancelar"
+          icon="pi pi-times"
+          [text]="true"
+          severity="secondary"
+          (onClick)="cancelForm()"
+          [disabled]="loading">
+        </p-button>
+
+        <div class="step-buttons">
+          <p-button 
+            label="Anterior"
+            icon="pi pi-chevron-left"
+            [text]="true"
+            severity="secondary"
+            (onClick)="previousStep()"
+            [disabled]="!canGoPrevious || loading">
+          </p-button>
+
+          <p-button 
+            *ngIf="currentStep < totalSteps"
+            label="Próximo"
+            icon="pi pi-chevron-right"
+            iconPos="right"
+            (onClick)="nextStep()"
+            [disabled]="!canGoNext || loading">
+          </p-button>
+
+          <p-button 
+            *ngIf="currentStep === totalSteps"
+            label="Salvar Produto"
+            icon="pi pi-check"
+            iconPos="right"
+            (onClick)="submitForm()"
+            [disabled]="!canSubmit || loading"
+            [loading]="loading">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,48 @@
+<p-card 
+  [class]="getCardClass()"
+  styleClass="metric-card"
+  (click)="onCardClick()">
+  
+  <div class="metric-content">
+    <!-- Header -->
+    <div class="metric-header">
+      <div class="metric-title">
+        <h3>{{ metric.title }}</h3>
+        <p class="metric-subtitle" *ngIf="metric.subtitle">{{ metric.subtitle }}</p>
+      </div>
+      
+      <div class="metric-icon" *ngIf="metric.icon">
+        <i [class]="metric.icon" [style.color]="getIconColor()"></i>
+      </div>
+    </div>
+
+    <!-- Value -->
+    <div class="metric-value">
+      <span class="value-number">{{ formatValue() }}</span>
+      <span class="value-unit" *ngIf="metric.unit">{{ metric.unit }}</span>
+    </div>
+
+    <!-- Change and Trend -->
+    <div class="metric-footer" *ngIf="showChange || showTrend">
+      <!-- Change Percentage -->
+      <div class="metric-change" *ngIf="showChange && metric.change !== undefined" [class]="getChangeClass()">
+        <i [class]="getChangeIcon()"></i>
+        <span>{{ getChangeText() }}</span>
+      </div>
+
+      <!-- Trend Indicator -->
+      <div class="metric-trend" *ngIf="showTrend && metric.trend && metric.trend.length > 1">
+        <div class="trend-indicator" [class]="'trend-' + getTrendDirection()">
+          <i class="pi pi-chart-line"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="metric.loading">
+    <div class="loading-spinner">
+      <i class="pi pi-spin pi-spinner"></i>
+    </div>
+  </div>
+</p-card>

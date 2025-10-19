@@ -1,0 +1,206 @@
+<div class="estoque-data-table">
+  <!-- Table Header with Filters -->
+  <div class="table-header" *ngIf="showHeader">
+    <div class="header-left">
+      <h3 class="table-title">Dados</h3>
+      <div class="selection-info" *ngIf="hasSelection && selectedCount > 0">
+        <p-badge [value]="selectedCount" severity="info"></p-badge>
+        <span>{{ selectedCount }} item(s) selecionado(s)</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <!-- Global Filter -->
+      <div class="global-filter" *ngIf="showGlobalFilter">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          [placeholder]="globalFilterPlaceholder"
+          [value]="globalFilterValue"
+          (input)="onGlobalFilter($event)">
+      </div>
+
+      <!-- Clear Filters Button -->
+      <p-button 
+        icon="pi pi-filter-slash"
+        [text]="true"
+        [rounded]="true"
+        size="small"
+        (onClick)="clearFilters()"
+        pTooltip="Limpar Filtros"
+        tooltipPosition="bottom"
+        *ngIf="hasFilters || globalFilterValue">
+      </p-button>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container">
+    <p-table 
+      [value]="data"
+      [loading]="loading"
+      [paginator]="paginator"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      [sortField]="sortField"
+      [sortOrder]="sortOrder"
+      [selectionMode]="selectionMode"
+      [(selection)]="selectedItems"
+      [responsive]="responsive"
+      [stripedRows]="stripedRows"
+      [hoverableRows]="hoverableRows"
+      [emptyMessage]="emptyMessage"
+      (onRowSelect)="onRowSelectHandler($event)"
+      (onRowUnselect)="onRowUnselectHandler($event)"
+      (onSelectionChange)="onSelectionChangeHandler($event)"
+      (onSort)="onSortHandler($event)"
+      (onRowClick)="onRowClickHandler($event)"
+      (onRowDblClick)="onRowDoubleClickHandler($event)"
+      styleClass="estoque-table"
+      [trackBy]="trackByIndex">
+
+      <!-- Selection Column -->
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngIf="hasSelection" style="width: 3rem">
+            <p-checkbox 
+              [modelValue]="isAllSelected"
+              [binary]="true"
+              [partialSelected]="isPartiallySelected"
+              (onChange)="selectAll()">
+            </p-checkbox>
+          </th>
+          <th *ngFor="let col of columns; trackBy: trackByField" 
+              [pSortableColumn]="col.sortable ? col.field : null"
+              [style.width]="col.width"
+              [style.text-align]="col.align || 'left'">
+            {{ col.header }}
+            <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
+          </th>
+          <th *ngIf="hasActions" style="width: 8rem">Ações</th>
+        </tr>
+        
+        <!-- Filter Row -->
+        <tr *ngIf="hasFilters">
+          <td *ngIf="hasSelection"></td>
+          <td *ngFor="let col of columns; trackBy: trackByField">
+            <div class="column-filter" *ngIf="col.filterable">
+              <!-- Text Filter -->
+              <input 
+                *ngIf="col.filterType === 'text' || !col.filterType"
+                type="text" 
+                pInputText 
+                [placeholder]="'Filtrar ' + col.header"
+                [value]="columnFilters[col.field] || ''"
+                (input)="onColumnFilter(col.field, $event.target.value)"
+                class="filter-input">
+              
+              <!-- Dropdown Filter -->
+              <p-dropdown 
+                *ngIf="col.filterType === 'dropdown'"
+                [options]="col.filterOptions"
+                [placeholder]="'Filtrar ' + col.header"
+                [value]="columnFilters[col.field]"
+                (onChange)="onColumnFilter(col.field, $event.value)"
+                [showClear]="true"
+                class="filter-dropdown">
+              </p-dropdown>
+              
+              <!-- Boolean Filter -->
+              <p-dropdown 
+                *ngIf="col.filterType === 'boolean'"
+                [options]="[
+                  { label: 'Todos', value: null },
+                  { label: 'Sim', value: true },
+                  { label: 'Não', value: false }
+                ]"
+                [placeholder]="'Filtrar ' + col.header"
+                [value]="columnFilters[col.field]"
+                (onChange)="onColumnFilter(col.field, $event.value)"
+                [showClear]="true"
+                class="filter-dropdown">
+              </p-dropdown>
+            </div>
+          </td>
+          <td *ngIf="hasActions"></td>
+        </tr>
+      </ng-template>
+
+      <!-- Data Rows -->
+      <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+        <tr [pSelectableRow]="rowData" [pSelectableRowIndex]="rowIndex">
+          <!-- Selection Cell -->
+          <td *ngIf="hasSelection">
+            <p-checkbox 
+              [modelValue]="selectedItems?.includes(rowData)"
+              [binary]="true">
+            </p-checkbox>
+          </td>
+          
+          <!-- Data Cells -->
+          <td *ngFor="let col of columns; trackBy: trackByField"
+              [style.text-align]="col.align || 'left'">
+            
+            <!-- Custom Template -->
+            <ng-container *ngIf="col.template; else defaultCell">
+              <ng-container *ngTemplateOutlet="col.template; context: { $implicit: rowData, rowIndex: rowIndex, col: col }"></ng-container>
+            </ng-container>
+            
+            <!-- Default Cell -->
+            <ng-template #defaultCell>
+              <span [class]="getCellClass(col, rowData)">
+                {{ getColumnValue(rowData, col) }}
+              </span>
+            </ng-template>
+          </td>
+          
+          <!-- Actions Cell -->
+          <td *ngIf="hasActions">
+            <div class="action-buttons">
+              <p-button 
+                *ngFor="let action of actions; trackBy: trackByField"
+                [icon]="action.icon"
+                [text]="true"
+                [rounded]="true"
+                size="small"
+                [severity]="action.severity || 'secondary'"
+                [disabled]="isActionDisabled(action, rowData)"
+                (onClick)="executeAction(action, rowData)"
+                [pTooltip]="action.label"
+                tooltipPosition="top"
+                *ngIf="isActionVisible(action, rowData)">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty State -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="columns.length + (hasSelection ? 1 : 0) + (hasActions ? 1 : 0)" class="empty-state">
+            <div class="empty-content">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: var(--p-text-color-secondary);"></i>
+              <h4>{{ emptyMessage }}</h4>
+              <p *ngIf="globalFilterValue || hasActiveFilters()">Tente ajustar os filtros para encontrar o que procura.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Loading State -->
+      <ng-template pTemplate="loadingbody">
+        <tr>
+          <td [attr.colspan]="columns.length + (hasSelection ? 1 : 0) + (hasActions ? 1 : 0)" class="loading-state">
+            <div class="loading-content">
+              <p-progressSpinner [style]="{ width: '50px', height: '50px' }"></p-progressSpinner>
+              <p>Carregando dados...</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

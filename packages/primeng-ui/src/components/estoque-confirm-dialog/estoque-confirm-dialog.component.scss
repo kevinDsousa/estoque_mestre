@@ -1,0 +1,74 @@
+:host ::ng-deep .estoque-confirm-dialog {
+  .p-dialog-header {
+    background: var(--p-surface-50);
+    border-bottom: 1px solid var(--p-surface-border);
+    padding: 1.5rem;
+  }
+
+  .p-dialog-content {
+    padding: 1.5rem;
+  }
+
+  .p-dialog-footer {
+    background: var(--p-surface-50);
+    border-top: 1px solid var(--p-surface-border);
+    padding: 1rem 1.5rem;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dialog-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.dialog-content {
+  .dialog-message {
+    margin: 0;
+    color: var(--p-text-color);
+    line-height: 1.5;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.severity-info {
+  color: var(--p-blue-500);
+}
+
+.severity-warn {
+  color: var(--p-orange-500);
+}
+
+.severity-error {
+  color: var(--p-red-500);
+}
+
+.severity-success {
+  color: var(--p-green-500);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  :host ::ng-deep .estoque-confirm-dialog {
+    .p-dialog {
+      width: 95vw !important;
+      margin: 0 auto;
+    }
+  }
+  
+  .dialog-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

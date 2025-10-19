@@ -1,0 +1,111 @@
+<div class="estoque-chart" [class.fullscreen]="isFullscreen">
+  <p-card [header]="title" styleClass="chart-card">
+    
+    <!-- Chart Header -->
+    <div class="chart-header" *ngIf="title || showPeriodSelector || showExportButton || showFullscreenButton">
+      <div class="header-left">
+        <h3 class="chart-title" *ngIf="title">{{ title }}</h3>
+        <p class="chart-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+      </div>
+      
+      <div class="header-right">
+        <!-- Period Selector -->
+        <div class="period-selector" *ngIf="showPeriodSelector && periods.length > 0">
+          <p-dropdown 
+            [options]="periods"
+            [(ngModel)]="selectedPeriod"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Período"
+            (onChange)="onPeriodChangeHandler($event.value)"
+            styleClass="period-dropdown">
+          </p-dropdown>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="chart-actions">
+          <p-button 
+            icon="pi pi-download"
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            (onClick)="onExportHandler('png')"
+            pTooltip="Exportar como PNG"
+            tooltipPosition="bottom"
+            *ngIf="showExportButton">
+          </p-button>
+
+          <p-button 
+            icon="pi pi-expand"
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            (onClick)="onFullscreenHandler()"
+            [pTooltip]="isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'"
+            tooltipPosition="bottom"
+            *ngIf="showFullscreenButton">
+          </p-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Content -->
+    <div class="chart-content">
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="loading">
+        <div class="loading-skeleton">
+          <p-skeleton height="300px" styleClass="mb-3"></p-skeleton>
+          <div class="loading-text">
+            <p-skeleton width="200px" height="20px" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="150px" height="16px"></p-skeleton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && isEmpty">
+        <div class="empty-content">
+          <i class="pi pi-chart-line" style="font-size: 4rem; color: var(--p-text-color-secondary);"></i>
+          <h4>Nenhum dado disponível</h4>
+          <p>Não há dados para exibir no gráfico no período selecionado.</p>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-container" *ngIf="!loading && hasData && !isEmpty">
+        <p-chart 
+          [type]="type"
+          [data]="data"
+          [options]="chartOptions"
+          [style]="{ width: chartWidth, height: chartHeight }"
+          (onDataSelect)="onDataClickHandler($event)">
+        </p-chart>
+      </div>
+    </div>
+
+    <!-- Chart Footer -->
+    <div class="chart-footer" *ngIf="hasData && !isEmpty">
+      <div class="chart-legend" *ngIf="data.datasets.length > 1">
+        <div class="legend-item" *ngFor="let dataset of data.datasets; let i = index">
+          <div class="legend-color" [style.background-color]="getDatasetColor(dataset, i)"></div>
+          <span class="legend-label">{{ dataset.label }}</span>
+        </div>
+      </div>
+      
+      <div class="chart-stats" *ngIf="type === 'line' || type === 'bar'">
+        <div class="stat-item">
+          <span class="stat-label">Total:</span>
+          <span class="stat-value">{{ getTotalValue() | number:'1.0-2' }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Média:</span>
+          <span class="stat-value">{{ getAverageValue() | number:'1.0-2' }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Máximo:</span>
+          <span class="stat-value">{{ getMaxValue() | number:'1.0-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </p-card>
+</div>

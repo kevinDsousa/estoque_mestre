@@ -1,0 +1,158 @@
+.estoque-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  
+  &.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+  }
+  
+  &.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--p-surface-0);
+    z-index: 9999;
+  }
+}
+
+.loading-spinner,
+.loading-skeleton,
+.loading-dots,
+.loading-pulse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-message {
+  margin: 0;
+  color: var(--p-text-color-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.skeleton-content {
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Dots Animation */
+.dots-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--p-primary-color);
+  animation: dotPulse 1.4s infinite ease-in-out both;
+  
+  &:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+  
+  &:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pulse Animation */
+.pulse-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--p-primary-color);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
+
+/* Size Variations */
+.size-small {
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .pulse-circle {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .loading-message {
+    font-size: 0.75rem;
+  }
+}
+
+.size-large {
+  .dot {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .pulse-circle {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .loading-message {
+    font-size: 1rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .estoque-loading {
+    padding: 1rem;
+  }
+  
+  .skeleton-content {
+    max-width: 250px;
+  }
+}

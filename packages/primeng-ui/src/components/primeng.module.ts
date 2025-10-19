@@ -89,6 +89,14 @@ import { StyleClassModule } from 'primeng/styleclass';
 
 // Custom Components
 import { EstoqueToastComponent } from '../components/estoque-toast/estoque-toast.component';
+import { EstoqueLayoutComponent } from '../components/estoque-layout/estoque-layout.component';
+import { EstoqueImageUploadComponent } from '../components/estoque-image-upload/estoque-image-upload.component';
+import { EstoqueProductFormComponent } from '../components/estoque-product-form/estoque-product-form.component';
+import { EstoqueDataTableComponent } from '../components/estoque-data-table/estoque-data-table.component';
+import { EstoqueChartComponent } from '../components/estoque-chart/estoque-chart.component';
+import { EstoqueConfirmDialogComponent } from '../components/estoque-confirm-dialog/estoque-confirm-dialog.component';
+import { EstoqueLoadingComponent } from '../components/estoque-loading/estoque-loading.component';
+import { EstoqueMetricCardComponent } from '../components/estoque-metric-card/estoque-metric-card.component';
 
 /**
  * Módulo principal do PrimeNG para Estoque Mestre
@@ -291,6 +299,14 @@ import { EstoqueToastComponent } from '../components/estoque-toast/estoque-toast
     
     // Custom Components
     EstoqueToastComponent,
+    EstoqueLayoutComponent,
+    EstoqueImageUploadComponent,
+    EstoqueProductFormComponent,
+    EstoqueDataTableComponent,
+    EstoqueChartComponent,
+    EstoqueConfirmDialogComponent,
+    EstoqueLoadingComponent,
+    EstoqueMetricCardComponent,
   ],
   providers: [
     // ConfirmationService será fornecido pelo módulo que usar

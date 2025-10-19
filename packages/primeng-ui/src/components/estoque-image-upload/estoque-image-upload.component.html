@@ -1,0 +1,162 @@
+<div class="estoque-image-upload">
+  <!-- Upload Area -->
+  <div class="upload-area" 
+       [class.drag-over]="isDragOver"
+       [class.disabled]="disabled"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)">
+    
+    <p-fileUpload 
+      #fileUpload
+      mode="basic"
+      [multiple]="true"
+      [accept]="acceptedTypes.join(',')"
+      [maxFileSize]="maxFileSize"
+      [disabled]="disabled || isUploading"
+      [auto]="false"
+      [showUploadButton]="false"
+      [showCancelButton]="false"
+      (onSelect)="onFileSelect($event)"
+      (onError)="onUploadError($event)"
+      styleClass="hidden-file-upload">
+    </p-fileUpload>
+
+    <div class="upload-content" (click)="fileUpload.choose()">
+      <i class="pi pi-cloud-upload" style="font-size: 3rem; color: var(--p-primary-color);"></i>
+      <h3>Arraste e solte suas imagens aqui</h3>
+      <p>ou clique para selecionar arquivos</p>
+      <div class="upload-info">
+        <small>
+          Máximo {{ maxFiles }} arquivo(s), até {{ formatFileSize(maxFileSize) }}
+        </small>
+        <small>
+          Formatos: {{ getAcceptedFormats() }}
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Preview Grid -->
+  <div class="image-grid" *ngIf="images.length > 0">
+    <div class="image-item" 
+         *ngFor="let image of images; let i = index; trackBy: trackByImageId"
+         [class.primary]="image.isPrimary"
+         [class.uploading]="image.uploading"
+         [class.error]="image.error">
+      
+      <!-- Image Preview -->
+      <div class="image-preview">
+        <p-image 
+          [src]="image.url"
+          [alt]="image.file.name"
+          [preview]="true"
+          [style]="{ width: '100%', height: '100%' }">
+        </p-image>
+        
+        <!-- Upload Progress -->
+        <div class="upload-progress" *ngIf="image.uploading">
+          <p-progressBar 
+            [value]="uploadProgress"
+            [showValue]="false"
+            styleClass="upload-progress-bar">
+          </p-progressBar>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" *ngIf="image.error">
+          <p-message 
+            [severity]="'error'"
+            [text]="image.error"
+            [closable]="false">
+          </p-message>
+        </div>
+      </div>
+
+      <!-- Image Controls -->
+      <div class="image-controls">
+        <!-- Primary Badge -->
+        <div class="primary-badge" *ngIf="image.isPrimary">
+          <i class="pi pi-star-fill"></i>
+          <span>Principal</span>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="control-buttons">
+          <!-- Set as Primary -->
+          <p-button 
+            icon="pi pi-star"
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            [disabled]="image.isPrimary || image.uploading"
+            (onClick)="setAsPrimary(image.id)"
+            pTooltip="Definir como principal"
+            tooltipPosition="top">
+          </p-button>
+
+          <!-- Move Up -->
+          <p-button 
+            icon="pi pi-chevron-up"
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            [disabled]="i === 0 || image.uploading"
+            (onClick)="moveImage(image.id, 'up')"
+            pTooltip="Mover para cima"
+            tooltipPosition="top">
+          </p-button>
+
+          <!-- Move Down -->
+          <p-button 
+            icon="pi pi-chevron-down"
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            [disabled]="i === images.length - 1 || image.uploading"
+            (onClick)="moveImage(image.id, 'down')"
+            pTooltip="Mover para baixo"
+            tooltipPosition="top">
+          </p-button>
+
+          <!-- Remove -->
+          <p-button 
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            size="small"
+            [disabled]="image.uploading"
+            (onClick)="removeImage(image.id)"
+            pTooltip="Remover imagem"
+            tooltipPosition="top">
+          </p-button>
+        </div>
+      </div>
+
+      <!-- Drag Handle -->
+      <div class="drag-handle" *ngIf="!image.uploading">
+        <i class="pi pi-grip-vertical"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Summary -->
+  <div class="upload-summary" *ngIf="images.length > 0">
+    <div class="summary-stats">
+      <span>{{ images.length }} de {{ maxFiles }} imagens</span>
+      <span *ngIf="primaryImage">• Imagem principal definida</span>
+      <span *ngIf="uploadingCount > 0">• {{ uploadingCount }} enviando...</span>
+    </div>
+    
+    <div class="summary-actions">
+      <p-button 
+        label="Limpar Todas"
+        icon="pi pi-trash"
+        [text]="true"
+        size="small"
+        [disabled]="isUploading"
+        (onClick)="clearAllImages()">
+      </p-button>
+    </div>
+  </div>
+</div>
