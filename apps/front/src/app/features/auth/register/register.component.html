@@ -1,4 +1,246 @@
 <div class="register">
-  <h1>Registro</h1>
-  <p>Página de registro em desenvolvimento</p>
+  <div class="register-container">
+    <div class="register-header">
+      <div class="logo">
+        <i class="pi pi-box"></i>
+        <span>Estoque Mestre</span>
+      </div>
+      <h1>Criar Conta</h1>
+      <p>Preencha os dados abaixo para criar sua conta</p>
+    </div>
+
+    <form class="register-form" (ngSubmit)="onSubmit()">
+      <!-- Informações Pessoais -->
+      <div class="form-section">
+        <h3>
+          <i class="pi pi-user"></i>
+          Informações Pessoais
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">Nome *</label>
+            <input 
+              type="text" 
+              id="firstName"
+              [(ngModel)]="form.firstName"
+              name="firstName"
+              class="form-control"
+              [class.error]="hasError('firstName')"
+              placeholder="Digite seu nome">
+            @if (hasError('firstName')) {
+              <span class="error-message">{{ getError('firstName') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Sobrenome *</label>
+            <input 
+              type="text" 
+              id="lastName"
+              [(ngModel)]="form.lastName"
+              name="lastName"
+              class="form-control"
+              [class.error]="hasError('lastName')"
+              placeholder="Digite seu sobrenome">
+            @if (hasError('lastName')) {
+              <span class="error-message">{{ getError('lastName') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="form.email"
+              name="email"
+              class="form-control"
+              [class.error]="hasError('email')"
+              placeholder="seu@email.com">
+            @if (hasError('email')) {
+              <span class="error-message">{{ getError('email') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Telefone *</label>
+            <input 
+              type="tel" 
+              id="phone"
+              [(ngModel)]="form.phone"
+              name="phone"
+              class="form-control"
+              [class.error]="hasError('phone')"
+              placeholder="(11) 99999-9999">
+            @if (hasError('phone')) {
+              <span class="error-message">{{ getError('phone') }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações da Empresa -->
+      <div class="form-section">
+        <h3>
+          <i class="pi pi-building"></i>
+          Informações da Empresa
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="company">Nome da Empresa *</label>
+            <input 
+              type="text" 
+              id="company"
+              [(ngModel)]="form.company"
+              name="company"
+              class="form-control"
+              [class.error]="hasError('company')"
+              placeholder="Nome da sua empresa">
+            @if (hasError('company')) {
+              <span class="error-message">{{ getError('company') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="position">Cargo *</label>
+            <input 
+              type="text" 
+              id="position"
+              [(ngModel)]="form.position"
+              name="position"
+              class="form-control"
+              [class.error]="hasError('position')"
+              placeholder="Seu cargo na empresa">
+            @if (hasError('position')) {
+              <span class="error-message">{{ getError('position') }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Segurança -->
+      <div class="form-section">
+        <h3>
+          <i class="pi pi-lock"></i>
+          Segurança
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Senha *</label>
+            <div class="password-input">
+              <input 
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                [(ngModel)]="form.password"
+                name="password"
+                class="form-control"
+                [class.error]="hasError('password')"
+                placeholder="Mínimo 6 caracteres">
+              <button 
+                type="button" 
+                class="password-toggle"
+                (click)="togglePasswordVisibility()">
+                <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              </button>
+            </div>
+            @if (hasError('password')) {
+              <span class="error-message">{{ getError('password') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar Senha *</label>
+            <div class="password-input">
+              <input 
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                [(ngModel)]="form.confirmPassword"
+                name="confirmPassword"
+                class="form-control"
+                [class.error]="hasError('confirmPassword')"
+                placeholder="Confirme sua senha">
+              <button 
+                type="button" 
+                class="password-toggle"
+                (click)="toggleConfirmPasswordVisibility()">
+                <i [class]="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              </button>
+            </div>
+            @if (hasError('confirmPassword')) {
+              <span class="error-message">{{ getError('confirmPassword') }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Termos e Condições -->
+      <div class="form-section">
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="form.acceptTerms"
+              name="acceptTerms"
+              [class.error]="hasError('acceptTerms')">
+            <span class="checkmark"></span>
+            <span class="checkbox-text">
+              Eu aceito os <a href="#" class="link">Termos de Uso</a> e <a href="#" class="link">Política de Privacidade</a> *
+            </span>
+          </label>
+          @if (hasError('acceptTerms')) {
+            <span class="error-message">{{ getError('acceptTerms') }}</span>
+          }
+        </div>
+
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="form.acceptNewsletter"
+              name="acceptNewsletter">
+            <span class="checkmark"></span>
+            <span class="checkbox-text">
+              Quero receber novidades e ofertas por email
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Botões -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-ghost"
+          (click)="goToLogin()">
+          <i class="pi pi-arrow-left"></i>
+          Voltar ao Login
+        </button>
+        
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isLoading">
+          @if (isLoading) {
+            <i class="pi pi-spin pi-spinner"></i>
+            Criando Conta...
+          } @else {
+            <i class="pi pi-user-plus"></i>
+            Criar Conta
+          }
+        </button>
+      </div>
+    </form>
+
+    <div class="register-footer">
+      <p>
+        Já tem uma conta? 
+        <a routerLink="/login" class="link">Faça login aqui</a>
+      </p>
+    </div>
+  </div>
 </div>

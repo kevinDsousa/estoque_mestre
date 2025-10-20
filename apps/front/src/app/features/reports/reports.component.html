@@ -47,10 +47,12 @@
             <div class="stat-content">
               <div class="stat-value">{{ formatNumber(quickStats.inventory.totalProducts) }}</div>
               <div class="stat-label">Produtos em Estoque</div>
-              <div class="stat-alert" *ngIf="quickStats.inventory.lowStock > 0">
-                <i class="pi pi-exclamation-triangle"></i>
-                {{ quickStats.inventory.lowStock }} com estoque baixo
-              </div>
+              @if (quickStats.inventory.lowStock > 0) {
+                <div class="stat-alert">
+                  <i class="pi pi-exclamation-triangle"></i>
+                  {{ quickStats.inventory.lowStock }} com estoque baixo
+                </div>
+              }
             </div>
           </div>
 

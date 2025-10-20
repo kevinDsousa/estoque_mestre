@@ -15,14 +15,15 @@
       <div class="sidebar-section">
         <h3>Seções</h3>
         <nav class="settings-nav">
-          <button 
-            *ngFor="let section of settingsSections"
-            class="nav-item"
-            [class.active]="activeSection === section.id"
-            (click)="setActiveSection(section.id)">
-            <i [class]="section.icon"></i>
-            <span>{{ section.title }}</span>
-          </button>
+          @for (section of settingsSections; track section.id) {
+            <button 
+              class="nav-item"
+              [class.active]="activeSection === section.id"
+              (click)="setActiveSection(section.id)">
+              <i [class]="section.icon"></i>
+              <span>{{ section.title }}</span>
+            </button>
+          }
         </nav>
       </div>
     </div>

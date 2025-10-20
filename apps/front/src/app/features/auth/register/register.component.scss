@@ -1,8 +1,306 @@
 .register {
-  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-background) 0%, var(--color-surface) 100%);
+  padding: var(--spacing-xl);
 }
 
-h1 {
-  color: var(--color-primary);
-  margin-bottom: 16px;
+.register-container {
+  width: 100%;
+  max-width: 800px;
+  background: var(--color-background);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-heavy);
+  overflow: hidden;
+}
+
+.register-header {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--color-background-hover);
+  border-bottom: 1px solid var(--border-color);
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-primary);
+    
+    i {
+      font-size: var(--font-size-xxl);
+    }
+  }
+  
+  h1 {
+    color: var(--text-color);
+    font-size: var(--font-size-xxxl);
+    font-weight: 600;
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+  
+  p {
+    color: var(--text-color-secondary);
+    font-size: var(--font-size-base);
+    margin: 0;
+  }
+}
+
+.register-form {
+  padding: var(--spacing-xl);
+}
+
+.form-section {
+  margin-bottom: var(--spacing-xl);
+  
+  &:last-of-type {
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--text-color);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0 0 var(--spacing-lg) 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    
+    i {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  
+  label {
+    font-weight: 600;
+    color: var(--text-color-secondary);
+    font-size: var(--font-size-sm);
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    background: var(--color-background);
+    color: var(--text-color);
+    font-size: var(--font-size-base);
+    transition: all 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+    
+    &::placeholder {
+      color: var(--text-color-secondary);
+    }
+    
+    &.error {
+      border-color: var(--color-error);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+  
+  .error-message {
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+  }
+}
+
+.password-input {
+  position: relative;
+  
+  .form-control {
+    padding-right: 3rem;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--border-radius-small);
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: var(--text-color);
+    }
+    
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+.checkbox-group {
+  margin-bottom: var(--spacing-md);
+  
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      margin-top: 2px;
+      
+      &.error {
+        accent-color: var(--color-error);
+      }
+    }
+    
+    .checkbox-text {
+      color: var(--text-color);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+    }
+    
+    .link {
+      color: var(--color-primary);
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .error-message {
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+    margin-left: 1.5rem;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+.register-footer {
+  text-align: center;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--color-background-hover);
+  border-top: 1px solid var(--border-color);
+  
+  p {
+    color: var(--text-color-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    
+    .link {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 500;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Botões
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.75rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  i {
+    font-size: 1rem;
+  }
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  
+  &:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+  
+  i {
+    color: white;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-color);
+  border-color: var(--border-color);
+  
+  &:hover:not(:disabled) {
+    background: var(--color-background-hover);
+    border-color: var(--color-primary);
+  }
+  
+  i {
+    color: var(--text-color);
+  }
 }

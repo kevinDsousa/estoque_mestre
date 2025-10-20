@@ -49,18 +49,22 @@
           [(ngModel)]="selectedStatus" 
           (change)="filterProducts()"
           class="form-control status-select">
-          <option *ngFor="let status of statusOptions" [value]="status.value">
-            {{ status.label }}
-          </option>
+          @for (status of statusOptions; track status.value) {
+            <option [value]="status.value">
+              {{ status.label }}
+            </option>
+          }
         </select>
 
         <select 
           [(ngModel)]="selectedStockFilter" 
           (change)="filterProducts()"
           class="form-control stock-select">
-          <option *ngFor="let stock of stockFilterOptions" [value]="stock.value">
-            {{ stock.label }}
-          </option>
+          @for (stock of stockFilterOptions; track stock.value) {
+            <option [value]="stock.value">
+              {{ stock.label }}
+            </option>
+          }
         </select>
       </div>
     </div>
@@ -88,10 +92,12 @@
 
   <!-- Visualização de Produtos -->
   <!-- Tabela -->
-  <div *ngIf="currentView === 'table'" class="products-table-container">
+  @if (currentView === 'table') {
+    <div class="products-table-container">
     <table class="products-table">
       <thead>
         <tr>
+          <th>Imagem</th>
           <th>Nome</th>
           <th>Categoria</th>
           <th>SKU</th>
@@ -103,7 +109,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let product of getPaginatedProducts()">
+        @for (product of getPaginatedProducts(); track product.id) {
+          <tr>
+          <td class="product-image">
+            @if (product.images && product.images.length > 0) {
+              <img [src]="product.images[0]" [alt]="product.name" class="product-thumbnail" (error)="onImageError($event)">
+            } @else {
+              <div class="no-image-thumbnail">
+                <i class="pi pi-image"></i>
+              </div>
+            }
+          </td>
           <td class="product-name">
             <strong>{{ product.name }}</strong>
           </td>
@@ -131,15 +147,19 @@
               Excluir
             </button>
           </td>
-        </tr>
+          </tr>
+        }
       </tbody>
     </table>
-  </div>
+    </div>
+  }
 
   <!-- Cards -->
-  <div *ngIf="currentView === 'cards'" class="products-cards-container">
-    <div class="products-grid">
-      <div *ngFor="let product of getPaginatedProducts()" class="product-card">
+  @if (currentView === 'cards') {
+    <div class="products-cards-container">
+      <div class="products-grid">
+        @for (product of getPaginatedProducts(); track product.id) {
+          <div class="product-card">
         <div class="card-header">
           <h3 class="product-name">{{ product.name }}</h3>
           <span class="status-badge" [class]="getStatusClass(product.status)">
@@ -148,6 +168,24 @@
         </div>
         
         <div class="card-body">
+          <!-- Product Images -->
+          @if (product.images && product.images.length > 0) {
+            <div class="product-images">
+              <div class="image-gallery">
+                @for (image of product.images; track $index) {
+                  <div class="image-item">
+                    <img [src]="image" [alt]="product.name" (error)="onImageError($event)">
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="no-image">
+              <i class="pi pi-image"></i>
+              <span>Sem imagem</span>
+            </div>
+          }
+          
           <div class="product-info">
             <div class="info-item">
               <span class="label">Categoria:</span>
@@ -184,15 +222,19 @@
             Excluir
           </button>
         </div>
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 
   <!-- Estado vazio -->
-  <div *ngIf="filteredProducts.length === 0" class="no-results">
-    <i class="pi pi-search"></i>
-    <p>Nenhum produto encontrado</p>
-  </div>
+  @if (filteredProducts.length === 0) {
+    <div class="no-results">
+      <i class="pi pi-search"></i>
+      <p>Nenhum produto encontrado</p>
+    </div>
+  }
 
   <!-- Paginação -->
   <app-pagination 
@@ -202,7 +244,8 @@
   </app-pagination>
 
   <!-- Modal de Adicionar/Editar Produto -->
-  <div *ngIf="showAddModal" class="modal-overlay" (click)="closeModal()">
+  @if (showAddModal) {
+    <div class="modal-overlay" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ editingProduct ? 'Editar Produto' : 'Adicionar Produto' }}</h3>
@@ -228,9 +271,11 @@
               name="category"
               class="form-control">
               <option value="">Selecione uma categoria</option>
-              <option *ngFor="let category of categories" [value]="category">
-                {{ category }}
-              </option>
+              @for (category of categories; track category) {
+                <option [value]="category">
+                  {{ category }}
+                </option>
+              }
             </select>
           </div>
           <div class="form-row">
@@ -263,6 +308,36 @@
               class="form-control"
               placeholder="Quantidade em estoque">
           </div>
+          
+          <div class="form-group">
+            <label>Imagens do Produto (máximo 5)</label>
+            <div class="image-upload-area">
+              <input 
+                type="file" 
+                id="imageUpload" 
+                multiple 
+                accept="image/*" 
+                (change)="onImageSelect($event)"
+                style="display: none;">
+              <label for="imageUpload" class="upload-button">
+                <i class="pi pi-cloud-upload"></i>
+                <span>Selecionar Imagens</span>
+              </label>
+              
+              @if (editingProduct!.images && editingProduct!.images.length > 0) {
+                <div class="image-preview-list">
+                  @for (image of editingProduct!.images; track $index) {
+                    <div class="image-preview-item">
+                      <img [src]="image" [alt]="'Imagem ' + ($index + 1)">
+                      <button type="button" class="remove-image" (click)="removeImage($index)">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -272,5 +347,6 @@
         </button>
       </div>
     </div>
-  </div>
+    </div>
+  }
 </div>

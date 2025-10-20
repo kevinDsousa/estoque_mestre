@@ -17,6 +17,7 @@ interface Product {
   sku: string;
   status: 'active' | 'inactive' | 'low-stock';
   lastUpdated: Date;
+  images: string[];
 }
 
 @Component({
@@ -115,7 +116,11 @@ export class ProductsComponent implements OnInit {
         stock: 15,
         sku: 'DELL-INS15-001',
         status: 'active',
-        lastUpdated: new Date('2024-01-15')
+        lastUpdated: new Date('2024-01-15'),
+        images: [
+          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
+          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop'
+        ]
       },
       {
         id: 2,
@@ -125,7 +130,10 @@ export class ProductsComponent implements OnInit {
         stock: 3,
         sku: 'LOG-MX3-002',
         status: 'low-stock',
-        lastUpdated: new Date('2024-01-14')
+        lastUpdated: new Date('2024-01-14'),
+        images: [
+          'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400'
+        ]
       },
       {
         id: 3,
@@ -135,7 +143,12 @@ export class ProductsComponent implements OnInit {
         stock: 25,
         sku: 'MECH-KB-003',
         status: 'active',
-        lastUpdated: new Date('2024-01-13')
+        lastUpdated: new Date('2024-01-13'),
+        images: [
+          'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400',
+          'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop&sat=-50'
+        ]
       },
       {
         id: 4,
@@ -145,7 +158,10 @@ export class ProductsComponent implements OnInit {
         stock: 8,
         sku: 'MON-24FHD-004',
         status: 'active',
-        lastUpdated: new Date('2024-01-12')
+        lastUpdated: new Date('2024-01-12'),
+        images: [
+          'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400'
+        ]
       },
       {
         id: 5,
@@ -155,7 +171,8 @@ export class ProductsComponent implements OnInit {
         stock: 0,
         sku: 'SAM-GAL-005',
         status: 'inactive',
-        lastUpdated: new Date('2024-01-11')
+        lastUpdated: new Date('2024-01-11'),
+        images: []
       },
       {
         id: 6,
@@ -165,7 +182,10 @@ export class ProductsComponent implements OnInit {
         stock: 3,
         sku: 'SAM-A54-001',
         status: 'low-stock',
-        lastUpdated: new Date('2024-01-12')
+        lastUpdated: new Date('2024-01-12'),
+        images: [
+          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400'
+        ]
       },
       {
         id: 7,
@@ -175,7 +195,8 @@ export class ProductsComponent implements OnInit {
         stock: 0,
         sku: 'LG-24-001',
         status: 'inactive',
-        lastUpdated: new Date('2024-01-08')
+        lastUpdated: new Date('2024-01-08'),
+        images: []
       },
       {
         id: 8,
@@ -185,7 +206,8 @@ export class ProductsComponent implements OnInit {
         stock: 5,
         sku: 'TEC-RGB-001',
         status: 'low-stock',
-        lastUpdated: new Date('2024-01-14')
+        lastUpdated: new Date('2024-01-14'),
+        images: []
       }
     ];
     this.filteredProducts = [...this.products];
@@ -309,7 +331,17 @@ export class ProductsComponent implements OnInit {
   }
 
   addProduct(): void {
-    this.editingProduct = null;
+    this.editingProduct = {
+      id: 0,
+      name: '',
+      category: '',
+      price: 0,
+      stock: 0,
+      sku: '',
+      status: 'active',
+      lastUpdated: new Date(),
+      images: []
+    };
     this.showAddModal = true;
   }
 
@@ -337,5 +369,46 @@ export class ProductsComponent implements OnInit {
   closeModal(): void {
     this.showAddModal = false;
     this.editingProduct = null;
+  }
+
+  onImageSelect(event: any): void {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const maxFiles = 5;
+      const currentImages = this.editingProduct?.images || [];
+      const remainingSlots = maxFiles - currentImages.length;
+      const filesToAdd = Math.min(files.length, remainingSlots);
+      
+      for (let i = 0; i < filesToAdd; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            if (this.editingProduct) {
+              if (!this.editingProduct.images) {
+                this.editingProduct.images = [];
+              }
+              this.editingProduct.images.push(e.target.result);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+    // Limpa o input para permitir selecionar o mesmo arquivo novamente
+    event.target.value = '';
+  }
+
+  removeImage(index: number): void {
+    if (this.editingProduct && this.editingProduct.images) {
+      this.editingProduct.images.splice(index, 1);
+    }
+  }
+
+  onImageError(event: any): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.style.display = 'none';
+    }
   }
 }

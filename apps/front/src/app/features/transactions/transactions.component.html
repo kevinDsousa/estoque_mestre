@@ -34,9 +34,11 @@
         [(ngModel)]="selectedStatus" 
         (change)="filterTransactions()"
         class="form-control status-select">
-        <option *ngFor="let status of statusOptions" [value]="status.value">
-          {{ status.label }}
-        </option>
+        @for (status of statusOptions; track status.value) {
+          <option [value]="status.value">
+            {{ status.label }}
+          </option>
+        }
       </select>
 
       <button 
@@ -54,9 +56,11 @@
         [(ngModel)]="selectedDateRange" 
         (change)="filterTransactions()"
         class="form-control date-select">
-        <option *ngFor="let date of dateRangeOptions" [value]="date.value">
-          {{ date.label }}
-        </option>
+        @for (date of dateRangeOptions; track date.value) {
+          <option [value]="date.value">
+            {{ date.label }}
+          </option>
+        }
       </select>
 
       <div class="amount-range">
@@ -78,7 +82,8 @@
   </div>
 
   <!-- Table View -->
-  <div *ngIf="currentView === 'table'" class="transactions-table-container">
+  @if (currentView === 'table') {
+    <div class="transactions-table-container">
     <table class="transactions-table">
       <thead>
         <tr>
@@ -93,7 +98,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let transaction of getPaginatedTransactions()">
+        @for (transaction of getPaginatedTransactions(); track transaction.id) {
+          <tr>
           <td class="transaction-id">#{{ transaction.id }}</td>
           <td>
             <span class="type-badge" [class]="'type-' + transaction.type">
@@ -123,15 +129,19 @@
               Cancelar
             </button>
           </td>
-        </tr>
+          </tr>
+        }
       </tbody>
     </table>
-  </div>
+    </div>
+  }
 
   <!-- Cards View -->
-  <div *ngIf="currentView === 'cards'" class="transactions-cards-container">
-    <div class="transactions-grid">
-      <div *ngFor="let transaction of getPaginatedTransactions()" class="transaction-card">
+  @if (currentView === 'cards') {
+    <div class="transactions-cards-container">
+      <div class="transactions-grid">
+        @for (transaction of getPaginatedTransactions(); track transaction.id) {
+          <div class="transaction-card">
         <div class="card-header">
           <div class="transaction-info">
             <h3 class="transaction-id">#{{ transaction.id }}</h3>
@@ -177,14 +187,18 @@
             Cancelar
           </button>
         </div>
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 
-  <div *ngIf="filteredTransactions.length === 0" class="no-results">
-    <i class="pi pi-search"></i>
-    <p>Nenhuma transação encontrada</p>
-  </div>
+  @if (filteredTransactions.length === 0) {
+    <div class="no-results">
+      <i class="pi pi-search"></i>
+      <p>Nenhuma transação encontrada</p>
+    </div>
+  }
 
   <!-- Paginação -->
   <app-pagination 
