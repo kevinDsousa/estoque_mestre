@@ -127,8 +127,8 @@
           <td class="sku">{{ product.sku }}</td>
           <td class="price">R$ {{ product.price | number:'1.2-2' }}</td>
           <td class="stock">
-            <span [class]="product.stock < 5 ? 'low-stock' : ''">
-              {{ product.stock }}
+            <span [class]="(product.stock || 0) < 5 ? 'low-stock' : ''">
+              {{ product.stock || 0 }}
             </span>
           </td>
           <td>
@@ -201,8 +201,8 @@
             </div>
             <div class="info-item">
               <span class="label">Estoque:</span>
-              <span class="value stock" [class]="product.stock < 5 ? 'low-stock' : ''">
-                {{ product.stock }}
+              <span class="value stock" [class]="(product.stock || 0) < 5 ? 'low-stock' : ''">
+                {{ product.stock || 0 }}
               </span>
             </div>
             <div class="info-item">

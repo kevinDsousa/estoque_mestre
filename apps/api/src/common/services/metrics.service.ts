@@ -221,6 +221,9 @@ export class MetricsService implements OnModuleInit {
   });
 
   onModuleInit() {
+    // Temporarily disabled to debug startup issue
+    console.log('[DEBUG] MetricsService onModuleInit - disabled for debugging');
+    /*
     // Collect default metrics (CPU, memory, etc.)
     collectDefaultMetrics({
       register: this.register,
@@ -234,6 +237,7 @@ export class MetricsService implements OnModuleInit {
     setInterval(() => {
       this.updateSystemMetrics();
     }, 30000);
+    */
   }
 
   private updateSystemMetrics() {

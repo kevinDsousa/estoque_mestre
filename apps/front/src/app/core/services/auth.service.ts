@@ -87,8 +87,34 @@ export class AuthService {
    * Login user
    */
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.apiService.post<LoginResponse>('auth/login', credentials)
+    return this.apiService.post<any>('auth/login', credentials)
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const loginResponse: LoginResponse = {
+            user: {
+              id: response.user.id,
+              email: response.user.email,
+              role: response.user.role,
+              status: 'ACTIVE',
+              companyId: response.user.companyId,
+              profile: {
+                firstName: response.user.firstName,
+                lastName: response.user.lastName,
+                email: response.user.email,
+                phone: response.user.phone || '',
+                avatar: response.user.avatar || ''
+              },
+              permissions: this.getUserPermissions(response.user.role),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            accessToken: response.access_token,
+            refreshToken: response.refresh_token,
+            expiresIn: 3600 // 1 hour default
+          };
+          return loginResponse;
+        }),
         tap(response => {
           this.setAuthState(response);
           this.storageService.setItem(this.TOKEN_KEY, response.accessToken);
@@ -103,10 +129,74 @@ export class AuthService {
   }
 
   /**
+   * Get user permissions based on role
+   */
+  private getUserPermissions(role: string): any {
+    const permissions: any = {
+      canCreateUsers: false,
+      canDeleteUsers: false,
+      canManageProducts: false,
+      canManageCategories: false,
+      canManageInventory: false,
+      canViewReports: false,
+      canManageCompany: false,
+      canManageSuppliers: false,
+      canManageCustomers: false,
+    };
+
+    switch (role) {
+      case 'SUPER_ADMIN':
+      case 'ADMIN':
+        Object.keys(permissions).forEach(key => {
+          permissions[key] = true;
+        });
+        break;
+      case 'MANAGER':
+        permissions.canManageProducts = true;
+        permissions.canManageCategories = true;
+        permissions.canManageInventory = true;
+        permissions.canViewReports = true;
+        permissions.canManageSuppliers = true;
+        permissions.canManageCustomers = true;
+        break;
+      case 'EMPLOYEE':
+        permissions.canManageProducts = true;
+        permissions.canManageInventory = true;
+        permissions.canViewReports = true;
+        break;
+    }
+
+    return permissions;
+  }
+
+  /**
    * Register new user
    */
-  register(userData: CreateUserRequest): Observable<UserResponse> {
-    return this.apiService.post<UserResponse>('auth/register', userData);
+  register(userData: RegisterRequest): Observable<UserResponse> {
+    return this.apiService.post<any>('auth/register', userData)
+      .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const userResponse: UserResponse = {
+            id: response.user.id,
+            email: response.user.email,
+            role: response.user.role,
+            status: 'ACTIVE',
+            companyId: response.user.companyId,
+            profile: {
+              firstName: response.user.firstName,
+              lastName: response.user.lastName,
+              email: response.user.email,
+              phone: response.user.phone || '',
+              avatar: response.user.avatar || ''
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          return userResponse;
+        }),
+        catchError(error => throwError(() => error))
+      );
   }
 
   /**
@@ -130,7 +220,7 @@ export class AuthService {
   /**
    * Refresh access token
    */
-  refreshToken(): Observable<LoginResponse> {
+  refreshToken(): Observable<RefreshTokenResponse> {
     const refreshToken = this.storageService.getItem(this.REFRESH_TOKEN_KEY);
     
     if (!refreshToken) {
@@ -138,13 +228,34 @@ export class AuthService {
       return throwError(() => new Error('No refresh token available'));
     }
 
-    return this.apiService.post<LoginResponse>('auth/refresh', { refreshToken })
+    return this.apiService.post<any>('auth/refresh', { refreshToken })
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const refreshResponse: RefreshTokenResponse = {
+            accessToken: response.access_token,
+            refreshToken: response.refresh_token || refreshToken,
+            expiresIn: 3600 // 1 hour default
+          };
+          return refreshResponse;
+        }),
         tap(response => {
-          this.setAuthState(response);
+          // Update stored tokens
           this.storageService.setItem(this.TOKEN_KEY, response.accessToken);
-          this.storageService.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-          this.storageService.setItem(this.USER_KEY, JSON.stringify(response.user));
+          if (response.refreshToken) {
+            this.storageService.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+          }
+          
+          // Update auth state
+          const currentState = this.authStateSubject.value;
+          if (currentState.isAuthenticated) {
+            this.authStateSubject.next({
+              ...currentState,
+              token: response.accessToken,
+              refreshToken: response.refreshToken,
+              expiresAt: Date.now() + (response.expiresIn * 1000)
+            });
+          }
         }),
         catchError(error => {
           this.logout();
@@ -171,19 +282,48 @@ export class AuthService {
    * Confirm password reset
    */
   confirmPasswordReset(confirmData: ConfirmResetPasswordRequest): Observable<void> {
-    return this.apiService.post<void>('auth/reset-password', confirmData);
+    return this.apiService.post<void>('auth/reset-password', {
+      token: confirmData.token,
+      newPassword: confirmData.newPassword
+    });
   }
 
   /**
    * Update user profile
    */
   updateProfile(profileData: UpdateProfileRequest): Observable<UserResponse> {
-    return this.apiService.patch<UserResponse>('auth/profile', profileData)
+    return this.apiService.patch<any>('auth/profile', profileData)
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const userResponse: UserResponse = {
+            id: response.id,
+            email: response.email,
+            role: response.role,
+            status: response.status,
+            companyId: response.companyId,
+            profile: {
+              firstName: response.firstName,
+              lastName: response.lastName,
+              email: response.email,
+              phone: response.phone || '',
+              avatar: response.avatar || ''
+            },
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt
+          };
+          return userResponse;
+        }),
         tap(user => {
           const currentState = this.authStateSubject.value;
           if (currentState.user) {
-            const updatedUser = { ...currentState.user, ...user };
+            const updatedUser = { 
+              ...currentState.user, 
+              profile: {
+                ...currentState.user.profile,
+                ...user.profile
+              }
+            };
             this.authStateSubject.next({
               ...currentState,
               user: updatedUser
@@ -198,7 +338,29 @@ export class AuthService {
    * Get current user
    */
   getCurrentUser(): Observable<UserResponse> {
-    return this.apiService.get<UserResponse>('auth/me');
+    return this.apiService.get<any>('auth/profile')
+      .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const userResponse: UserResponse = {
+            id: response.id,
+            email: response.email,
+            role: response.role,
+            status: response.status,
+            companyId: response.companyId,
+            profile: {
+              firstName: response.firstName,
+              lastName: response.lastName,
+              email: response.email,
+              phone: response.phone || '',
+              avatar: response.avatar || ''
+            },
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt
+          };
+          return userResponse;
+        })
+      );
   }
 
   /**

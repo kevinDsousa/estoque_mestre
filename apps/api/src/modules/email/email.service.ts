@@ -75,14 +75,16 @@ export class EmailService {
       },
     });
 
-    // Verify connection configuration
-    this.transporter.verify((error, success) => {
-      if (error) {
-        this.logger.error('Email transporter verification failed:', error);
-      } else {
-        this.logger.log('Email transporter is ready to send messages');
-      }
-    });
+    // Verify connection configuration asynchronously to avoid blocking startup
+    // setImmediate(() => {
+    //   this.transporter.verify((error, success) => {
+    //     if (error) {
+    //       this.logger.error('Email transporter verification failed:', error);
+    //     } else {
+    //       this.logger.log('Email transporter is ready to send messages');
+    //     }
+    //   });
+    // });
   }
 
   private async sendEmail(to: string, subject: string, html: string, text?: string): Promise<boolean> {

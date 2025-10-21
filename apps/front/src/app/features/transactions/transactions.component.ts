@@ -1,284 +1,471 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
+import { TransactionService, TransactionFilters } from '../../core/services/transaction.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
-import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 import { ViewToggleComponent } from '../../core/components';
+import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 
 interface Transaction {
-  id: number;
-  type: 'sale' | 'purchase' | 'return';
-  customer: string;
-  amount: number;
-  date: Date;
-  status: 'completed' | 'pending' | 'cancelled';
-  items: number;
+  id: string;
+  type: 'SALE' | 'PURCHASE' | 'RETURN' | 'ADJUSTMENT' | 'TRANSFER';
+  status: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED';
+  customerId?: string;
+  supplierId?: string;
+  totalAmount: number;
+  discountAmount?: number;
+  taxAmount?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  customer?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  supplier?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  items: Array<{
+    id: string;
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }>;
+  paymentMethod?: string;
+  paymentStatus?: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentDate?: string;
+  // Propriedades para templates
+  amount?: number;
+  date?: string;
 }
 
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectComponent, PaginationComponent, ViewToggleComponent],
+  imports: [CommonModule, FormsModule, MultiSelectComponent, ViewToggleComponent, PaginationComponent],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss'
 })
-export class TransactionsComponent implements OnInit {
+export class TransactionsComponent implements OnInit, OnDestroy {
   transactions: Transaction[] = [];
   filteredTransactions: Transaction[] = [];
+  loading = false;
   searchTerm = '';
   selectedTypes: string[] = [];
   selectedStatus = '';
+  selectedPaymentStatus = '';
+  dateFrom = '';
+  dateTo = '';
   currentView: ViewMode = 'table';
-
-  constructor(
-    private dialogService: DialogService,
-    private viewPreferencesService: ViewPreferencesService
-  ) {}
+  
+  // Propriedades faltando para templates
   selectedDateRange = '';
   minAmount = '';
   maxAmount = '';
-  
-  // Pagination
-  paginationConfig: PaginationConfig = {
-    currentPage: 1,
-    totalItems: 0,
-    itemsPerPage: 10
-  };
-
-  // Filter options
-  typeOptions = [
-    { value: 'sale', label: 'Venda' },
-    { value: 'purchase', label: 'Compra' },
-    { value: 'return', label: 'Devolução' }
-  ];
-
-  statusOptions = [
-    { value: '', label: 'Todos os status' },
-    { value: 'completed', label: 'Concluída' },
-    { value: 'pending', label: 'Pendente' },
-    { value: 'cancelled', label: 'Cancelada' }
-  ];
-
   dateRangeOptions = [
-    { value: '', label: 'Todas as datas' },
     { value: 'today', label: 'Hoje' },
     { value: 'week', label: 'Esta semana' },
     { value: 'month', label: 'Este mês' },
     { value: 'quarter', label: 'Este trimestre' },
     { value: 'year', label: 'Este ano' }
   ];
+  
+  // Paginação
+  paginationConfig: PaginationConfig = {
+    currentPage: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  };
+
+  statusOptions = [
+    { value: '', label: 'Todos os status' },
+    { value: 'PENDING', label: 'Pendente' },
+    { value: 'COMPLETED', label: 'Concluída' },
+    { value: 'CANCELLED', label: 'Cancelada' },
+    { value: 'REFUNDED', label: 'Reembolsada' }
+  ];
+
+  paymentStatusOptions = [
+    { value: '', label: 'Todos os pagamentos' },
+    { value: 'PENDING', label: 'Pendente' },
+    { value: 'PAID', label: 'Pago' },
+    { value: 'FAILED', label: 'Falhou' },
+    { value: 'REFUNDED', label: 'Reembolsado' }
+  ];
 
   // Multi-select options
   typeMultiOptions: MultiSelectOption[] = [];
 
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private dialogService: DialogService,
+    private viewPreferencesService: ViewPreferencesService,
+    private transactionService: TransactionService
+  ) {}
+
   ngOnInit(): void {
-    this.transactions = [
-      {
-        id: 1,
-        type: 'sale',
-        customer: 'Ana Silva',
-        amount: 1250.50,
-        date: new Date('2024-01-15'),
-        status: 'completed',
-        items: 3
-      },
-      {
-        id: 2,
-        type: 'purchase',
-        customer: 'Tech Solutions Ltda',
-        amount: 2500.00,
-        date: new Date('2024-01-14'),
-        status: 'completed',
-        items: 5
-      },
-      {
-        id: 3,
-        type: 'sale',
-        customer: 'Carlos Santos',
-        amount: 890.75,
-        date: new Date('2024-01-13'),
-        status: 'pending',
-        items: 2
-      },
-      {
-        id: 4,
-        type: 'return',
-        customer: 'Maria Costa',
-        amount: 299.90,
-        date: new Date('2024-01-12'),
-        status: 'completed',
-        items: 1
-      }
-    ];
-    this.filteredTransactions = [...this.transactions];
     this.initializeTypeOptions();
-    this.updatePagination();
+    this.loadTransactions();
     // Carrega a preferência salva
     this.currentView = this.viewPreferencesService.getViewPreference('transactions');
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private initializeTypeOptions(): void {
-    this.typeMultiOptions = this.typeOptions.map(type => ({
-      value: type.value,
-      label: type.label,
-      selected: false
-    }));
+    this.typeMultiOptions = [
+      { value: 'SALE', label: 'Venda', selected: false },
+      { value: 'PURCHASE', label: 'Compra', selected: false },
+      { value: 'RETURN', label: 'Devolução', selected: false },
+      { value: 'ADJUSTMENT', label: 'Ajuste', selected: false },
+      { value: 'TRANSFER', label: 'Transferência', selected: false }
+    ];
   }
 
-  private updatePagination(): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      totalItems: this.filteredTransactions.length,
-      currentPage: 1
+  private loadTransactions(): void {
+    this.loading = true;
+    
+    const filters: TransactionFilters = {
+      query: this.searchTerm,
+      type: this.selectedTypes.length > 0 ? this.selectedTypes[0] : undefined,
+      status: this.selectedStatus || undefined,
+      // paymentStatus: this.selectedPaymentStatus || undefined, // Removido - não existe no TransactionFilters
+      // dateFrom: this.dateFrom || undefined, // Removido - não existe no TransactionFilters
+      // dateTo: this.dateTo || undefined, // Removido - não existe no TransactionFilters
+      page: this.paginationConfig.currentPage,
+      limit: this.paginationConfig.itemsPerPage,
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
     };
-  }
 
-  getTypeText(type: string): string {
-    switch (type) {
-      case 'sale': return 'Venda';
-      case 'purchase': return 'Compra';
-      case 'return': return 'Devolução';
-      default: return type;
-    }
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'completed': return 'status-completed';
-      case 'pending': return 'status-pending';
-      case 'cancelled': return 'status-cancelled';
-      default: return '';
-    }
-  }
-
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'completed': return 'Concluída';
-      case 'pending': return 'Pendente';
-      case 'cancelled': return 'Cancelada';
-      default: return status;
-    }
+    this.transactionService.getTransactions(filters)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (response) => {
+          // Mapear dados do backend para interface local
+          this.transactions = response.data.map(transaction => ({
+            ...transaction,
+            amount: transaction.totalAmount,
+            date: transaction.createdAt
+          }));
+          this.paginationConfig.totalItems = response.pagination.total;
+          this.filteredTransactions = [...this.transactions];
+          this.updatePagination();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar transações:', error);
+          this.dialogService.showError('Erro ao carregar transações. Tente novamente.');
+        }
+      });
   }
 
   filterTransactions(): void {
     this.filteredTransactions = this.transactions.filter(transaction => {
-      // Filtro por busca (cliente)
-      const matchesSearch = transaction.customer.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesSearch = transaction.id.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                           (transaction.customer?.name && transaction.customer.name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+                           (transaction.supplier?.name && transaction.supplier.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
       
-      // Filtro por tipos (múltiplos)
-      const matchesType = this.selectedTypes.length === 0 || 
-                         this.selectedTypes.includes(transaction.type);
-      
-      // Filtro por status
+      const matchesType = this.selectedTypes.length === 0 || this.selectedTypes.includes(transaction.type);
       const matchesStatus = !this.selectedStatus || transaction.status === this.selectedStatus;
+      const matchesPaymentStatus = !this.selectedPaymentStatus || transaction.paymentStatus === this.selectedPaymentStatus;
       
-      // Filtro por faixa de valor
-      const matchesAmount = this.matchesAmountFilter(transaction.amount);
-      
-      // Filtro por data
-      const matchesDate = this.matchesDateFilter(transaction.date);
-      
-      return matchesSearch && matchesType && matchesStatus && matchesAmount && matchesDate;
+      return matchesSearch && matchesType && matchesStatus && matchesPaymentStatus;
     });
-
+    this.paginationConfig.totalItems = this.filteredTransactions.length;
     this.updatePagination();
   }
 
-  private matchesAmountFilter(amount: number): boolean {
-    const min = this.minAmount ? parseFloat(this.minAmount) : 0;
-    const max = this.maxAmount ? parseFloat(this.maxAmount) : Infinity;
-    return amount >= min && amount <= max;
+  onSearchChange(): void {
+    this.filterTransactions();
   }
 
-  private matchesDateFilter(date: Date): boolean {
-    if (!this.selectedDateRange) return true;
-    
-    const now = new Date();
-    const transactionDate = new Date(date);
-    
-    switch (this.selectedDateRange) {
-      case 'today':
-        return transactionDate.toDateString() === now.toDateString();
-      case 'week':
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        return transactionDate >= weekAgo;
-      case 'month':
-        return transactionDate.getMonth() === now.getMonth() && 
-               transactionDate.getFullYear() === now.getFullYear();
-      case 'quarter':
-        const quarter = Math.floor(now.getMonth() / 3);
-        const transactionQuarter = Math.floor(transactionDate.getMonth() / 3);
-        return transactionQuarter === quarter && 
-               transactionDate.getFullYear() === now.getFullYear();
-      case 'year':
-        return transactionDate.getFullYear() === now.getFullYear();
-      default:
-        return true;
-    }
+  onTypeChange(): void {
+    this.filterTransactions();
+  }
+
+  onStatusChange(): void {
+    this.filterTransactions();
+  }
+
+  onPaymentStatusChange(): void {
+    this.filterTransactions();
+  }
+
+  onDateChange(): void {
+    this.filterTransactions();
   }
 
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedTypes = [];
     this.selectedStatus = '';
-    this.selectedDateRange = '';
-    this.minAmount = '';
-    this.maxAmount = '';
-    
-    // Reset multi-select options
-    this.typeMultiOptions.forEach(option => option.selected = false);
-    
+    this.selectedPaymentStatus = '';
+    this.dateFrom = '';
+    this.dateTo = '';
     this.filterTransactions();
   }
 
-  onTypeSelectionChange(selectedValues: string[]): void {
-    this.selectedTypes = selectedValues;
-    this.filterTransactions();
+  updatePagination(): void {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    this.filteredTransactions = this.transactions.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      currentPage: page
-    };
+    this.paginationConfig.currentPage = page;
+    this.loadTransactions();
   }
 
-  onItemsPerPageChange(itemsPerPage: number): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      itemsPerPage: itemsPerPage,
-      currentPage: 1
-    };
+  onViewModeChange(mode: ViewMode): void {
+    this.currentView = mode;
+    this.viewPreferencesService.setViewPreference('transactions', mode);
   }
 
-  getPaginatedTransactions(): Transaction[] {
-    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
-    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
-    return this.filteredTransactions.slice(startIndex, endIndex);
-  }
-
-  viewTransaction(transaction: Transaction): void {
-    console.log('Visualizando transação:', transaction);
-    // TODO: Implementar modal de visualização
+  addTransaction(): void {
+    console.log('Criando nova transação');
+    // Implementar modal de criação
   }
 
   editTransaction(transaction: Transaction): void {
     console.log('Editando transação:', transaction);
-    // TODO: Implementar modal de edição
+    // Implementar modal de edição
+  }
+
+  deleteTransaction(transaction: Transaction): void {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja excluir a transação "${transaction.id}"?`,
+      'Confirmar exclusão'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        this.transactionService.deleteTransaction(transaction.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.dialogService.showSuccess('Transação excluída com sucesso!');
+              this.loadTransactions();
+            },
+            error: (error) => {
+              console.error('Erro ao excluir transação:', error);
+              this.dialogService.showError('Erro ao excluir transação. Tente novamente.');
+            }
+          });
+      }
+    });
   }
 
   cancelTransaction(transaction: Transaction): void {
-    if (confirm(`Tem certeza que deseja cancelar a transação #${transaction.id}?`)) {
-      transaction.status = 'cancelled';
-      console.log('Transação cancelada:', transaction);
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja cancelar a transação "${transaction.id}"?`,
+      'Cancelar Transação'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        const updatedTransaction = { ...transaction, status: 'CANCELLED' as const };
+        this.transactionService.updateTransaction(transaction.id, updatedTransaction)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.dialogService.showSuccess('Transação cancelada com sucesso!');
+              this.loadTransactions();
+            },
+            error: (error) => {
+              console.error('Erro ao cancelar transação:', error);
+              this.dialogService.showError('Erro ao cancelar transação. Tente novamente.');
+            }
+          });
+      }
+    });
+  }
+
+  getTypeClass(type: string): string {
+    switch (type) {
+      case 'SALE':
+        return 'type-sale';
+      case 'PURCHASE':
+        return 'type-purchase';
+      case 'RETURN':
+        return 'type-return';
+      case 'ADJUSTMENT':
+        return 'type-adjustment';
+      case 'TRANSFER':
+        return 'type-transfer';
+      default:
+        return '';
     }
+  }
+
+  getTypeLabel(type: string): string {
+    switch (type) {
+      case 'SALE':
+        return 'Venda';
+      case 'PURCHASE':
+        return 'Compra';
+      case 'RETURN':
+        return 'Devolução';
+      case 'ADJUSTMENT':
+        return 'Ajuste';
+      case 'TRANSFER':
+        return 'Transferência';
+      default:
+        return type;
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'PENDING':
+        return 'status-pending';
+      case 'COMPLETED':
+        return 'status-completed';
+      case 'CANCELLED':
+        return 'status-cancelled';
+      case 'REFUNDED':
+        return 'status-refunded';
+      default:
+        return '';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'PENDING':
+        return 'Pendente';
+      case 'COMPLETED':
+        return 'Concluída';
+      case 'CANCELLED':
+        return 'Cancelada';
+      case 'REFUNDED':
+        return 'Reembolsada';
+      default:
+        return status;
+    }
+  }
+
+  getPaymentStatusClass(paymentStatus: string): string {
+    switch (paymentStatus) {
+      case 'PENDING':
+        return 'payment-pending';
+      case 'PAID':
+        return 'payment-paid';
+      case 'FAILED':
+        return 'payment-failed';
+      case 'REFUNDED':
+        return 'payment-refunded';
+      default:
+        return '';
+    }
+  }
+
+  getPaymentStatusLabel(paymentStatus: string): string {
+    switch (paymentStatus) {
+      case 'PENDING':
+        return 'Pendente';
+      case 'PAID':
+        return 'Pago';
+      case 'FAILED':
+        return 'Falhou';
+      case 'REFUNDED':
+        return 'Reembolsado';
+      default:
+        return paymentStatus;
+    }
+  }
+
+  getCustomerName(transaction: Transaction): string {
+    return transaction.customer?.name || 'Cliente não informado';
+  }
+
+  getSupplierName(transaction: Transaction): string {
+    return transaction.supplier?.name || 'Fornecedor não informado';
+  }
+
+  getTotalAmount(transaction: Transaction): number {
+    return transaction.totalAmount;
+  }
+
+  getItemCount(transaction: Transaction): number {
+    return transaction.items?.length || 0;
+  }
+
+  getFormattedDate(date: string): string {
+    return new Date(date).toLocaleDateString('pt-BR');
+  }
+
+  getFormattedDateTime(date: string): string {
+    return new Date(date).toLocaleString('pt-BR');
+  }
+
+  canCancel(transaction: Transaction): boolean {
+    return transaction.status === 'PENDING';
+  }
+
+  canEdit(transaction: Transaction): boolean {
+    return transaction.status === 'PENDING';
+  }
+
+  canDelete(transaction: Transaction): boolean {
+    return transaction.status === 'PENDING' || transaction.status === 'CANCELLED';
+  }
+
+  // Métodos faltando para templates
+  getPaginatedTransactions(): Transaction[] {
+    return this.filteredTransactions;
+  }
+
+  getTypeText(type: string): string {
+    const typeMap: { [key: string]: string } = {
+      'SALE': 'Venda',
+      'PURCHASE': 'Compra',
+      'RETURN': 'Devolução',
+      'ADJUSTMENT': 'Ajuste',
+      'TRANSFER': 'Transferência'
+    };
+    return typeMap[type] || type;
+  }
+
+  getStatusText(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'PENDING': 'Pendente',
+      'COMPLETED': 'Concluída',
+      'CANCELLED': 'Cancelada',
+      'REFUNDED': 'Reembolsada'
+    };
+    return statusMap[status] || status;
+  }
+
+  viewTransaction(transaction: Transaction): void {
+    console.log('Ver transação:', transaction);
+    // Implementar modal de visualização
+  }
+
+  onItemsPerPageChange(limit: number): void {
+    this.paginationConfig.itemsPerPage = limit;
+    this.paginationConfig.currentPage = 1;
+    this.loadTransactions();
   }
 
   onViewChange(view: ViewMode): void {
     this.currentView = view;
-    // Salva a preferência no localStorage
     this.viewPreferencesService.setViewPreference('transactions', view);
+  }
+
+  onTypeSelectionChange(selectedTypes: string[]): void {
+    this.selectedTypes = selectedTypes;
+    this.filterTransactions();
   }
 }

@@ -2,11 +2,38 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService, PaginatedResponse } from './api.service';
-import { 
-  CategoryResponse, 
-  CreateCategoryRequest, 
-  UpdateCategoryRequest 
-} from '@estoque-mestre/models';
+// Interfaces locais
+export interface CategoryResponse {
+  id: string;
+  name: string;
+  description?: string;
+  parentId?: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  parent?: {
+    id: string;
+    name: string;
+  };
+  children?: CategoryResponse[];
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  description?: string;
+  parentId?: string;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+export interface UpdateCategoryRequest {
+  name?: string;
+  description?: string;
+  parentId?: string;
+  isActive?: boolean;
+  sortOrder?: number;
+}
 
 export interface CategoryFilters {
   query?: string;

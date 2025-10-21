@@ -181,8 +181,9 @@ export class AlertsService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    // Initialize alert monitoring
-    this.startAlertMonitoring();
+    // Temporarily disabled to debug startup issue
+    console.log('[DEBUG] AlertsService onModuleInit - disabled for debugging');
+    // this.startAlertMonitoring();
   }
 
   @Cron(CronExpression.EVERY_MINUTE)

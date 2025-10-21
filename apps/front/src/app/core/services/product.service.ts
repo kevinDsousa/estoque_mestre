@@ -2,16 +2,100 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService, PaginatedResponse } from './api.service';
-import { 
-  ProductResponse, 
-  ProductListResponse, 
-  ProductSummaryResponse,
-  InventoryStatusResponse,
-  CreateProductRequest, 
-  UpdateProductRequest, 
-  ProductSearchRequest,
-  InventoryAdjustmentRequest
-} from '@estoque-mestre/models';
+// Interfaces locais
+export interface ProductResponse {
+  id: string;
+  name: string;
+  description?: string;
+  sku: string;
+  barcode?: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  type: 'PRODUCT' | 'SERVICE';
+  costPrice: number;
+  sellingPrice: number;
+  currentStock: number;
+  minStock: number;
+  maxStock: number;
+  weight?: number;
+  dimensions?: string;
+  brand?: string;
+  model?: string;
+  categoryId: string;
+  supplierId: string;
+  trackExpiration: boolean;
+  expirationDate?: Date;
+  tags?: string[];
+  notes?: string;
+  isTaxable: boolean;
+  taxRate?: number;
+  createdAt: string;
+  updatedAt: string;
+  category?: {
+    id: string;
+    name: string;
+  };
+  supplier?: {
+    id: string;
+    name: string;
+  };
+  images?: Array<{
+    id: string;
+    url: string;
+    alt?: string;
+  }>;
+}
+
+export interface CreateProductRequest {
+  name: string;
+  description?: string;
+  sku: string;
+  barcode?: string;
+  status?: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  type?: 'PRODUCT' | 'SERVICE';
+  costPrice: number;
+  sellingPrice: number;
+  currentStock?: number;
+  minStock?: number;
+  maxStock?: number;
+  weight?: number;
+  dimensions?: string;
+  brand?: string;
+  model?: string;
+  categoryId: string;
+  supplierId: string;
+  trackExpiration?: boolean;
+  expirationDate?: Date;
+  tags?: string[];
+  notes?: string;
+  isTaxable?: boolean;
+  taxRate?: number;
+}
+
+export interface UpdateProductRequest {
+  name?: string;
+  description?: string;
+  sku?: string;
+  barcode?: string;
+  status?: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  type?: 'PRODUCT' | 'SERVICE';
+  costPrice?: number;
+  sellingPrice?: number;
+  currentStock?: number;
+  minStock?: number;
+  maxStock?: number;
+  weight?: number;
+  dimensions?: string;
+  brand?: string;
+  model?: string;
+  categoryId?: string;
+  supplierId?: string;
+  trackExpiration?: boolean;
+  expirationDate?: Date;
+  tags?: string[];
+  notes?: string;
+  isTaxable?: boolean;
+  taxRate?: number;
+}
 
 export interface ProductFilters {
   query?: string;
@@ -29,14 +113,72 @@ export interface ProductFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface ProductStats {
-  total: number;
-  active: number;
-  inactive: number;
-  lowStock: number;
-  outOfStock: number;
-  totalValue: number;
+export interface ProductListResponse {
+  id: string;
+  name: string;
+  sku: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  type: 'PRODUCT' | 'SERVICE';
+  costPrice: number;
+  sellingPrice: number;
+  currentStock: number;
+  minStock: number;
+  maxStock: number;
+  categoryId: string;
+  supplierId: string;
+  createdAt: string;
+  updatedAt: string;
+  category?: {
+    id: string;
+    name: string;
+  };
+  supplier?: {
+    id: string;
+    name: string;
+  };
+  images?: Array<{
+    id: string;
+    url: string;
+    alt?: string;
+  }>;
 }
+
+export interface ProductStats {
+  totalProducts: number;
+  activeProducts: number;
+  inactiveProducts: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  totalValue: number;
+  averagePrice: number;
+}
+
+export interface InventoryStatusResponse {
+  productId: string;
+  productName: string;
+  currentStock: number;
+  minStock: number;
+  maxStock: number;
+  status: 'NORMAL' | 'LOW' | 'OUT';
+  lastMovement?: string;
+}
+
+export interface ProductSearchRequest {
+  query: string;
+  categoryId?: string;
+  supplierId?: string;
+  status?: string;
+  type?: string;
+  limit?: number;
+}
+
+export interface InventoryAdjustmentRequest {
+  productId: string;
+  quantity: number;
+  reason: string;
+  notes?: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -57,24 +199,65 @@ export class ProductService {
    * Get all products with pagination and filters
    */
   getProducts(filters: ProductFilters = {}): Observable<PaginatedResponse<ProductListResponse>> {
-    const searchParams: ProductSearchRequest = {
+    const searchParams = {
       query: filters.query,
       categoryId: filters.categoryId,
       supplierId: filters.supplierId,
-      status: filters.status as any,
-      type: filters.type as any,
+      status: filters.status,
+      type: filters.type,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
       inStock: filters.inStock,
       lowStock: filters.lowStock,
       page: filters.page || 1,
       limit: filters.limit || 20,
-      sortBy: (filters.sortBy as any) || 'name',
+      sortBy: filters.sortBy || 'name',
       sortOrder: filters.sortOrder || 'asc'
     };
 
-    return this.apiService.getPaginated<ProductListResponse>('products', searchParams)
+    return this.apiService.getPaginated<any>('products', searchParams)
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const transformedData = response.data.map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            sku: product.sku,
+            barcode: product.barcode,
+            status: product.status,
+            type: product.type,
+            costPrice: product.costPrice,
+            sellingPrice: product.sellingPrice,
+            currentStock: product.currentStock,
+            minStock: product.minStock,
+            maxStock: product.maxStock,
+            weight: product.weight,
+            dimensions: product.dimensions,
+            brand: product.brand,
+            model: product.model,
+            categoryId: product.categoryId,
+            supplierId: product.supplierId,
+            trackExpiration: product.trackExpiration,
+            expirationDate: product.expirationDate,
+            tags: product.tags,
+            notes: product.notes,
+            isTaxable: product.isTaxable,
+            taxRate: product.taxRate,
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt,
+            category: product.category,
+            supplier: product.supplier,
+            images: product.images || []
+          }));
+
+          return {
+            data: transformedData,
+            pagination: response.pagination,
+            success: response.success,
+            timestamp: response.timestamp
+          };
+        }),
         tap(response => {
           this.productsSubject.next(response.data);
         })
@@ -85,8 +268,43 @@ export class ProductService {
    * Get product by ID
    */
   getProduct(id: string): Observable<ProductResponse> {
-    return this.apiService.get<ProductResponse>(`products/${id}`)
+    return this.apiService.get<any>(`products/${id}`)
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const productResponse: ProductResponse = {
+            id: response.id,
+            name: response.name,
+            description: response.description,
+            sku: response.sku,
+            barcode: response.barcode,
+            status: response.status,
+            type: response.type,
+            costPrice: response.costPrice,
+            sellingPrice: response.sellingPrice,
+            currentStock: response.currentStock,
+            minStock: response.minStock,
+            maxStock: response.maxStock,
+            weight: response.weight,
+            dimensions: response.dimensions,
+            brand: response.brand,
+            model: response.model,
+            categoryId: response.categoryId,
+            supplierId: response.supplierId,
+            trackExpiration: response.trackExpiration,
+            expirationDate: response.expirationDate,
+            tags: response.tags,
+            notes: response.notes,
+            isTaxable: response.isTaxable,
+            taxRate: response.taxRate,
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt,
+            category: response.category,
+            supplier: response.supplier,
+            images: response.images || []
+          };
+          return productResponse;
+        }),
         tap(product => {
           this.currentProductSubject.next(product);
         })
@@ -96,9 +314,71 @@ export class ProductService {
   /**
    * Create new product
    */
-  createProduct(productData: CreateProductRequest): Observable<ProductResponse> {
-    return this.apiService.post<ProductResponse>('products', productData)
+  createProduct(productData: any): Observable<ProductResponse> {
+    // Transform frontend data to backend format
+    const backendData = {
+      name: productData.name,
+      description: productData.description,
+      sku: productData.sku,
+      barcode: productData.barcode,
+      type: productData.type || 'ACCESSORY',
+      status: productData.status || 'ACTIVE',
+      costPrice: productData.costPrice || productData.pricing?.costPrice,
+      sellingPrice: productData.sellingPrice || productData.pricing?.sellingPrice,
+      currentStock: productData.currentStock || productData.inventory?.currentStock || 0,
+      minStock: productData.minStock || productData.inventory?.minStock || 0,
+      maxStock: productData.maxStock || productData.inventory?.maxStock,
+      weight: productData.weight,
+      dimensions: productData.dimensions,
+      brand: productData.brand,
+      model: productData.model,
+      categoryId: productData.categoryId,
+      supplierId: productData.supplierId,
+      trackExpiration: productData.trackExpiration || false,
+      expirationDate: productData.expirationDate,
+      tags: productData.tags,
+      notes: productData.notes,
+      isTaxable: productData.isTaxable !== false,
+      taxRate: productData.taxRate
+    };
+
+    return this.apiService.post<any>('products', backendData)
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const productResponse: ProductResponse = {
+            id: response.id,
+            name: response.name,
+            description: response.description,
+            sku: response.sku,
+            barcode: response.barcode,
+            status: response.status,
+            type: response.type,
+            costPrice: response.costPrice,
+            sellingPrice: response.sellingPrice,
+            currentStock: response.currentStock,
+            minStock: response.minStock,
+            maxStock: response.maxStock,
+            weight: response.weight,
+            dimensions: response.dimensions,
+            brand: response.brand,
+            model: response.model,
+            categoryId: response.categoryId,
+            supplierId: response.supplierId,
+            trackExpiration: response.trackExpiration,
+            expirationDate: response.expirationDate,
+            tags: response.tags,
+            notes: response.notes,
+            isTaxable: response.isTaxable,
+            taxRate: response.taxRate,
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt,
+            category: response.category,
+            supplier: response.supplier,
+            images: response.images || []
+          };
+          return productResponse;
+        }),
         tap(product => {
           const currentProducts = this.productsSubject.value;
           this.productsSubject.next([product as any, ...currentProducts]);
@@ -109,9 +389,71 @@ export class ProductService {
   /**
    * Update product
    */
-  updateProduct(id: string, productData: UpdateProductRequest): Observable<ProductResponse> {
-    return this.apiService.put<ProductResponse>(`products/${id}`, productData)
+  updateProduct(id: string, productData: any): Observable<ProductResponse> {
+    // Transform frontend data to backend format
+    const backendData = {
+      name: productData.name,
+      description: productData.description,
+      sku: productData.sku,
+      barcode: productData.barcode,
+      type: productData.type,
+      status: productData.status,
+      costPrice: productData.costPrice || productData.pricing?.costPrice,
+      sellingPrice: productData.sellingPrice || productData.pricing?.sellingPrice,
+      currentStock: productData.currentStock || productData.inventory?.currentStock,
+      minStock: productData.minStock || productData.inventory?.minStock,
+      maxStock: productData.maxStock || productData.inventory?.maxStock,
+      weight: productData.weight,
+      dimensions: productData.dimensions,
+      brand: productData.brand,
+      model: productData.model,
+      categoryId: productData.categoryId,
+      supplierId: productData.supplierId,
+      trackExpiration: productData.trackExpiration,
+      expirationDate: productData.expirationDate,
+      tags: productData.tags,
+      notes: productData.notes,
+      isTaxable: productData.isTaxable,
+      taxRate: productData.taxRate
+    };
+
+    return this.apiService.patch<any>(`products/${id}`, backendData)
       .pipe(
+        map(response => {
+          // Transform backend response to frontend format
+          const productResponse: ProductResponse = {
+            id: response.id,
+            name: response.name,
+            description: response.description,
+            sku: response.sku,
+            barcode: response.barcode,
+            status: response.status,
+            type: response.type,
+            costPrice: response.costPrice,
+            sellingPrice: response.sellingPrice,
+            currentStock: response.currentStock,
+            minStock: response.minStock,
+            maxStock: response.maxStock,
+            weight: response.weight,
+            dimensions: response.dimensions,
+            brand: response.brand,
+            model: response.model,
+            categoryId: response.categoryId,
+            supplierId: response.supplierId,
+            trackExpiration: response.trackExpiration,
+            expirationDate: response.expirationDate,
+            tags: response.tags,
+            notes: response.notes,
+            isTaxable: response.isTaxable,
+            taxRate: response.taxRate,
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt,
+            category: response.category,
+            supplier: response.supplier,
+            images: response.images || []
+          };
+          return productResponse;
+        }),
         tap(product => {
           this.currentProductSubject.next(product);
           
@@ -214,16 +556,16 @@ export class ProductService {
   /**
    * Get product summary (for dropdowns, autocomplete, etc.)
    */
-  getProductSummary(id: string): Observable<ProductSummaryResponse> {
-    return this.apiService.get<ProductSummaryResponse>(`products/${id}/summary`);
+  getProductSummary(id: string): Observable<ProductResponse> {
+    return this.apiService.get<ProductResponse>(`products/${id}/summary`);
   }
 
   /**
    * Get product summaries with search
    */
-  getProductSummaries(query?: string, limit: number = 10): Observable<ProductSummaryResponse[]> {
+  getProductSummaries(query?: string, limit: number = 10): Observable<ProductResponse[]> {
     const params = query ? { query, limit } : { limit };
-    return this.apiService.get<ProductSummaryResponse[]>('products/summaries', params);
+    return this.apiService.get<ProductResponse[]>('products/summaries', params);
   }
 
   /**

@@ -2,11 +2,61 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService, PaginatedResponse } from './api.service';
-import { 
-  CustomerResponse, 
-  CreateCustomerRequest, 
-  UpdateCustomerRequest 
-} from '@estoque-mestre/models';
+// Interfaces locais
+export interface CustomerResponse {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  dateOfBirth?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
+  customerType: 'INDIVIDUAL' | 'COMPANY';
+  taxId?: string;
+  notes?: string;
+  lastPurchaseAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCustomerRequest {
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  dateOfBirth?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  status?: 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
+  customerType?: 'INDIVIDUAL' | 'COMPANY';
+  taxId?: string;
+  notes?: string;
+}
+
+export interface UpdateCustomerRequest {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  dateOfBirth?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  status?: 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
+  customerType?: 'INDIVIDUAL' | 'COMPANY';
+  taxId?: string;
+  notes?: string;
+}
 
 export interface CustomerFilters {
   query?: string;

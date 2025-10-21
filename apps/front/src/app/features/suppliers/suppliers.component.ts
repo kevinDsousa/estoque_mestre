@@ -1,20 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
+import { SupplierService, SupplierFilters } from '../../core/services/supplier.service';
 import { ViewToggleComponent } from '../../core/components';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 
 interface Supplier {
-  id: number;
+  id: string;
   name: string;
-  contact: string;
+  contactName?: string;
   email: string;
-  phone: string;
-  address: string;
-  productCount: number;
-  isActive: boolean;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  website?: string;
+  taxId?: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  paymentTerms?: string;
+  creditLimit?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  productCount?: number;
+  totalPurchases?: number;
+  lastPurchaseDate?: string;
+  // Propriedades para templates
+  isActive?: boolean;
+  contact?: string;
 }
 
 @Component({
@@ -24,11 +42,17 @@ interface Supplier {
   templateUrl: './suppliers.component.html',
   styleUrl: './suppliers.component.scss'
 })
-export class SuppliersComponent implements OnInit {
+export class SuppliersComponent implements OnInit, OnDestroy {
   suppliers: Supplier[] = [];
   filteredSuppliers: Supplier[] = [];
+  loading = false;
   searchTerm = '';
+  selectedStatus = '';
   currentView: ViewMode = 'cards';
+  
+  // Propriedades faltando para templates
+  editingSupplier: Supplier | null = null;
+  showAddModal = false;
   
   // Paginação
   paginationConfig: PaginationConfig = {
@@ -37,9 +61,19 @@ export class SuppliersComponent implements OnInit {
     itemsPerPage: 10
   };
 
+  statusOptions = [
+    { value: '', label: 'Todos os status' },
+    { value: 'ACTIVE', label: 'Ativo' },
+    { value: 'INACTIVE', label: 'Inativo' },
+    { value: 'SUSPENDED', label: 'Suspenso' }
+  ];
+
+  private destroy$ = new Subject<void>();
+
   constructor(
     private dialogService: DialogService,
-    private viewPreferencesService: ViewPreferencesService
+    private viewPreferencesService: ViewPreferencesService,
+    private supplierService: SupplierService
   ) {}
 
   ngOnInit(): void {
@@ -49,104 +83,230 @@ export class SuppliersComponent implements OnInit {
     this.loadSuppliers();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private loadSuppliers(): void {
-    this.suppliers = [
-      {
-        id: 1,
-        name: 'Tech Solutions Ltda',
-        contact: 'João Silva',
-        email: 'joao@techsolutions.com',
-        phone: '(11) 99999-9999',
-        address: 'São Paulo, SP',
-        productCount: 45,
-        isActive: true
-      },
-      {
-        id: 2,
-        name: 'Electronics Corp',
-        contact: 'Maria Santos',
-        email: 'maria@electronics.com',
-        phone: '(11) 88888-8888',
-        address: 'Rio de Janeiro, RJ',
-        productCount: 32,
-        isActive: true
-      },
-      {
-        id: 3,
-        name: 'Gadget World',
-        contact: 'Pedro Costa',
-        email: 'pedro@gadgetworld.com',
-        phone: '(11) 77777-7777',
-        address: 'Belo Horizonte, MG',
-        productCount: 18,
-        isActive: false
-      }
-    ];
-    this.filteredSuppliers = [...this.suppliers];
+    this.loading = true;
+    
+    const filters: SupplierFilters = {
+      query: this.searchTerm,
+      status: this.selectedStatus || undefined,
+      page: this.paginationConfig.currentPage,
+      limit: this.paginationConfig.itemsPerPage,
+      sortBy: 'name',
+      sortOrder: 'asc'
+    };
+
+    this.supplierService.getSuppliers(filters)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (response) => {
+          // Mapear dados do backend para interface local
+          this.suppliers = response.data.map(supplier => ({
+            ...supplier,
+            email: supplier.contacts?.[0]?.email || 'email@exemplo.com', // Usar email do primeiro contato ou fallback
+            contactName: supplier.contacts?.[0]?.name,
+            phone: supplier.contacts?.[0]?.phone,
+            address: supplier.addresses?.[0]?.street,
+            city: supplier.addresses?.[0]?.city,
+            state: supplier.addresses?.[0]?.state,
+            zipCode: supplier.addresses?.[0]?.zipCode,
+            country: supplier.addresses?.[0]?.country,
+            // Propriedades para templates
+            isActive: supplier.status === 'ACTIVE',
+            contact: supplier.contacts?.[0]?.name || (supplier as any).contactName || 'Não informado'
+          }));
+          this.paginationConfig.totalItems = response.pagination.total;
+          this.filteredSuppliers = [...this.suppliers];
+          this.updatePagination();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar fornecedores:', error);
+          this.dialogService.showError('Erro ao carregar fornecedores. Tente novamente.');
+        }
+      });
+  }
+
+  filterSuppliers(): void {
+    this.filteredSuppliers = this.suppliers.filter(supplier => {
+      const matchesSearch = supplier.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                           supplier.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                           (supplier.contactName && supplier.contactName.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      
+      const matchesStatus = !this.selectedStatus || supplier.status === this.selectedStatus;
+      
+      return matchesSearch && matchesStatus;
+    });
+    this.paginationConfig.totalItems = this.filteredSuppliers.length;
     this.updatePagination();
   }
 
-  editSupplier(supplier: Supplier): void {
-    console.log('Editando fornecedor:', supplier);
-    // TODO: Implementar modal de edição
+  onSearchChange(): void {
+    this.filterSuppliers();
   }
 
-  viewProducts(supplier: Supplier): void {
-    console.log('Visualizando produtos do fornecedor:', supplier);
-    // TODO: Navegar para página de produtos filtrados por fornecedor
+  onStatusChange(): void {
+    this.filterSuppliers();
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.selectedStatus = '';
+    this.filterSuppliers();
+  }
+
+  updatePagination(): void {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    this.filteredSuppliers = this.suppliers.slice(startIndex, endIndex);
+  }
+
+  onPageChange(page: number): void {
+    this.paginationConfig.currentPage = page;
+    this.loadSuppliers();
+  }
+
+  onViewModeChange(mode: ViewMode): void {
+    this.currentView = mode;
+    this.viewPreferencesService.setViewPreference('suppliers', mode);
+  }
+
+  addSupplier(): void {
+    const newSupplier: Supplier = {
+      id: '',
+      name: '',
+      email: '',
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.editSupplier(newSupplier);
+  }
+
+  editSupplier(supplier: Supplier): void {
+    this.editingSupplier = { ...supplier };
+    this.showAddModal = true;
   }
 
   deleteSupplier(supplier: Supplier): void {
-    this.dialogService.confirmDelete(supplier.name, 'fornecedor').subscribe(result => {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja excluir o fornecedor "${supplier.name}"?`,
+      'Confirmar exclusão'
+    ).subscribe(result => {
       if (result.confirmed) {
-        this.suppliers = this.suppliers.filter(s => s.id !== supplier.id);
-        console.log('Fornecedor excluído:', supplier);
+        this.supplierService.deleteSupplier(supplier.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.dialogService.showSuccess('Fornecedor excluído com sucesso!');
+              this.loadSuppliers();
+            },
+            error: (error) => {
+              console.error('Erro ao excluir fornecedor:', error);
+              this.dialogService.showError('Erro ao excluir fornecedor. Tente novamente.');
+            }
+          });
       }
     });
   }
 
+  toggleSupplierStatus(supplier: Supplier): void {
+    const newStatus = supplier.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const updatedSupplier = { 
+      ...supplier, 
+      status: newStatus as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+    };
+    
+    this.supplierService.updateSupplier(supplier.id, updatedSupplier)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.dialogService.showSuccess(`Fornecedor ${newStatus === 'ACTIVE' ? 'ativado' : 'desativado'} com sucesso!`);
+          this.loadSuppliers();
+        },
+        error: (error) => {
+          console.error('Erro ao alterar status do fornecedor:', error);
+          this.dialogService.showError('Erro ao alterar status do fornecedor. Tente novamente.');
+        }
+      });
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'status-active';
+      case 'INACTIVE':
+        return 'status-inactive';
+      case 'SUSPENDED':
+        return 'status-suspended';
+      default:
+        return '';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'Ativo';
+      case 'INACTIVE':
+        return 'Inativo';
+      case 'SUSPENDED':
+        return 'Suspenso';
+      default:
+        return status;
+    }
+  }
+
+  getProductCount(supplier: Supplier): number {
+    return supplier.productCount || 0;
+  }
+
+  getTotalPurchases(supplier: Supplier): number {
+    return supplier.totalPurchases || 0;
+  }
+
+  getLastPurchaseDate(supplier: Supplier): string {
+    return supplier.lastPurchaseDate ? new Date(supplier.lastPurchaseDate).toLocaleDateString() : 'Nunca';
+  }
+
+  getContactName(supplier: Supplier): string {
+    return supplier.contactName || 'Não informado';
+  }
+
+  getFullAddress(supplier: Supplier): string {
+    const parts = [supplier.address, supplier.city, supplier.state, supplier.zipCode].filter(Boolean);
+    return parts.join(', ') || 'Endereço não informado';
+  }
+
+  getWebsiteUrl(supplier: Supplier): string {
+    if (!supplier.website) return '';
+    return supplier.website.startsWith('http') ? supplier.website : `https://${supplier.website}`;
+  }
+
+  // Métodos faltando para templates
+  getPaginatedSuppliers(): Supplier[] {
+    return this.filteredSuppliers;
+  }
+
+  viewProducts(supplier: Supplier): void {
+    console.log('Ver produtos do fornecedor:', supplier);
+    // Implementar navegação para produtos do fornecedor
+  }
+
+  onItemsPerPageChange(limit: number): void {
+    this.paginationConfig.itemsPerPage = limit;
+    this.paginationConfig.currentPage = 1;
+    this.loadSuppliers();
+  }
+
   onViewChange(view: ViewMode): void {
     this.currentView = view;
-    // Salva a preferência no localStorage
     this.viewPreferencesService.setViewPreference('suppliers', view);
-  }
-
-  // Métodos de filtro e paginação
-  filterSuppliers(): void {
-    this.filteredSuppliers = this.suppliers.filter(supplier =>
-      supplier.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      supplier.contact.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      supplier.email.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-    this.updatePagination();
-  }
-
-  private updatePagination(): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      totalItems: this.filteredSuppliers.length,
-      currentPage: 1 // Reset para primeira página quando filtrar
-    };
-  }
-
-  onPageChange(page: number): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      currentPage: page
-    };
-  }
-
-  onItemsPerPageChange(itemsPerPage: number): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      itemsPerPage: itemsPerPage,
-      currentPage: 1
-    };
-  }
-
-  getPaginatedSuppliers(): Supplier[] {
-    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
-    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
-    return this.filteredSuppliers.slice(startIndex, endIndex);
   }
 }

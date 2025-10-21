@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
-import { ApproveCompanyDto, RejectCompanyDto, SuspendCompanyDto, CompanyQueryDto } from './dto/admin-company.dto';
+import { ApproveCompanyDto, AdminRejectCompanyDto, SuspendCompanyDto, CompanyQueryDto } from './dto/admin-company.dto';
 import { CreateBusinessMetricDto, BusinessMetricQueryDto } from './dto/admin-metrics.dto';
 import { CreateAdminUserDto, UpdateAdminUserDto, AdminUserQueryDto } from './dto/admin-user.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -88,7 +88,7 @@ export class AdminController {
   @ApiParam({ name: 'id', description: 'Company ID' })
   async rejectCompany(
     @Param('id') id: string,
-    @Body() rejectDto: RejectCompanyDto,
+    @Body() rejectDto: AdminRejectCompanyDto,
   ) {
     return this.adminService.rejectCompany(id, rejectDto);
   }
@@ -244,5 +244,165 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'System health retrieved successfully' })
   async getSystemHealth() {
     return this.adminService.getSystemHealth();
+  }
+
+  // ===== DASHBOARD ENDPOINTS =====
+
+  @Get('dashboard/stats')
+  @ApiOperation({ summary: 'Get dashboard statistics' })
+  @ApiResponse({ status: 200, description: 'Dashboard stats retrieved successfully' })
+  async getDashboardStats(@User('companyId') companyId: string) {
+    return this.adminService.getDashboardStats(companyId);
+  }
+
+  @Get('dashboard/quick-stats')
+  @ApiOperation({ summary: 'Get quick statistics for different time periods' })
+  @ApiResponse({ status: 200, description: 'Quick stats retrieved successfully' })
+  async getQuickStats(@User('companyId') companyId: string) {
+    return this.adminService.getQuickStats(companyId);
+  }
+
+  @Get('dashboard/recent-activity')
+  @ApiOperation({ summary: 'Get recent activities' })
+  @ApiResponse({ status: 200, description: 'Recent activities retrieved successfully' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of activities to return' })
+  async getRecentActivity(
+    @User('companyId') companyId: string,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number
+  ) {
+    return this.adminService.getRecentActivity(companyId, limit);
+  }
+
+  @Get('dashboard/low-stock')
+  @ApiOperation({ summary: 'Get low stock products' })
+  @ApiResponse({ status: 200, description: 'Low stock products retrieved successfully' })
+  async getLowStockProducts(@User('companyId') companyId: string) {
+    return this.adminService.getLowStockProducts(companyId);
+  }
+
+  @Get('dashboard/pending-orders')
+  @ApiOperation({ summary: 'Get pending orders' })
+  @ApiResponse({ status: 200, description: 'Pending orders retrieved successfully' })
+  async getPendingOrders(@User('companyId') companyId: string) {
+    return this.adminService.getPendingOrders(companyId);
+  }
+
+  @Get('dashboard/sales-chart')
+  @ApiOperation({ summary: 'Get sales chart data' })
+  @ApiResponse({ status: 200, description: 'Sales chart data retrieved successfully' })
+  @ApiQuery({ name: 'period', required: false, type: String, description: 'Chart period (week, month, year)' })
+  async getSalesChartData(
+    @User('companyId') companyId: string,
+    @Query('period', new DefaultValuePipe('month')) period: string
+  ) {
+    return this.adminService.getSalesChartData(companyId, period);
+  }
+
+  @Get('dashboard/inventory-chart')
+  @ApiOperation({ summary: 'Get inventory chart data' })
+  @ApiResponse({ status: 200, description: 'Inventory chart data retrieved successfully' })
+  async getInventoryChartData(@User('companyId') companyId: string) {
+    return this.adminService.getInventoryChartData(companyId);
+  }
+
+  @Get('dashboard/top-selling')
+  @ApiOperation({ summary: 'Get top selling products' })
+  @ApiResponse({ status: 200, description: 'Top selling products retrieved successfully' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of products to return' })
+  async getTopSellingProducts(
+    @User('companyId') companyId: string,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number
+  ) {
+    return this.adminService.getTopSellingProducts(companyId, limit);
+  }
+
+  @Get('dashboard/top-customers')
+  @ApiOperation({ summary: 'Get top customers by revenue' })
+  @ApiResponse({ status: 200, description: 'Top customers retrieved successfully' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of customers to return' })
+  async getTopCustomers(
+    @User('companyId') companyId: string,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number
+  ) {
+    return this.adminService.getTopCustomers(companyId, limit);
+  }
+
+  @Get('dashboard/revenue-by-category')
+  @ApiOperation({ summary: 'Get revenue by category' })
+  @ApiResponse({ status: 200, description: 'Revenue by category retrieved successfully' })
+  async getRevenueByCategory(@User('companyId') companyId: string) {
+    return this.adminService.getRevenueByCategory(companyId);
+  }
+
+  @Get('dashboard/monthly-sales-trend')
+  @ApiOperation({ summary: 'Get monthly sales trend' })
+  @ApiResponse({ status: 200, description: 'Monthly sales trend retrieved successfully' })
+  @ApiQuery({ name: 'months', required: false, type: Number, description: 'Number of months to return' })
+  async getMonthlySalesTrend(
+    @User('companyId') companyId: string,
+    @Query('months', new DefaultValuePipe(12), ParseIntPipe) months: number
+  ) {
+    return this.adminService.getMonthlySalesTrend(companyId, months);
+  }
+
+  @Get('dashboard/inventory-value-by-category')
+  @ApiOperation({ summary: 'Get inventory value by category' })
+  @ApiResponse({ status: 200, description: 'Inventory value by category retrieved successfully' })
+  async getInventoryValueByCategory(@User('companyId') companyId: string) {
+    return this.adminService.getInventoryValueByCategory(companyId);
+  }
+
+  @Get('dashboard/profit-margin-analysis')
+  @ApiOperation({ summary: 'Get profit margin analysis' })
+  @ApiResponse({ status: 200, description: 'Profit margin analysis retrieved successfully' })
+  async getProfitMarginAnalysis(@User('companyId') companyId: string) {
+    return this.adminService.getProfitMarginAnalysis(companyId);
+  }
+
+  @Get('dashboard/stock-movement-trends')
+  @ApiOperation({ summary: 'Get stock movement trends' })
+  @ApiResponse({ status: 200, description: 'Stock movement trends retrieved successfully' })
+  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Number of days to return' })
+  async getStockMovementTrends(
+    @User('companyId') companyId: string,
+    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number
+  ) {
+    return this.adminService.getStockMovementTrends(companyId, days);
+  }
+
+  @Get('dashboard/supplier-performance')
+  @ApiOperation({ summary: 'Get supplier performance' })
+  @ApiResponse({ status: 200, description: 'Supplier performance retrieved successfully' })
+  async getSupplierPerformance(@User('companyId') companyId: string) {
+    return this.adminService.getSupplierPerformance(companyId);
+  }
+
+  @Get('dashboard/customer-acquisition-trends')
+  @ApiOperation({ summary: 'Get customer acquisition trends' })
+  @ApiResponse({ status: 200, description: 'Customer acquisition trends retrieved successfully' })
+  @ApiQuery({ name: 'months', required: false, type: Number, description: 'Number of months to return' })
+  async getCustomerAcquisitionTrends(
+    @User('companyId') companyId: string,
+    @Query('months', new DefaultValuePipe(12), ParseIntPipe) months: number
+  ) {
+    return this.adminService.getCustomerAcquisitionTrends(companyId, months);
+  }
+
+  @Get('dashboard/alerts-summary')
+  @ApiOperation({ summary: 'Get alerts and notifications summary' })
+  @ApiResponse({ status: 200, description: 'Alerts summary retrieved successfully' })
+  async getAlertsSummary(@User('companyId') companyId: string) {
+    return this.adminService.getAlertsSummary(companyId);
+  }
+
+  @Get('dashboard/export')
+  @ApiOperation({ summary: 'Export dashboard data' })
+  @ApiResponse({ status: 200, description: 'Dashboard data exported successfully' })
+  @ApiQuery({ name: 'format', required: false, type: String, description: 'Export format (csv, xlsx, pdf)' })
+  async exportDashboardData(
+    @User('companyId') companyId: string,
+    @Query('format', new DefaultValuePipe('xlsx')) format: string
+  ) {
+    return this.adminService.exportDashboardData(companyId, format);
   }
 }

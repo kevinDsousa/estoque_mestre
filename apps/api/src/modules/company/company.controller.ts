@@ -22,8 +22,8 @@ import {
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { ApproveCompanyDto } from './dto/approve-company.dto';
-import { RejectCompanyDto } from './dto/reject-company.dto';
+import { CompanyApproveDto } from './dto/approve-company.dto';
+import { CompanyRejectDto } from './dto/reject-company.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 import { CompanyStatus } from '@prisma/client';
@@ -93,7 +93,7 @@ export class CompanyController {
   @ApiResponse({ status: 403, description: 'Admin access required' })
   approve(
     @Param('id') id: string,
-    @Body() approveCompanyDto: ApproveCompanyDto,
+    @Body() approveCompanyDto: CompanyApproveDto,
   ) {
     return this.companyService.approve(id, 'admin-id', approveCompanyDto.reason);
   }
@@ -109,7 +109,7 @@ export class CompanyController {
   @ApiResponse({ status: 403, description: 'Admin access required' })
   reject(
     @Param('id') id: string,
-    @Body() rejectCompanyDto: RejectCompanyDto,
+    @Body() rejectCompanyDto: CompanyRejectDto,
   ) {
     return this.companyService.reject(id, 'admin-id', rejectCompanyDto.reason);
   }

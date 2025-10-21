@@ -1,23 +1,60 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
+import { ProductService, ProductFilters } from '../../core/services/product.service';
+import { CategoryService } from '../../core/services/category.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 import { ViewToggleComponent } from '../../core/components';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
-  category: string;
-  price: number;
-  stock: number;
+  description?: string;
   sku: string;
-  status: 'active' | 'inactive' | 'low-stock';
-  lastUpdated: Date;
-  images: string[];
+  barcode?: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  type: 'PRODUCT' | 'SERVICE';
+  costPrice: number;
+  sellingPrice: number;
+  currentStock: number;
+  minStock: number;
+  maxStock: number;
+  weight?: number;
+  dimensions?: string;
+  brand?: string;
+  model?: string;
+  categoryId: string;
+  supplierId: string;
+  trackExpiration: boolean;
+  expirationDate?: Date;
+  tags?: string[];
+  notes?: string;
+  isTaxable: boolean;
+  taxRate?: number;
+  createdAt: string;
+  updatedAt: string;
+  category?: {
+    id: string;
+    name: string;
+  };
+  supplier?: {
+    id: string;
+    name: string;
+  };
+  images?: Array<{
+    id: string;
+    url: string;
+    alt?: string;
+  }>;
+  // Propriedades para templates
+  price?: number;
+  stock?: number;
+  lastUpdated?: string;
 }
 
 @Component({
@@ -27,9 +64,11 @@ interface Product {
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
-export class ProductsComponent implements OnInit {
+export class ProductsComponent implements OnInit, OnDestroy {
   products: Product[] = [];
   filteredProducts: Product[] = [];
+  categories: any[] = [];
+  loading = false;
   searchTerm = '';
   selectedCategories: string[] = [];
   selectedStatus = '';
@@ -47,34 +86,28 @@ export class ProductsComponent implements OnInit {
     itemsPerPage: 10
   };
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private dialogService: DialogService,
     private viewPreferencesService: ViewPreferencesService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private productService: ProductService,
+    private categoryService: CategoryService
   ) {}
-
-  categories = [
-    'Eletrônicos',
-    'Informática',
-    'Casa e Jardim',
-    'Esportes',
-    'Livros',
-    'Roupas',
-    'Acessórios'
-  ];
 
   statusOptions = [
     { value: '', label: 'Todos os status' },
-    { value: 'active', label: 'Ativo' },
-    { value: 'inactive', label: 'Inativo' },
-    { value: 'low-stock', label: 'Estoque Baixo' }
+    { value: 'ACTIVE', label: 'Ativo' },
+    { value: 'INACTIVE', label: 'Inativo' },
+    { value: 'DISCONTINUED', label: 'Descontinuado' }
   ];
 
   stockFilterOptions = [
     { value: '', label: 'Todos os produtos' },
-    { value: 'low', label: 'Estoque baixo (< 10)' },
-    { value: 'medium', label: 'Estoque médio (10-50)' },
-    { value: 'high', label: 'Estoque alto (> 50)' },
+    { value: 'low', label: 'Estoque baixo' },
+    { value: 'medium', label: 'Estoque médio' },
+    { value: 'high', label: 'Estoque alto' },
     { value: 'out', label: 'Sem estoque (0)' }
   ];
 
@@ -82,8 +115,8 @@ export class ProductsComponent implements OnInit {
   categoryOptions: MultiSelectOption[] = [];
 
   ngOnInit(): void {
+    this.loadCategories();
     this.loadProducts();
-    this.initializeCategoryOptions();
     // Carrega a preferência salva
     this.currentView = this.viewPreferencesService.getViewPreference('products');
     
@@ -97,121 +130,73 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getCategories()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories.data;
+          this.initializeCategoryOptions();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar categorias:', error);
+        }
+      });
+  }
+
   private initializeCategoryOptions(): void {
     this.categoryOptions = this.categories.map(category => ({
-      value: category,
-      label: category,
+      value: category.id,
+      label: category.name,
       selected: false
     }));
   }
 
   private loadProducts(): void {
-    // Mock data - substituir por chamada da API
-    this.products = [
-      {
-        id: 1,
-        name: 'Notebook Dell Inspiron 15',
-        category: 'Informática',
-        price: 2500.00,
-        stock: 15,
-        sku: 'DELL-INS15-001',
-        status: 'active',
-        lastUpdated: new Date('2024-01-15'),
-        images: [
-          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
-          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop'
-        ]
-      },
-      {
-        id: 2,
-        name: 'Mouse sem fio Logitech',
-        category: 'Informática',
-        price: 89.90,
-        stock: 3,
-        sku: 'LOG-MX3-002',
-        status: 'low-stock',
-        lastUpdated: new Date('2024-01-14'),
-        images: [
-          'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400'
-        ]
-      },
-      {
-        id: 3,
-        name: 'Teclado Mecânico RGB',
-        category: 'Informática',
-        price: 299.90,
-        stock: 25,
-        sku: 'MECH-KB-003',
-        status: 'active',
-        lastUpdated: new Date('2024-01-13'),
-        images: [
-          'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400',
-          'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop',
-          'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop&sat=-50'
-        ]
-      },
-      {
-        id: 4,
-        name: 'Monitor 24" Full HD',
-        category: 'Informática',
-        price: 899.90,
-        stock: 8,
-        sku: 'MON-24FHD-004',
-        status: 'active',
-        lastUpdated: new Date('2024-01-12'),
-        images: [
-          'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400'
-        ]
-      },
-      {
-        id: 5,
-        name: 'Smartphone Samsung Galaxy',
-        category: 'Eletrônicos',
-        price: 1899.90,
-        stock: 0,
-        sku: 'SAM-GAL-005',
-        status: 'inactive',
-        lastUpdated: new Date('2024-01-11'),
-        images: []
-      },
-      {
-        id: 6,
-        name: 'Smartphone Samsung Galaxy A54',
-        category: 'Eletrônicos',
-        price: 1200.00,
-        stock: 3,
-        sku: 'SAM-A54-001',
-        status: 'low-stock',
-        lastUpdated: new Date('2024-01-12'),
-        images: [
-          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400'
-        ]
-      },
-      {
-        id: 7,
-        name: 'Monitor LG 24"',
-        category: 'Informática',
-        price: 800.00,
-        stock: 0,
-        sku: 'LG-24-001',
-        status: 'inactive',
-        lastUpdated: new Date('2024-01-08'),
-        images: []
-      },
-      {
-        id: 8,
-        name: 'Teclado Mecânico RGB',
-        category: 'Informática',
-        price: 250.00,
-        stock: 5,
-        sku: 'TEC-RGB-001',
-        status: 'low-stock',
-        lastUpdated: new Date('2024-01-14'),
-        images: []
-      }
-    ];
-    this.filteredProducts = [...this.products];
-    this.updatePagination();
+    this.loading = true;
+    
+    const filters: ProductFilters = {
+      query: this.searchTerm,
+      categoryId: this.selectedCategories.length > 0 ? this.selectedCategories[0] : undefined,
+      status: this.selectedStatus || undefined,
+      minPrice: this.minPrice ? parseFloat(this.minPrice) : undefined,
+      maxPrice: this.maxPrice ? parseFloat(this.maxPrice) : undefined,
+      page: this.paginationConfig.currentPage,
+      limit: this.paginationConfig.itemsPerPage,
+      sortBy: 'name',
+      sortOrder: 'asc'
+    };
+
+    this.productService.getProducts(filters)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (response) => {
+          // Mapear dados do backend para interface local
+          this.products = response.data.map(product => ({
+            ...product,
+            trackExpiration: (product as any).trackExpiration || false,
+            isTaxable: (product as any).isTaxable || false,
+            price: product.sellingPrice,
+            stock: product.currentStock,
+            lastUpdated: product.updatedAt
+          }));
+          this.paginationConfig.totalItems = response.pagination.total;
+          this.filteredProducts = [...this.products];
+          this.updatePagination();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar produtos:', error);
+          this.dialogService.showError('Erro ao carregar produtos. Tente novamente.');
+        }
+      });
   }
 
   filterProducts(): void {
@@ -222,48 +207,58 @@ export class ProductsComponent implements OnInit {
       
       // Filtro por categorias (múltiplas)
       const matchesCategory = this.selectedCategories.length === 0 || 
-                             this.selectedCategories.includes(product.category);
+                             this.selectedCategories.includes(product.categoryId);
       
       // Filtro por status
       const matchesStatus = !this.selectedStatus || product.status === this.selectedStatus;
       
+      // Filtro por preço
+      const matchesPrice = (!this.minPrice || product.sellingPrice >= parseFloat(this.minPrice)) &&
+                          (!this.maxPrice || product.sellingPrice <= parseFloat(this.maxPrice));
+      
       // Filtro por estoque
-      const matchesStock = this.matchesStockFilter(product.stock);
+      let matchesStock = true;
+      if (this.selectedStockFilter) {
+        switch (this.selectedStockFilter) {
+          case 'low':
+            matchesStock = product.currentStock < product.minStock;
+            break;
+          case 'medium':
+            matchesStock = product.currentStock >= product.minStock && product.currentStock <= 50;
+            break;
+          case 'high':
+            matchesStock = product.currentStock > 50;
+            break;
+          case 'out':
+            matchesStock = product.currentStock === 0;
+            break;
+        }
+      }
       
-      // Filtro por faixa de preço
-      const matchesPrice = this.matchesPriceFilter(product.price);
-      
-      return matchesSearch && matchesCategory && matchesStatus && matchesStock && matchesPrice;
+      return matchesSearch && matchesCategory && matchesStatus && matchesPrice && matchesStock;
     });
-
-    // Atualizar paginação
+    
     this.updatePagination();
   }
 
-  private updatePagination(): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      totalItems: this.filteredProducts.length,
-      currentPage: 1 // Reset para primeira página quando filtrar
-    };
+  onSearchChange(): void {
+    this.filterProducts();
   }
 
-  private matchesStockFilter(stock: number): boolean {
-    if (!this.selectedStockFilter) return true;
-    
-    switch (this.selectedStockFilter) {
-      case 'low': return stock < 10;
-      case 'medium': return stock >= 10 && stock <= 50;
-      case 'high': return stock > 50;
-      case 'out': return stock === 0;
-      default: return true;
-    }
+  onCategoryChange(): void {
+    this.filterProducts();
   }
 
-  private matchesPriceFilter(price: number): boolean {
-    const min = this.minPrice ? parseFloat(this.minPrice) : 0;
-    const max = this.maxPrice ? parseFloat(this.maxPrice) : Infinity;
-    return price >= min && price <= max;
+  onStatusChange(): void {
+    this.filterProducts();
+  }
+
+  onStockFilterChange(): void {
+    this.filterProducts();
+  }
+
+  onPriceFilterChange(): void {
+    this.filterProducts();
   }
 
   clearFilters(): void {
@@ -273,74 +268,43 @@ export class ProductsComponent implements OnInit {
     this.selectedStockFilter = '';
     this.minPrice = '';
     this.maxPrice = '';
-    
-    // Reset multi-select options
-    this.categoryOptions.forEach(option => option.selected = false);
-    
     this.filterProducts();
   }
 
-  onCategorySelectionChange(selectedValues: string[]): void {
-    this.selectedCategories = selectedValues;
-    this.filterProducts();
+  updatePagination(): void {
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    this.filteredProducts = this.products.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      currentPage: page
-    };
+    this.paginationConfig.currentPage = page;
+    this.loadProducts();
   }
 
-  onItemsPerPageChange(itemsPerPage: number): void {
-    this.paginationConfig = {
-      ...this.paginationConfig,
-      itemsPerPage: itemsPerPage,
-      currentPage: 1
-    };
-  }
-
-  getPaginatedProducts(): Product[] {
-    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
-    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
-    return this.filteredProducts.slice(startIndex, endIndex);
-  }
-
-  onViewChange(view: ViewMode): void {
-    this.currentView = view;
-    // Salva a preferência no localStorage
-    this.viewPreferencesService.setViewPreference('products', view);
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'active': return 'status-active';
-      case 'inactive': return 'status-inactive';
-      case 'low-stock': return 'status-low-stock';
-      default: return '';
-    }
-  }
-
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'active': return 'Ativo';
-      case 'inactive': return 'Inativo';
-      case 'low-stock': return 'Estoque Baixo';
-      default: return status;
-    }
+  onViewModeChange(mode: ViewMode): void {
+    this.currentView = mode;
+    this.viewPreferencesService.setViewPreference('products', mode);
   }
 
   addProduct(): void {
     this.editingProduct = {
-      id: 0,
+      id: '',
       name: '',
-      category: '',
-      price: 0,
-      stock: 0,
       sku: '',
-      status: 'active',
-      lastUpdated: new Date(),
-      images: []
+      status: 'ACTIVE',
+      type: 'PRODUCT',
+      costPrice: 0,
+      sellingPrice: 0,
+      currentStock: 0,
+      minStock: 0,
+      maxStock: 0,
+      categoryId: '',
+      supplierId: '',
+      trackExpiration: false,
+      isTaxable: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     this.showAddModal = true;
   }
@@ -350,20 +314,163 @@ export class ProductsComponent implements OnInit {
     this.showAddModal = true;
   }
 
+  saveProduct(): void {
+    if (!this.editingProduct) return;
+
+    if (this.editingProduct.id) {
+      // Update existing product
+      this.productService.updateProduct(this.editingProduct.id, this.editingProduct)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.dialogService.showSuccess('Produto atualizado com sucesso!');
+            this.loadProducts();
+            this.showAddModal = false;
+            this.editingProduct = null;
+          },
+          error: (error) => {
+            console.error('Erro ao atualizar produto:', error);
+            this.dialogService.showError('Erro ao atualizar produto. Tente novamente.');
+          }
+        });
+    } else {
+      // Create new product
+      this.productService.createProduct(this.editingProduct)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.dialogService.showSuccess('Produto criado com sucesso!');
+            this.loadProducts();
+            this.showAddModal = false;
+            this.editingProduct = null;
+          },
+          error: (error) => {
+            console.error('Erro ao criar produto:', error);
+            this.dialogService.showError('Erro ao criar produto. Tente novamente.');
+          }
+        });
+    }
+  }
+
   deleteProduct(product: Product): void {
-    this.dialogService.confirmDelete(product.name, 'produto').subscribe(result => {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja excluir o produto "${product.name}"?`,
+      'Confirmar exclusão'
+    ).subscribe(result => {
       if (result.confirmed) {
-        this.products = this.products.filter(p => p.id !== product.id);
-        this.filterProducts();
+        this.productService.deleteProduct(product.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.dialogService.showSuccess('Produto excluído com sucesso!');
+              this.loadProducts();
+            },
+            error: (error) => {
+              console.error('Erro ao excluir produto:', error);
+              this.dialogService.showError('Erro ao excluir produto. Tente novamente.');
+            }
+          });
       }
     });
   }
 
-  saveProduct(): void {
-    // TODO: Implementar salvamento
-    console.log('Salvando produto:', this.editingProduct);
+  cancelEdit(): void {
     this.showAddModal = false;
     this.editingProduct = null;
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'status-active';
+      case 'INACTIVE':
+        return 'status-inactive';
+      case 'DISCONTINUED':
+        return 'status-discontinued';
+      default:
+        return '';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'Ativo';
+      case 'INACTIVE':
+        return 'Inativo';
+      case 'DISCONTINUED':
+        return 'Descontinuado';
+      default:
+        return status;
+    }
+  }
+
+  getStockClass(stock: number, minStock: number): string {
+    if (stock === 0) return 'stock-out';
+    if (stock < minStock) return 'stock-low';
+    if (stock > 50) return 'stock-high';
+    return 'stock-normal';
+  }
+
+  getStockLabel(stock: number, minStock: number): string {
+    if (stock === 0) return 'Sem estoque';
+    if (stock < minStock) return 'Estoque baixo';
+    if (stock > 50) return 'Estoque alto';
+    return 'Estoque normal';
+  }
+
+  getProductImage(product: Product): string {
+    if (product.images && product.images.length > 0) {
+      return product.images[0].url;
+    }
+    return 'https://via.placeholder.com/100x100?text=Sem+Imagem';
+  }
+
+  getProductPrice(product: Product): number {
+    return product.sellingPrice;
+  }
+
+  getProductStock(product: Product): number {
+    return product.currentStock;
+  }
+
+  getProductCategory(product: Product): string {
+    return product.category?.name || 'Sem categoria';
+  }
+
+  getProductSupplier(product: Product): string {
+    return product.supplier?.name || 'Sem fornecedor';
+  }
+
+  // Métodos faltando para templates
+  getPaginatedProducts(): Product[] {
+    return this.filteredProducts;
+  }
+
+  getStatusText(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'ACTIVE': 'Ativo',
+      'INACTIVE': 'Inativo',
+      'DISCONTINUED': 'Descontinuado'
+    };
+    return statusMap[status] || status;
+  }
+
+  onCategorySelectionChange(selectedCategories: string[]): void {
+    this.selectedCategories = selectedCategories;
+    this.filterProducts();
+  }
+
+  onImageError(event: any): void {
+    console.log('Erro ao carregar imagem:', event);
+  }
+
+  onImageSelect(event: any): void {
+    console.log('Imagem selecionada:', event);
+  }
+
+  removeImage(index: number): void {
+    console.log('Remover imagem:', index);
   }
 
   closeModal(): void {
@@ -371,44 +478,14 @@ export class ProductsComponent implements OnInit {
     this.editingProduct = null;
   }
 
-  onImageSelect(event: any): void {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const maxFiles = 5;
-      const currentImages = this.editingProduct?.images || [];
-      const remainingSlots = maxFiles - currentImages.length;
-      const filesToAdd = Math.min(files.length, remainingSlots);
-      
-      for (let i = 0; i < filesToAdd; i++) {
-        const file = files[i];
-        if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (e: any) => {
-            if (this.editingProduct) {
-              if (!this.editingProduct.images) {
-                this.editingProduct.images = [];
-              }
-              this.editingProduct.images.push(e.target.result);
-            }
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    }
-    // Limpa o input para permitir selecionar o mesmo arquivo novamente
-    event.target.value = '';
+  onItemsPerPageChange(limit: number): void {
+    this.paginationConfig.itemsPerPage = limit;
+    this.paginationConfig.currentPage = 1;
+    this.loadProducts();
   }
 
-  removeImage(index: number): void {
-    if (this.editingProduct && this.editingProduct.images) {
-      this.editingProduct.images.splice(index, 1);
-    }
-  }
-
-  onImageError(event: any): void {
-    const target = event.target as HTMLImageElement;
-    if (target) {
-      target.style.display = 'none';
-    }
+  onViewChange(view: ViewMode): void {
+    this.currentView = view;
+    this.viewPreferencesService.setViewPreference('products', view);
   }
 }

@@ -15,7 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam }
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { TransferStockDto } from './dto/transfer-stock.dto';
+import { LocationTransferStockDto } from './dto/location-transfer-stock.dto';
 import { LocationStatsDto } from './dto/location-stats.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { LocationType, UserRole } from '@prisma/client';
@@ -129,7 +129,7 @@ export class LocationController {
   @ApiResponse({ status: 400, description: 'Bad request - insufficient stock or capacity exceeded' })
   @ApiResponse({ status: 404, description: 'Source or destination location not found' })
   async transferStock(
-    @Body() transferStockDto: TransferStockDto,
+    @Body() transferStockDto: LocationTransferStockDto,
     @User('companyId') companyId: string,
     @User('userId') userId: string,
   ) {

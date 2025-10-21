@@ -2,11 +2,87 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService, PaginatedResponse } from './api.service';
-import { 
-  SupplierResponse, 
-  CreateSupplierRequest, 
-  UpdateSupplierRequest 
-} from '@estoque-mestre/models';
+// Interfaces locais
+export interface SupplierResponse {
+  id: string;
+  name: string;
+  document?: string;
+  type: 'DISTRIBUTOR' | 'MANUFACTURER' | 'WHOLESALER';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  contacts?: Array<{
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+  }>;
+  addresses?: Array<{
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    isDefault: boolean;
+  }>;
+  paymentTerms?: string;
+  creditLimit?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSupplierRequest {
+  name: string;
+  document?: string;
+  type: 'DISTRIBUTOR' | 'MANUFACTURER' | 'WHOLESALER';
+  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  contacts?: Array<{
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+  }>;
+  addresses?: Array<{
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    isDefault: boolean;
+  }>;
+  paymentTerms?: string;
+  creditLimit?: number;
+  notes?: string;
+}
+
+export interface UpdateSupplierRequest {
+  name?: string;
+  document?: string;
+  type?: 'DISTRIBUTOR' | 'MANUFACTURER' | 'WHOLESALER';
+  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  contacts?: Array<{
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+  }>;
+  addresses?: Array<{
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    isDefault: boolean;
+  }>;
+  paymentTerms?: string;
+  creditLimit?: number;
+  notes?: string;
+}
 
 export interface SupplierFilters {
   query?: string;

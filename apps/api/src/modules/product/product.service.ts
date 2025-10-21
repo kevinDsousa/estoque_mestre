@@ -5,7 +5,7 @@ import { QueryCacheService } from '../../common/cache/query-cache.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
-import { TransferStockDto } from './dto/transfer-stock.dto';
+import { ProductTransferStockDto } from './dto/product-transfer-stock.dto';
 import { ProductStatus, MovementType, MovementReason } from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
 
@@ -18,7 +18,7 @@ export class ProductService {
     private queryCacheService: QueryCacheService,
   ) {}
 
-  async create(createProductDto: CreateProductDto, companyId: string) {
+  async create(createProductDto: CreateProductDto, companyId: string, userId: string) {
     // Check if product with same SKU already exists in company
     const existingProduct = await this.prisma.product.findFirst({
       where: {
@@ -119,7 +119,7 @@ export class ProductService {
           unitCost: createProductDto.costPrice,
           totalCost: createProductDto.costPrice * createProductDto.currentStock,
           notes: 'Initial stock',
-          userId: 'system', // TODO: Get from auth context
+          userId: userId,
         },
       });
     }
@@ -305,7 +305,7 @@ export class ProductService {
     });
   }
 
-  async adjustStock(id: string, adjustStockDto: AdjustStockDto, companyId: string) {
+  async adjustStock(id: string, adjustStockDto: AdjustStockDto, companyId: string, userId: string) {
     const product = await this.findOne(id, companyId);
 
     const newStock = product.currentStock + adjustStockDto.quantity;
@@ -336,7 +336,7 @@ export class ProductService {
         unitCost: product.costPrice,
         totalCost: product.costPrice * Math.abs(adjustStockDto.quantity),
         notes: adjustStockDto.notes || adjustStockDto.reason,
-        userId: 'system', // TODO: Get from auth context
+        userId: userId,
       },
     });
 
@@ -346,7 +346,7 @@ export class ProductService {
     return updatedProduct;
   }
 
-  async transferStock(id: string, transferStockDto: TransferStockDto, companyId: string) {
+  async transferStock(id: string, transferStockDto: ProductTransferStockDto, companyId: string, userId: string) {
     const product = await this.findOne(id, companyId);
 
     if (product.currentStock < transferStockDto.quantity) {
@@ -388,7 +388,7 @@ export class ProductService {
         unitCost: product.costPrice,
         totalCost: product.costPrice * transferStockDto.quantity,
         notes: `Transfer: ${transferStockDto.reason}`,
-        userId: 'system', // TODO: Get from auth context
+        userId: userId,
       },
     });
 

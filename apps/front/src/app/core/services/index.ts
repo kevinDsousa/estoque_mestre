@@ -7,8 +7,19 @@
 // Core Services
 export { ApiService } from './api.service';
 export { AuthService } from './auth.service';
-export { StorageService } from './storage.service';
+export { ProductService } from './product.service';
+export { CategoryService } from './category.service';
+export { SupplierService } from './supplier.service';
+export { CustomerService } from './customer.service';
+export { TransactionService } from './transaction.service';
+export { UserService } from './user.service';
+export { ReportsService } from './reports.service';
+export { ImageService } from './image.service';
 export { NotificationService } from './notification.service';
+export { PaymentService } from './payment.service';
+export { CompanyService } from './company.service';
+export { DashboardService } from './dashboard.service';
+export { StorageService } from './storage.service';
 export { DialogService } from './dialog.service';
 
 // Business Services

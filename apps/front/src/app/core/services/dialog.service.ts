@@ -173,4 +173,40 @@ export class DialogService {
   isDialogOpen(): boolean {
     return this.dialogSubject.value !== null;
   }
+
+  /**
+   * Show success message
+   */
+  showSuccess(message: string, title: string = 'Sucesso'): void {
+    this.info({
+      title,
+      message,
+      icon: 'pi pi-check-circle',
+      type: 'info'
+    });
+  }
+
+  /**
+   * Show error message
+   */
+  showError(message: string, title: string = 'Erro'): void {
+    this.error({
+      title,
+      message,
+      icon: 'pi pi-times-circle',
+      type: 'error'
+    });
+  }
+
+  /**
+   * Show confirmation dialog (alias for confirm)
+   */
+  showConfirm(message: string, title: string = 'Confirmar'): Observable<DialogResult> {
+    return this.confirm({
+      title,
+      message,
+      icon: 'pi pi-question-circle',
+      type: 'confirm'
+    });
+  }
 }

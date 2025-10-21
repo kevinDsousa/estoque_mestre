@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { EmailService } from '../email/email.service';
-import { ApproveCompanyDto, RejectCompanyDto, SuspendCompanyDto, CompanyQueryDto } from './dto/admin-company.dto';
+import { ApproveCompanyDto, AdminRejectCompanyDto, SuspendCompanyDto, CompanyQueryDto } from './dto/admin-company.dto';
 import { CreateBusinessMetricDto, BusinessMetricQueryDto, GlobalMetricsDto } from './dto/admin-metrics.dto';
 import { CreateAdminUserDto, UpdateAdminUserDto, AdminUserQueryDto } from './dto/admin-user.dto';
 import { CompanyStatus, UserRole, UserStatus, BusinessMetricType } from '@prisma/client';
@@ -181,7 +181,7 @@ export class AdminService {
     return updatedCompany;
   }
 
-  async rejectCompany(id: string, rejectDto: RejectCompanyDto) {
+  async rejectCompany(id: string, rejectDto: AdminRejectCompanyDto) {
     const company = await this.prisma.company.findUnique({
       where: { id },
     });
@@ -645,5 +645,636 @@ export class AdminService {
     if (unhealthyCount > 0) return 'unhealthy';
     if (degradedCount > 0) return 'degraded';
     return 'healthy';
+  }
+
+  // ===== DASHBOARD METHODS =====
+
+  async getDashboardStats(companyId: string) {
+    const [
+      totalProducts,
+      totalCategories,
+      totalSuppliers,
+      totalCustomers,
+      totalTransactions,
+      lowStockProducts,
+      outOfStockProducts,
+      totalInventoryValue
+    ] = await Promise.all([
+      this.prisma.product.count({ where: { companyId } }),
+      this.prisma.category.count({ where: { companyId } }),
+      this.prisma.supplier.count({ where: { companyId } }),
+      this.prisma.customer.count({ where: { companyId } }),
+      this.prisma.transaction.count({ where: { companyId } }),
+      this.prisma.product.count({ 
+        where: { 
+          companyId,
+          currentStock: { lte: this.prisma.product.fields.minStock }
+        }
+      }),
+      this.prisma.product.count({ 
+        where: { 
+          companyId,
+          currentStock: 0
+        }
+      }),
+      this.prisma.product.aggregate({
+        where: { companyId },
+        _sum: {
+          currentStock: true
+        }
+      })
+    ]);
+
+    return {
+      totalProducts,
+      totalCategories,
+      totalSuppliers,
+      totalCustomers,
+      totalTransactions,
+      lowStockProducts,
+      outOfStockProducts,
+      totalInventoryValue: totalInventoryValue._sum.currentStock || 0
+    };
+  }
+
+  async getQuickStats(companyId: string) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const [monthlyStats, weeklyStats, dailyStats] = await Promise.all([
+      this.getPeriodStats(companyId, startOfMonth, now),
+      this.getPeriodStats(companyId, startOfWeek, now),
+      this.getPeriodStats(companyId, startOfDay, now)
+    ]);
+
+    return {
+      monthly: monthlyStats,
+      weekly: weeklyStats,
+      daily: dailyStats
+    };
+  }
+
+  private async getPeriodStats(companyId: string, startDate: Date, endDate: Date) {
+    const [sales, purchases, newProducts, newCustomers] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where: {
+          companyId,
+          type: 'SALE',
+          transactionDate: { gte: startDate, lte: endDate }
+        },
+        include: {
+          items: true
+        }
+      }),
+      this.prisma.transaction.findMany({
+        where: {
+          companyId,
+          type: 'PURCHASE',
+          transactionDate: { gte: startDate, lte: endDate }
+        },
+        include: {
+          items: true
+        }
+      }),
+      this.prisma.product.count({
+        where: {
+          companyId,
+          createdAt: { gte: startDate, lte: endDate }
+        }
+      }),
+      this.prisma.customer.count({
+        where: {
+          companyId,
+          createdAt: { gte: startDate, lte: endDate }
+        }
+      })
+    ]);
+
+    const salesAmount = sales.reduce((sum, transaction) => 
+      sum + transaction.items.reduce((itemSum, item) => itemSum + (item.unitPrice * item.quantity), 0), 0
+    );
+
+    const purchasesAmount = purchases.reduce((sum, transaction) => 
+      sum + transaction.items.reduce((itemSum, item) => itemSum + (item.unitPrice * item.quantity), 0), 0
+    );
+
+    return {
+      sales: {
+        amount: salesAmount,
+        count: sales.length
+      },
+      purchases: {
+        amount: purchasesAmount,
+        count: purchases.length
+      },
+      newProducts,
+      newCustomers
+    };
+  }
+
+  async getRecentActivity(companyId: string, limit: number = 10) {
+    const activities = await this.prisma.transaction.findMany({
+      where: { companyId },
+      take: limit,
+      orderBy: { transactionDate: 'desc' },
+      include: {
+        customer: true,
+        supplier: true,
+        user: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    return activities.map(transaction => {
+      const totalAmount = transaction.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+      return {
+        id: transaction.id,
+        type: transaction.type,
+        description: this.getActivityDescription(transaction),
+        date: transaction.transactionDate,
+        user: transaction.user ? `${transaction.user.firstName} ${transaction.user.lastName}` : 'Sistema',
+        amount: totalAmount
+      };
+    });
+  }
+
+  private getActivityDescription(transaction: any): string {
+    const itemCount = transaction.items.length;
+    const firstItem = transaction.items[0]?.product?.name || 'Produto';
+    
+    if (transaction.type === 'SALE') {
+      return `Venda de ${itemCount} item(s) - ${firstItem}`;
+    } else if (transaction.type === 'PURCHASE') {
+      return `Compra de ${itemCount} item(s) - ${firstItem}`;
+    } else {
+      return `Transação de ${itemCount} item(s) - ${firstItem}`;
+    }
+  }
+
+  async getLowStockProducts(companyId: string) {
+    return this.prisma.product.findMany({
+      where: {
+        companyId,
+        currentStock: { lte: this.prisma.product.fields.minStock }
+      },
+      include: {
+        category: true,
+        supplier: true
+      },
+      orderBy: { currentStock: 'asc' }
+    });
+  }
+
+  async getPendingOrders(companyId: string) {
+    return this.prisma.transaction.findMany({
+      where: {
+        companyId,
+        status: 'PENDING'
+      },
+      include: {
+        customer: true,
+        supplier: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
+      },
+      orderBy: { transactionDate: 'desc' }
+    });
+  }
+
+  async getSalesChartData(companyId: string, period: string = 'month') {
+    const now = new Date();
+    let startDate: Date;
+    let groupBy: string;
+
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.setDate(now.getDate() - 7));
+        groupBy = 'day';
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        groupBy = 'month';
+        break;
+      default: // month
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        groupBy = 'day';
+    }
+
+    const sales = await this.prisma.transaction.findMany({
+      where: {
+        companyId,
+        type: 'SALE',
+        transactionDate: { gte: startDate }
+      },
+      include: {
+        items: true
+      },
+      orderBy: { transactionDate: 'asc' }
+    });
+
+    // Group data by period
+    const groupedData = this.groupSalesData(sales, groupBy);
+    
+    return {
+      labels: Object.keys(groupedData),
+      data: Object.values(groupedData)
+    };
+  }
+
+  private groupSalesData(sales: any[], groupBy: string) {
+    const grouped: { [key: string]: number } = {};
+
+    sales.forEach(sale => {
+      let key: string;
+      const date = new Date(sale.transactionDate);
+
+      if (groupBy === 'day') {
+        key = date.toISOString().split('T')[0];
+      } else if (groupBy === 'month') {
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      } else {
+        key = date.toISOString().split('T')[0];
+      }
+
+      const totalAmount = sale.items.reduce((sum: number, item: any) => sum + (item.unitPrice * item.quantity), 0);
+      grouped[key] = (grouped[key] || 0) + totalAmount;
+    });
+
+    return grouped;
+  }
+
+  async getInventoryChartData(companyId: string) {
+    const categories = await this.prisma.category.findMany({
+      where: { companyId },
+      include: {
+        products: {
+          select: {
+            currentStock: true,
+            costPrice: true
+          }
+        }
+      }
+    });
+
+    return categories.map(category => ({
+      name: category.name,
+      totalStock: category.products.reduce((sum, product) => sum + product.currentStock, 0),
+      totalValue: category.products.reduce((sum, product) => sum + (product.currentStock * product.costPrice), 0)
+    }));
+  }
+
+  async getTopSellingProducts(companyId: string, limit: number = 5) {
+    const topProducts = await this.prisma.transactionItem.groupBy({
+      by: ['productId'],
+      where: {
+        transaction: {
+          companyId,
+          type: 'SALE'
+        }
+      },
+      _sum: {
+        quantity: true
+      },
+      orderBy: {
+        _sum: {
+          quantity: 'desc'
+        }
+      },
+      take: limit
+    });
+
+    const productIds = topProducts.map(item => item.productId);
+    const products = await this.prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        companyId
+      },
+      include: {
+        category: true
+      }
+    });
+
+    return topProducts.map(item => {
+      const product = products.find(p => p.id === item.productId);
+      return {
+        product,
+        totalSold: item._sum.quantity || 0
+      };
+    });
+  }
+
+  async getTopCustomers(companyId: string, limit: number = 5) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        companyId,
+        type: 'SALE',
+        customerId: { not: null }
+      },
+      include: {
+        customer: true,
+        items: true
+      }
+    });
+
+    // Group by customer and calculate totals
+    const customerTotals: { [key: string]: { customer: any; totalSpent: number; orderCount: number } } = {};
+
+    transactions.forEach(transaction => {
+      const customerId = transaction.customerId!;
+      const totalAmount = transaction.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+
+      if (!customerTotals[customerId]) {
+        customerTotals[customerId] = {
+          customer: transaction.customer,
+          totalSpent: 0,
+          orderCount: 0
+        };
+      }
+
+      customerTotals[customerId].totalSpent += totalAmount;
+      customerTotals[customerId].orderCount += 1;
+    });
+
+    // Sort by total spent and take top customers
+    const topCustomers = Object.values(customerTotals)
+      .sort((a, b) => b.totalSpent - a.totalSpent)
+      .slice(0, limit);
+
+    return topCustomers;
+  }
+
+  async getRevenueByCategory(companyId: string) {
+    const revenueByCategory = await this.prisma.transactionItem.groupBy({
+      by: ['productId'],
+      where: {
+        transaction: {
+          companyId,
+          type: 'SALE'
+        }
+      },
+      _sum: {
+        unitPrice: true
+      }
+    });
+
+    const productIds = revenueByCategory.map(item => item.productId);
+    const products = await this.prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        companyId
+      },
+      include: {
+        category: true
+      }
+    });
+
+    const categoryRevenue: { [key: string]: number } = {};
+
+    revenueByCategory.forEach(item => {
+      const product = products.find(p => p.id === item.productId);
+      if (product && product.category) {
+        const categoryName = product.category.name;
+        categoryRevenue[categoryName] = (categoryRevenue[categoryName] || 0) + (item._sum.unitPrice || 0);
+      }
+    });
+
+    return Object.entries(categoryRevenue).map(([category, revenue]) => ({
+      category,
+      revenue
+    }));
+  }
+
+  async getMonthlySalesTrend(companyId: string, months: number = 12) {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - months);
+
+    const sales = await this.prisma.transaction.findMany({
+      where: {
+        companyId,
+        type: 'SALE',
+        transactionDate: { gte: startDate, lte: endDate }
+      },
+      include: {
+        items: true
+      },
+      orderBy: { transactionDate: 'asc' }
+    });
+
+    const monthlyData = this.groupSalesData(sales, 'month');
+    
+    return {
+      labels: Object.keys(monthlyData),
+      data: Object.values(monthlyData)
+    };
+  }
+
+  async getInventoryValueByCategory(companyId: string) {
+    const categories = await this.prisma.category.findMany({
+      where: { companyId },
+      include: {
+        products: {
+          select: {
+            currentStock: true,
+            costPrice: true
+          }
+        }
+      }
+    });
+
+    return categories.map(category => ({
+      category: category.name,
+      value: category.products.reduce((sum, product) => sum + (product.currentStock * product.costPrice), 0)
+    }));
+  }
+
+  async getProfitMarginAnalysis(companyId: string) {
+    const products = await this.prisma.product.findMany({
+      where: { companyId },
+      select: {
+        costPrice: true,
+        sellingPrice: true,
+        currentStock: true
+      }
+    });
+
+    const totalCost = products.reduce((sum, product) => sum + (product.currentStock * product.costPrice), 0);
+    const totalValue = products.reduce((sum, product) => sum + (product.currentStock * product.sellingPrice), 0);
+    const profitMargin = totalValue > 0 ? ((totalValue - totalCost) / totalValue) * 100 : 0;
+
+    return {
+      totalCost,
+      totalValue,
+      profitMargin,
+      profitAmount: totalValue - totalCost
+    };
+  }
+
+  async getStockMovementTrends(companyId: string, days: number = 30) {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const movements = await this.prisma.inventoryMovement.findMany({
+      where: {
+        companyId,
+        movementDate: { gte: startDate, lte: endDate }
+      },
+      select: {
+        movementDate: true,
+        quantity: true,
+        type: true
+      },
+      orderBy: { movementDate: 'asc' }
+    });
+
+    const dailyMovements = this.groupStockMovements(movements);
+    
+    return {
+      labels: Object.keys(dailyMovements),
+      data: Object.values(dailyMovements)
+    };
+  }
+
+  private groupStockMovements(movements: any[]) {
+    const grouped: { [key: string]: { in: number; out: number } } = {};
+
+    movements.forEach(movement => {
+      const date = new Date(movement.movementDate).toISOString().split('T')[0];
+      if (!grouped[date]) {
+        grouped[date] = { in: 0, out: 0 };
+      }
+      
+      if (movement.type === 'IN') {
+        grouped[date].in += movement.quantity;
+      } else {
+        grouped[date].out += movement.quantity;
+      }
+    });
+
+    return grouped;
+  }
+
+  async getSupplierPerformance(companyId: string) {
+    const suppliers = await this.prisma.supplier.findMany({
+      where: { companyId },
+      include: {
+        products: {
+          include: {
+            inventoryMovements: {
+              where: {
+                type: 'IN'
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return suppliers.map(supplier => ({
+      supplier: {
+        id: supplier.id,
+        name: supplier.name
+      },
+      totalProducts: supplier.products.length,
+      totalStockReceived: supplier.products.reduce((sum, product) => 
+        sum + product.inventoryMovements.reduce((stockSum, history) => stockSum + history.quantity, 0), 0
+      )
+    }));
+  }
+
+  async getCustomerAcquisitionTrends(companyId: string, months: number = 12) {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - months);
+
+    const customers = await this.prisma.customer.findMany({
+      where: {
+        companyId,
+        createdAt: { gte: startDate, lte: endDate }
+      },
+      select: {
+        createdAt: true
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    const monthlyAcquisition = this.groupCustomerAcquisition(customers);
+    
+    return {
+      labels: Object.keys(monthlyAcquisition),
+      data: Object.values(monthlyAcquisition)
+    };
+  }
+
+  private groupCustomerAcquisition(customers: any[]) {
+    const grouped: { [key: string]: number } = {};
+
+    customers.forEach(customer => {
+      const date = new Date(customer.createdAt);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      grouped[key] = (grouped[key] || 0) + 1;
+    });
+
+    return grouped;
+  }
+
+  async getAlertsSummary(companyId: string) {
+    const [lowStockCount, outOfStockCount, pendingOrdersCount, expiredProductsCount] = await Promise.all([
+      this.prisma.product.count({
+        where: {
+          companyId,
+          AND: [
+            { currentStock: { lte: this.prisma.product.fields.minStock } },
+            { currentStock: { gt: 0 } }
+          ]
+        }
+      }),
+      this.prisma.product.count({
+        where: {
+          companyId,
+          currentStock: 0
+        }
+      }),
+      this.prisma.transaction.count({
+        where: {
+          companyId,
+          status: 'PENDING'
+        }
+      }),
+      this.prisma.product.count({
+        where: {
+          companyId,
+          expirationDate: { lte: new Date() }
+        }
+      })
+    ]);
+
+    return {
+      lowStock: lowStockCount,
+      outOfStock: outOfStockCount,
+      pendingOrders: pendingOrdersCount,
+      expiredProducts: expiredProductsCount,
+      total: lowStockCount + outOfStockCount + pendingOrdersCount + expiredProductsCount
+    };
+  }
+
+  async exportDashboardData(companyId: string, format: string = 'xlsx') {
+    // This would typically generate and return a file
+    // For now, return a mock response
+    return {
+      message: `Dashboard data exported in ${format} format`,
+      downloadUrl: `/api/admin/dashboard/export/download?format=${format}&companyId=${companyId}`,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    };
   }
 }

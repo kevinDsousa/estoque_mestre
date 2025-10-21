@@ -29,7 +29,8 @@ export class MinioService {
       }
     } catch (error) {
       console.error('Error initializing MinIO:', error);
-      throw new InternalServerErrorException('Failed to initialize MinIO service');
+      console.warn('MinIO service is not available. File upload functionality will be limited.');
+      // Don't throw error to allow app to start even without MinIO
     }
   }
 

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ConflictException }
 import { PrismaService } from '../../database/prisma.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { TransferStockDto } from './dto/transfer-stock.dto';
+import { LocationTransferStockDto } from './dto/location-transfer-stock.dto';
 import { LocationStatsDto } from './dto/location-stats.dto';
 import { LocationType } from '@prisma/client';
 
@@ -271,7 +271,7 @@ export class LocationService {
     return { message: 'Location deleted successfully' };
   }
 
-  async transferStock(transferStockDto: TransferStockDto, companyId: string, userId: string) {
+  async transferStock(transferStockDto: LocationTransferStockDto, companyId: string, userId: string) {
     const { fromLocationId, toLocationId, quantity, reason, notes } = transferStockDto;
 
     if (fromLocationId === toLocationId) {

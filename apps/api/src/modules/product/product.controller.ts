@@ -24,7 +24,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
-import { TransferStockDto } from './dto/transfer-stock.dto';
+import { ProductTransferStockDto } from './dto/product-transfer-stock.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ProductStatus } from '@prisma/client';
 import { AuthContext } from '../../common/decorators/auth-context.decorator';
@@ -42,7 +42,7 @@ export class ProductController {
   @ApiResponse({ status: 409, description: 'Product with this SKU or barcode already exists' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   create(@Body() createProductDto: CreateProductDto, @AuthContext() authContext: any) {
-    return this.productService.create(createProductDto, authContext.companyId);
+    return this.productService.create(createProductDto, authContext.companyId, authContext.userId);
   }
 
   @Get()
@@ -124,8 +124,8 @@ export class ProductController {
   @ApiResponse({ status: 200, description: 'Stock adjusted successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 400, description: 'Insufficient stock for adjustment' })
-  adjustStock(@Param('id') id: string, @Body() adjustStockDto: AdjustStockDto, @Request() req) {
-    return this.productService.adjustStock(id, adjustStockDto, req.user.companyId);
+  adjustStock(@Param('id') id: string, @Body() adjustStockDto: AdjustStockDto, @AuthContext() authContext: any) {
+    return this.productService.adjustStock(id, adjustStockDto, authContext.companyId, authContext.userId);
   }
 
   @Patch(':id/transfer-stock')
@@ -134,8 +134,8 @@ export class ProductController {
   @ApiResponse({ status: 200, description: 'Stock transferred successfully' })
   @ApiResponse({ status: 404, description: 'Product or target location not found' })
   @ApiResponse({ status: 400, description: 'Insufficient stock for transfer' })
-  transferStock(@Param('id') id: string, @Body() transferStockDto: TransferStockDto, @Request() req) {
-    return this.productService.transferStock(id, transferStockDto, req.user.companyId);
+  transferStock(@Param('id') id: string, @Body() transferStockDto: ProductTransferStockDto, @AuthContext() authContext: any) {
+    return this.productService.transferStock(id, transferStockDto, authContext.companyId, authContext.userId);
   }
 
   @Delete(':id')

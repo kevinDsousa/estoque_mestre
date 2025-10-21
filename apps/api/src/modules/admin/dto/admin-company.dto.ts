@@ -23,7 +23,7 @@ export class ApproveCompanyDto {
   subscriptionPlanId?: string;
 }
 
-export class RejectCompanyDto {
+export class AdminRejectCompanyDto {
   @ApiProperty({ description: 'ID do administrador que está rejeitando' })
   @IsString()
   @IsNotEmpty()

@@ -2,11 +2,74 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService, PaginatedResponse } from './api.service';
-import { 
-  TransactionResponse, 
-  CreateTransactionRequest, 
-  UpdateTransactionRequest 
-} from '@estoque-mestre/models';
+// Interfaces locais
+export interface TransactionResponse {
+  id: string;
+  type: 'SALE' | 'PURCHASE' | 'RETURN' | 'ADJUSTMENT' | 'TRANSFER';
+  status: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED';
+  customerId?: string;
+  supplierId?: string;
+  totalAmount: number;
+  discountAmount?: number;
+  taxAmount?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  customer?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  supplier?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  items: Array<{
+    id: string;
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }>;
+  paymentMethod?: string;
+  paymentStatus?: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentDate?: string;
+}
+
+export interface CreateTransactionRequest {
+  type: 'SALE' | 'PURCHASE' | 'RETURN' | 'ADJUSTMENT' | 'TRANSFER';
+  customerId?: string;
+  supplierId?: string;
+  totalAmount: number;
+  discountAmount?: number;
+  taxAmount?: number;
+  notes?: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+  }>;
+  paymentMethod?: string;
+}
+
+export interface UpdateTransactionRequest {
+  type?: 'SALE' | 'PURCHASE' | 'RETURN' | 'ADJUSTMENT' | 'TRANSFER';
+  customerId?: string;
+  supplierId?: string;
+  totalAmount?: number;
+  discountAmount?: number;
+  taxAmount?: number;
+  notes?: string;
+  items?: Array<{
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+  }>;
+  paymentMethod?: string;
+}
 
 export interface TransactionFilters {
   query?: string;

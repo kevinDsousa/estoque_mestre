@@ -5,6 +5,9 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PaginatedResponse, ApiError } from '../interfaces/api.interface';
 
+// Re-export interfaces for external use
+export { ApiResponse, PaginatedResponse, ApiError } from '../interfaces/api.interface';
+
 @Injectable({
   providedIn: 'root'
 })
