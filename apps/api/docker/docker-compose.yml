@@ -1,0 +1,122 @@
+version: '3'
+
+services:
+  api:
+    container_name: nodex-api
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - observability
+    env_file:
+      - ../.env
+    depends_on:
+      - postgres-db
+      - redis
+      - loki
+      - promtail
+    restart: always
+
+  postgres-db:
+    container_name: postgres-db
+    image: postgis/postgis:latest
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "postgres"
+      TZ: "America/Sao_Paulo"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - observability
+    restart: always
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    networks:
+      - observability
+    restart: always
+
+  redis-commander:
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - observability
+    restart: always
+
+  loki:
+    container_name: loki
+    image: grafana/loki:2.9.0
+    volumes:
+      - loki_data:/loki
+      - ./config/loki-config.yml:/etc/loki/loki-config.yml
+    networks:
+      - observability
+    ports:
+      - "3100:3100"
+    restart: always
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:2.9.0
+    volumes:
+      - /var/log:/var/log
+      - ./config/promtail-config.yml:/etc/promtail/promtail-config.yml
+    networks:
+      - observability
+    restart: always
+    command: -config.file=/etc/promtail/promtail-config.yml
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    labels:
+      application: "Prometheus"
+    volumes:
+      - ./config/prometheus-config.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - observability
+    ports:
+      - "9090:9090"
+    restart: always
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    labels:
+      application: "Grafana"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3003:3000"
+    networks:
+      - observability
+    restart: always
+
+networks:
+  observability:
+    external: true
+    name: observability
+
+volumes:
+  loki_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
