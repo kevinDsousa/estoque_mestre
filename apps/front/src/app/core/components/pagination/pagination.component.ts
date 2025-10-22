@@ -125,7 +125,7 @@ export class PaginationComponent implements OnInit, OnChanges {
   }
 
   shouldShowPagination(): boolean {
-    return this.totalPages > 1;
+    return this.config.totalItems > 0;
   }
 
   trackByPage(index: number, page: number): number {

@@ -261,7 +261,7 @@ export class ProductService {
       }
     }
 
-    return this.prisma.product.update({
+    const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: {
         name: updateProductDto.name,
@@ -286,6 +286,11 @@ export class ProductService {
         supplier: true,
       },
     });
+
+    // Invalidar cache relacionado após atualização
+    await this.queryCacheService.invalidateProductCache(id, companyId);
+
+    return updatedProduct;
   }
 
   async remove(id: string, companyId: string) {

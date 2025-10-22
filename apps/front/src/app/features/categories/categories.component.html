@@ -29,8 +29,8 @@
         <div class="category-card">
       <div class="category-header">
         <h3>{{ category.name }}</h3>
-        <span class="status-badge" [class]="getStatusClass(category.isActive)">
-          {{ getStatusText(category.isActive) }}
+        <span class="status-badge" [class]="getStatusClass(category.status)">
+          {{ getStatusText(category.status) }}
         </span>
       </div>
       <p class="category-description">{{ category.description }}</p>
@@ -93,8 +93,8 @@
           </td>
           <td>
             <div class="cell-content">
-              <span class="status-badge" [class]="getStatusClass(category.isActive)">
-                {{ getStatusText(category.isActive) }}
+              <span class="status-badge" [class]="getStatusClass(category.status)">
+                {{ getStatusText(category.status) }}
               </span>
             </div>
           </td>
@@ -172,8 +172,9 @@
             <label class="checkbox-label">
               <input 
                 type="checkbox" 
-                [(ngModel)]="editingCategory!.isActive"
-                name="isActive">
+                [checked]="editingCategory!.status === 'ACTIVE'"
+                (change)="editingCategory!.status = $event.target.checked ? 'ACTIVE' : 'INACTIVE'"
+                name="status">
               <span>Categoria ativa</span>
             </label>
           </div>
