@@ -165,7 +165,7 @@ export class TransactionService {
    * Update transaction
    */
   updateTransaction(id: string, transactionData: UpdateTransactionRequest): Observable<TransactionResponse> {
-    return this.apiService.put<TransactionResponse>(`transactions/${id}`, transactionData)
+    return this.apiService.patch<TransactionResponse>(`transactions/${id}`, transactionData)
       .pipe(
         tap(transaction => {
           this.currentTransactionSubject.next(transaction);

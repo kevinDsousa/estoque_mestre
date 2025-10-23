@@ -210,23 +210,7 @@
   font-weight: 600;
 }
 
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.status-badge.active {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-}
-
-.status-badge.inactive {
-  background: rgba(107, 114, 128, 0.1);
-  color: var(--text-color-secondary);
-}
+// Status badges now use global styles from styles.css
 
 .customer-details {
   margin-bottom: var(--spacing-md);

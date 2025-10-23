@@ -114,11 +114,28 @@ export class CustomersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           // Mapear dados do backend para interface local
-          this.customers = (response as any).customers.map((customer: any) => ({
-            ...customer,
-            isActive: customer.status === 'ACTIVE',
-            lastPurchase: customer.lastPurchaseAt
-          }));
+          this.customers = (response as any).customers.map((customer: any) => {
+            const primaryContact = customer.contacts?.[0] || {};
+            const primaryAddress = customer.addresses?.[0] || {};
+            
+            return {
+              ...customer,
+              // Extrair email e phone do primeiro contato
+              email: primaryContact.email || '',
+              phone: primaryContact.phone || '',
+              // Extrair dados do primeiro endereço
+              address: primaryAddress.street || '',
+              city: primaryAddress.city || '',
+              state: primaryAddress.state || '',
+              zipCode: primaryAddress.zipCode || '',
+              country: primaryAddress.country || '',
+              // Outros mapeamentos
+              isActive: customer.status === 'ACTIVE',
+              lastPurchase: customer.lastPurchaseAt,
+              lastPurchaseDate: customer.lastPurchaseAt,
+              purchaseCount: customer._count?.transactions || 0
+            };
+          });
           this.paginationConfig.totalItems = response.pagination.total;
           this.filteredCustomers = [...this.customers];
           this.updatePagination();
@@ -198,36 +215,11 @@ export class CustomersComponent implements OnInit, OnDestroy {
     // Implementar modal de edição
   }
 
-  deleteCustomer(customer: Customer): void {
-    this.dialogService.showConfirm(
-      `Tem certeza que deseja excluir o cliente "${customer.name}"?`,
-      'Confirmar exclusão'
-    ).subscribe(result => {
-      if (result.confirmed) {
-        this.customerService.deleteCustomer(customer.id)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.dialogService.showSuccess('Cliente excluído com sucesso!');
-              this.loadCustomers();
-            },
-            error: (error) => {
-              console.error('Erro ao excluir cliente:', error);
-              this.dialogService.showError('Erro ao excluir cliente. Tente novamente.');
-            }
-          });
-      }
-    });
-  }
 
   toggleCustomerStatus(customer: Customer): void {
     const newStatus = customer.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    const updatedCustomer = { 
-      ...customer, 
-      status: newStatus as 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
-    };
     
-    this.customerService.updateCustomer(customer.id, updatedCustomer)
+    this.customerService.toggleCustomerStatus(customer.id, customer.status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -235,8 +227,7 @@ export class CustomersComponent implements OnInit, OnDestroy {
           this.loadCustomers();
         },
         error: (error) => {
-          console.error('Erro ao alterar status do cliente:', error);
-          this.dialogService.showError('Erro ao alterar status do cliente. Tente novamente.');
+          this.dialogService.showError(error?.message || 'Erro ao alterar status do cliente. Tente novamente.');
         }
       });
   }
@@ -295,8 +286,17 @@ export class CustomersComponent implements OnInit, OnDestroy {
   }
 
   getFullAddress(customer: Customer): string {
-    const parts = [customer.address, customer.city, customer.state, customer.zipCode].filter(Boolean);
-    return parts.join(', ') || 'Endereço não informado';
+    const parts = [
+      customer.address, 
+      customer.city, 
+      customer.state
+    ].filter(Boolean);
+    
+    const address = parts.join(', ');
+    if (customer.zipCode) {
+      return `${address} - ${customer.zipCode}`;
+    }
+    return address || 'Endereço não informado';
   }
 
   getPhone(customer: Customer): string {

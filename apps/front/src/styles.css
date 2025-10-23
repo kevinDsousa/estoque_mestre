@@ -674,6 +674,91 @@ body {
   font-family: var(--font-family-primary);
 }
 
+/* ============================================
+// Status Badge Styles (Global)
+// ============================================ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+/* Active/Success States */
+.status-badge.status-active,
+.status-badge.active,
+.status-badge.status-completed,
+.status-badge.completed {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: var(--color-success) !important;
+}
+
+/* Inactive/Error/Cancelled States */
+.status-badge.status-inactive,
+.status-badge.inactive,
+.status-badge.status-cancelled,
+.status-badge.cancelled,
+.status-badge.status-discontinued,
+.status-badge.discontinued {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: var(--color-error) !important;
+}
+
+/* Pending/Warning States */
+.status-badge.status-pending,
+.status-badge.pending,
+.status-badge.status-processing,
+.status-badge.processing {
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: var(--color-warning) !important;
+}
+
+/* Info/Default States */
+.status-badge.status-info,
+.status-badge.info,
+.status-badge.status-draft,
+.status-badge.draft {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+}
+
+/* Dark mode adjustments for better contrast */
+[data-mode="dark"] .status-badge.status-active,
+[data-mode="dark"] .status-badge.active,
+[data-mode="dark"] .status-badge.status-completed,
+[data-mode="dark"] .status-badge.completed {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+[data-mode="dark"] .status-badge.status-inactive,
+[data-mode="dark"] .status-badge.inactive,
+[data-mode="dark"] .status-badge.status-cancelled,
+[data-mode="dark"] .status-badge.cancelled,
+[data-mode="dark"] .status-badge.status-discontinued,
+[data-mode="dark"] .status-badge.discontinued {
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+[data-mode="dark"] .status-badge.status-pending,
+[data-mode="dark"] .status-badge.pending,
+[data-mode="dark"] .status-badge.status-processing,
+[data-mode="dark"] .status-badge.processing {
+  background: rgba(245, 158, 11, 0.15) !important;
+}
+
+[data-mode="dark"] .status-badge.status-info,
+[data-mode="dark"] .status-badge.info,
+[data-mode="dark"] .status-badge.status-draft,
+[data-mode="dark"] .status-badge.draft {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
 /* Utility classes */
 .sr-only {
   position: absolute;
@@ -774,6 +859,165 @@ body {
   to {
     transform: translateX(100%);
   }
+}
+
+/* ============================================
+// Button Styles for Dark Mode
+// ============================================ */
+.btn {
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--color-primary) !important;
+  color: white !important;
+  border: 1px solid var(--color-primary) !important;
+  box-shadow: var(--border-soft) !important;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: white !important;
+}
+
+.btn-primary i {
+  color: white !important;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: var(--color-secondary) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--border-soft) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--color-surface) !important;
+  color: var(--text-color) !important;
+}
+
+.btn-secondary i {
+  color: var(--text-color) !important;
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+.btn-ghost:hover {
+  background: var(--color-background-hover) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--text-color) !important;
+}
+
+.btn-ghost i {
+  color: var(--text-color) !important;
+}
+
+/* Outline Button */
+.btn-outline {
+  background: transparent !important;
+  color: var(--color-primary) !important;
+  border: 1px solid var(--color-primary) !important;
+  box-shadow: none !important;
+}
+
+.btn-outline:hover {
+  background: var(--color-primary) !important;
+  color: white !important;
+}
+
+.btn-outline i {
+  color: inherit !important;
+}
+
+/* Error/Danger Button */
+.btn.text-error,
+.btn-error,
+.btn-danger {
+  color: var(--color-error) !important;
+}
+
+.btn.text-error:hover,
+.btn-error:hover,
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-error) !important;
+}
+
+.btn.text-error i,
+.btn-error i,
+.btn-danger i {
+  color: var(--color-error) !important;
+}
+
+/* Warning Button */
+.btn.text-warning,
+.btn-warning {
+  color: var(--color-warning) !important;
+}
+
+.btn.text-warning:hover,
+.btn-warning:hover {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: var(--color-warning) !important;
+  color: var(--color-warning) !important;
+}
+
+.btn.text-warning i,
+.btn-warning i {
+  color: var(--color-warning) !important;
+}
+
+/* Success Button */
+.btn.text-success,
+.btn-success {
+  color: var(--color-success) !important;
+}
+
+.btn.text-success:hover,
+.btn-success:hover {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-success) !important;
+}
+
+.btn.text-success i,
+.btn-success i {
+  color: var(--color-success) !important;
+}
+
+/* Dark mode specific button adjustments */
+[data-mode="dark"] .btn-secondary,
+.dark-theme .btn-secondary {
+  background: var(--surface-100) !important;
+  color: var(--surface-800) !important;
+}
+
+[data-mode="dark"] .btn-secondary:hover,
+.dark-theme .btn-secondary:hover {
+  background: var(--surface-200) !important;
+  color: var(--surface-900) !important;
+}
+
+[data-mode="dark"] .btn-ghost,
+.dark-theme .btn-ghost {
+  border-color: var(--surface-200) !important;
+}
+
+[data-mode="dark"] .btn-ghost:hover,
+.dark-theme .btn-ghost:hover {
+  background: var(--surface-100) !important;
+  border-color: var(--color-primary) !important;
 }
 
 /* Print styles */

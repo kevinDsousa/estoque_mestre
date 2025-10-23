@@ -100,7 +100,7 @@
       <tbody>
         @for (transaction of getPaginatedTransactions(); track transaction.id) {
           <tr>
-          <td class="transaction-id">#{{ transaction.id }}</td>
+          <td class="transaction-id" [appTruncateTooltip]="'#' + transaction.id" [maxLength]="20">#{{ transaction.id }}</td>
           <td>
             <span class="type-badge" [class]="'type-' + transaction.type">
               {{ getTypeText(transaction.type) }}
@@ -144,7 +144,7 @@
           <div class="transaction-card">
         <div class="card-header">
           <div class="transaction-info">
-            <h3 class="transaction-id">#{{ transaction.id }}</h3>
+            <h3 class="transaction-id" [appTruncateTooltip]="'#' + transaction.id" [maxLength]="20">#{{ transaction.id }}</h3>
             <span class="type-badge" [class]="'type-' + transaction.type">
               {{ getTypeText(transaction.type) }}
             </span>
@@ -201,9 +201,11 @@
   }
 
   <!-- Paginação -->
-  <app-pagination 
-    [config]="paginationConfig"
-    (pageChange)="onPageChange($event)"
-    (itemsPerPageChange)="onItemsPerPageChange($event)">
-  </app-pagination>
+  @if (paginationConfig.totalItems > 5) {
+    <app-pagination 
+      [config]="paginationConfig"
+      (pageChange)="onPageChange($event)"
+      (itemsPerPageChange)="onItemsPerPageChange($event)">
+    </app-pagination>
+  }
 </div>

@@ -133,7 +133,7 @@ export class CustomerService {
    * Update customer
    */
   updateCustomer(id: string, customerData: UpdateCustomerRequest): Observable<CustomerResponse> {
-    return this.apiService.put<CustomerResponse>(`customers/${id}`, customerData)
+    return this.apiService.patch<CustomerResponse>(`customers/${id}`, customerData)
       .pipe(
         tap(customer => {
           this.currentCustomerSubject.next(customer);
@@ -148,18 +148,50 @@ export class CustomerService {
   }
 
   /**
-   * Delete customer
+   * Delete customer (or deactivate if has transaction history)
    */
-  deleteCustomer(id: string): Observable<void> {
-    return this.apiService.delete<void>(`customers/${id}`)
+  deleteCustomer(id: string): Observable<CustomerResponse | void> {
+    return this.apiService.delete<CustomerResponse | void>(`customers/${id}`)
       .pipe(
-        tap(() => {
-          const currentCustomers = this.customersSubject.value;
-          const filteredCustomers = currentCustomers.filter(c => c.id !== id);
-          this.customersSubject.next(filteredCustomers);
+        tap((response) => {
+          // Se retornou o cliente, foi desativado ao invés de excluído
+          if (response && typeof response === 'object' && 'status' in response) {
+            const currentCustomers = this.customersSubject.value;
+            const updatedCustomers = currentCustomers.map(c => 
+              c.id === id ? { ...c, ...response } : c
+            );
+            this.customersSubject.next(updatedCustomers);
+          } else {
+            // Foi realmente excluído
+            const currentCustomers = this.customersSubject.value;
+            const filteredCustomers = currentCustomers.filter(c => c.id !== id);
+            this.customersSubject.next(filteredCustomers);
+            
+            if (this.currentCustomerSubject.value?.id === id) {
+              this.currentCustomerSubject.next(null);
+            }
+          }
+        })
+      );
+  }
+
+  /**
+   * Toggle customer status (ACTIVE <-> INACTIVE)
+   */
+  toggleCustomerStatus(id: string, currentStatus: string): Observable<CustomerResponse> {
+    const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    return this.apiService.patch<CustomerResponse>(`customers/${id}/status`, { status: newStatus })
+      .pipe(
+        tap((customer) => {
+          this.currentCustomerSubject.next(customer);
           
-          if (this.currentCustomerSubject.value?.id === id) {
-            this.currentCustomerSubject.next(null);
+          // Só atualiza o array se ele existir
+          const currentCustomers = this.customersSubject.value;
+          if (currentCustomers && Array.isArray(currentCustomers)) {
+            const updatedCustomers = currentCustomers.map(c => 
+              c.id === id ? { ...c, ...customer } : c
+            );
+            this.customersSubject.next(updatedCustomers);
           }
         })
       );

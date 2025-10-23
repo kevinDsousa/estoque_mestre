@@ -123,7 +123,7 @@
   }
 
   <!-- Paginação -->
-  @if (filteredCategories.length > 0) {
+  @if (paginationConfig.totalItems > 5) {
     <app-pagination
       [config]="paginationConfig"
       (pageChange)="onPageChange($event)"

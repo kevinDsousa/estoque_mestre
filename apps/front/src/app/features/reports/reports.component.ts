@@ -210,6 +210,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   private loadQuickStats(): void {
+    // Definir valores padrão imediatamente
+    this.quickStats = {
+      sales: { today: 0, thisMonth: 0, growth: 0 },
+      inventory: { totalProducts: 0, lowStock: 0, outOfStock: 0 },
+      financial: { revenue: 0, profit: 0, expenses: 0 }
+    };
+
     // Carregar estatísticas rápidas em paralelo
     const salesPromise = this.apiService.get('reports/quick/sales-summary').toPromise();
     const inventoryPromise = this.apiService.get('reports/quick/inventory-summary').toPromise();
@@ -217,20 +224,31 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     Promise.all([salesPromise, inventoryPromise, financialPromise])
       .then(([sales, inventory, financial]) => {
+        const salesData = (sales as any) || {};
+        const inventoryData = (inventory as any) || {};
+        const financialData = (financial as any) || {};
+        
         this.quickStats = {
-          sales: (sales as any) || { today: 0, thisMonth: 0, growth: 0 },
-          inventory: (inventory as any) || { totalProducts: 0, lowStock: 0, outOfStock: 0 },
-          financial: (financial as any) || { revenue: 0, profit: 0, expenses: 0 }
+          sales: {
+            today: salesData.today ?? 0,
+            thisMonth: salesData.thisMonth ?? 0,
+            growth: salesData.growth ?? 0
+          },
+          inventory: {
+            totalProducts: inventoryData.totalProducts ?? 0,
+            lowStock: inventoryData.lowStock ?? 0,
+            outOfStock: inventoryData.outOfStock ?? 0
+          },
+          financial: {
+            revenue: financialData.revenue ?? 0,
+            profit: financialData.profit ?? 0,
+            expenses: financialData.expenses ?? 0
+          }
         };
       })
       .catch((error) => {
         console.error('Erro ao carregar estatísticas rápidas:', error);
-        // Definir valores padrão em caso de erro
-        this.quickStats = {
-          sales: { today: 0, thisMonth: 0, growth: 0 },
-          inventory: { totalProducts: 0, lowStock: 0, outOfStock: 0 },
-          financial: { revenue: 0, profit: 0, expenses: 0 }
-        };
+        // Manter valores padrão em caso de erro
       });
   }
 
@@ -270,31 +288,38 @@ export class ReportsComponent implements OnInit, OnDestroy {
     // TODO: Implementar uso de template
   }
 
-  formatPrice(amount: number): string {
+  formatPrice(amount: number | undefined | null): string {
+    const value = amount ?? 0;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(amount);
+    }).format(isNaN(value) ? 0 : value);
   }
 
-  formatNumber(number: number): string {
-    return new Intl.NumberFormat('pt-BR').format(number);
+  formatNumber(number: number | undefined | null): string {
+    const value = number ?? 0;
+    return new Intl.NumberFormat('pt-BR').format(isNaN(value) ? 0 : value);
   }
 
-  getGrowthClass(growth: number): string {
-    if (growth > 0) return 'growth-positive';
-    if (growth < 0) return 'growth-negative';
+  getGrowthClass(growth: number | undefined | null): string {
+    const value = growth ?? 0;
+    if (isNaN(value) || value === 0) return 'growth-neutral';
+    if (value > 0) return 'growth-positive';
+    if (value < 0) return 'growth-negative';
     return 'growth-neutral';
   }
 
-  getGrowthIcon(growth: number): string {
-    if (growth > 0) return 'pi pi-arrow-up';
-    if (growth < 0) return 'pi pi-arrow-down';
+  getGrowthIcon(growth: number | undefined | null): string {
+    const value = growth ?? 0;
+    if (isNaN(value) || value === 0) return 'pi pi-minus';
+    if (value > 0) return 'pi pi-arrow-up';
+    if (value < 0) return 'pi pi-arrow-down';
     return 'pi pi-minus';
   }
 
-  getAbsValue(value: number): number {
-    return Math.abs(value);
+  getAbsValue(value: number | undefined | null): number {
+    const num = value ?? 0;
+    return Math.abs(isNaN(num) ? 0 : num);
   }
 
   // Métodos de filtro e paginação

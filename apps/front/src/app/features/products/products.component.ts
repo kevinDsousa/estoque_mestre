@@ -199,10 +199,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
-          console.log('Resposta da API recebida:', response);
           // Verificar se a resposta tem a estrutura esperada
           const productsData = (response as any).products || (response as any).data || [];
-          console.log('Produtos extraídos:', productsData.length);
           
           // Mapear dados do backend para interface local
           this.products = productsData.map((product: any) => ({
@@ -213,10 +211,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
             stock: product.currentStock,
             lastUpdated: product.updatedAt,
             category: product.category || { id: '', name: 'Sem categoria' },
+            supplier: product.supplier || { id: '', name: 'Sem fornecedor' },
             // Garantir que o status seja preservado
             status: product.status
           }));
-          
           
           // Atualizar configuração de paginação
           const paginationData = (response as any).pagination;
@@ -230,9 +228,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
             this.paginationConfig.currentPage = 1;
           }
           
-          this.filteredProducts = [...this.products];
-          console.log('Produtos atualizados no componente:', this.products.length);
-          console.log('Status dos produtos:', this.products.map(p => ({ id: p.id, name: p.name, status: p.status })));
+          // Forçar nova referência para detecção de mudanças
+          this.filteredProducts = this.products.slice();
         },
         error: (error) => {
           console.error('Erro ao carregar produtos:', error);
@@ -334,11 +331,21 @@ export class ProductsComponent implements OnInit, OnDestroy {
       this.productService.updateProduct(this.editingProduct.id, productData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
+          next: (updatedProduct) => {
+            // Atualizar produto localmente na lista
+            const index = this.products.findIndex(p => p.id === this.editingProduct!.id);
+            if (index !== -1) {
+              this.products[index] = {
+                ...updatedProduct,
+                price: updatedProduct.sellingPrice,
+                stock: updatedProduct.currentStock,
+                lastUpdated: updatedProduct.updatedAt
+              };
+              this.filteredProducts = this.products.slice();
+            }
+            
+            this.closeModal();
             this.dialogService.showSuccess('Produto atualizado com sucesso!');
-            this.loadProducts();
-            this.showAddModal = false;
-            this.editingProduct = null;
           },
           error: (error) => {
             console.error('Erro ao atualizar produto:', error);
@@ -351,10 +358,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
+            this.closeModal();
             this.dialogService.showSuccess('Produto criado com sucesso!');
             this.loadProducts();
-            this.showAddModal = false;
-            this.editingProduct = null;
           },
           error: (error) => {
             console.error('Erro ao criar produto:', error);

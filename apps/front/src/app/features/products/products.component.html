@@ -249,11 +249,13 @@
   }
 
   <!-- Paginação -->
-  <app-pagination 
-    [config]="paginationConfig"
-    (pageChange)="onPageChange($event)"
-    (itemsPerPageChange)="onItemsPerPageChange($event)">
-  </app-pagination>
+  @if (paginationConfig.totalItems > 5) {
+    <app-pagination 
+      [config]="paginationConfig"
+      (pageChange)="onPageChange($event)"
+      (itemsPerPageChange)="onItemsPerPageChange($event)">
+    </app-pagination>
+  }
 
   <!-- Modal de Adicionar/Editar Produto -->
   @if (showAddModal) {

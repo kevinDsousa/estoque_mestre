@@ -33,30 +33,7 @@
 }
 
 // Form controls
-.form-control {
-  width: 100%;
-  padding: 0.75rem;
-  box-shadow: var(--border-soft);
-  border-radius: var(--border-radius-small);
-  background: var(--color-background);
-  color: var(--text-color);
-  font-size: 0.875rem;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
-  }
-  
-  &[type="select"], select.form-control {
-    padding-right: 2.5rem;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.75rem center;
-    background-repeat: no-repeat;
-    background-size: 1rem;
-    appearance: none;
-  }
-}
+// Form controls use global styles
 
 .loading-state, .error-state {
   display: flex;
@@ -316,16 +293,17 @@
       .report-icon {
         width: 40px;
         height: 40px;
-        background: var(--color-primary-light);
+        background: var(--color-surface);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: var(--spacing-sm);
+        box-shadow: var(--border-soft);
         
         i {
           font-size: 1rem;
-          color: var(--color-primary);
+          color: var(--text-color-secondary);
         }
       }
       
@@ -459,73 +437,7 @@
   }
 }
 
-// Botões
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: 0.5rem 0.75rem;
-  border: none;
-  border-radius: var(--border-radius-small);
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-decoration: none;
-  white-space: nowrap;
-  
-  &.btn-primary {
-    background: var(--color-primary);
-    color: white;
-    border: 1px solid var(--color-primary);
-    
-    &:hover {
-      background: var(--color-primary-dark);
-      border-color: var(--color-primary-dark);
-    }
-  }
-  
-  &.btn-secondary {
-    background: var(--color-surface);
-    color: var(--text-color);
-    box-shadow: var(--border-soft);
-    
-    &:hover {
-      background: var(--color-border);
-    }
-  }
-  
-  &.btn-outline {
-    background: transparent;
-    color: var(--text-color);
-    box-shadow: var(--border-soft);
-    
-    &:hover {
-      background: var(--color-surface);
-    }
-  }
-  
-  &.btn-sm {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.625rem;
-  }
-}
-
-// Form Controls
-.form-control {
-  padding: 0.75rem;
-  box-shadow: var(--border-soft);
-  border-radius: var(--border-radius-small);
-  background: var(--color-background);
-  color: var(--text-color);
-  font-size: 0.875rem;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
-  }
-}
+// Buttons and form controls use global styles
 
 // Responsividade
 @media (max-width: 768px) {
@@ -620,7 +532,7 @@
 
         .report-icon {
           font-size: 1.25rem;
-          color: var(--color-primary);
+          color: var(--text-color-secondary);
         }
 
         .report-name {
@@ -630,12 +542,13 @@
       }
 
       .category-badge {
-        background: var(--color-primary-light);
-        color: var(--color-primary);
+        background: var(--color-surface) !important;
+        color: var(--text-color) !important;
         padding: 0.25rem 0.75rem;
         border-radius: var(--border-radius-small);
         font-size: 0.75rem;
         font-weight: 500;
+        box-shadow: var(--border-soft);
       }
 
       .description {

@@ -125,7 +125,7 @@ export class CategoryService {
    * Update category
    */
   updateCategory(id: string, categoryData: UpdateCategoryRequest): Observable<CategoryResponse> {
-    return this.apiService.put<CategoryResponse>(`categories/${id}`, categoryData)
+    return this.apiService.patch<CategoryResponse>(`categories/${id}`, categoryData)
       .pipe(
         tap(category => {
           this.currentCategorySubject.next(category);

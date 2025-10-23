@@ -70,7 +70,13 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   private loadCategories(): void {
     this.loading = true;
     
-    this.categoryService.getCategories()
+    const filters = {
+      query: this.searchTerm || undefined,
+      page: this.paginationConfig.currentPage,
+      limit: this.paginationConfig.itemsPerPage
+    };
+    
+    this.categoryService.getCategories(filters)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.loading = false)
@@ -80,7 +86,6 @@ export class CategoriesComponent implements OnInit, OnDestroy {
           this.categories = response.data;
           this.paginationConfig.totalItems = response.pagination.total;
           this.filteredCategories = [...this.categories];
-          this.updatePagination();
         },
         error: (error) => {
           console.error('Erro ao carregar categorias:', error);
@@ -91,12 +96,10 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   filterCategories(): void {
-    this.filteredCategories = this.categories.filter(category =>
-      category.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      (category.description && category.description.toLowerCase().includes(this.searchTerm.toLowerCase()))
-    );
-    this.paginationConfig.totalItems = this.filteredCategories.length;
-    this.updatePagination();
+    // Reset para primeira página ao filtrar
+    this.paginationConfig.currentPage = 1;
+    // Recarregar categorias com filtros aplicados
+    this.loadCategories();
   }
 
   onSearchChange(): void {
@@ -108,15 +111,11 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     this.filterCategories();
   }
 
-  updatePagination(): void {
-    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
-    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
-    this.filteredCategories = this.categories.slice(startIndex, endIndex);
-  }
+  // Pagination is now handled by backend via loadCategories()
 
   onPageChange(page: number): void {
     this.paginationConfig.currentPage = page;
-    this.updatePagination();
+    this.loadCategories();
   }
 
   onViewModeChange(mode: ViewMode): void {

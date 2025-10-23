@@ -72,13 +72,19 @@
           <i class="pi pi-history"></i>
           Histórico
         </button>
-        <button class="btn btn-ghost btn-sm" (click)="newSale(customer)">
-          <i class="pi pi-plus"></i>
-          Nova Venda
-        </button>
-        <button class="btn btn-ghost btn-sm text-error" (click)="deleteCustomer(customer)">
-          <i class="pi pi-trash"></i>
-          Excluir
+        @if (customer.status === 'ACTIVE') {
+          <button class="btn btn-ghost btn-sm" (click)="newSale(customer)">
+            <i class="pi pi-plus"></i>
+            Nova Venda
+          </button>
+        }
+        <button 
+          class="btn btn-ghost btn-sm" 
+          [class.text-success]="customer.status === 'INACTIVE'"
+          [class.text-warning]="customer.status === 'ACTIVE'"
+          (click)="toggleCustomerStatus(customer)">
+          <i [class]="customer.status === 'ACTIVE' ? 'pi pi-pause' : 'pi pi-check-circle'"></i>
+          {{ customer.status === 'ACTIVE' ? 'Desativar' : 'Ativar' }}
         </button>
       </div>
     </div>
@@ -145,17 +151,24 @@
           <td>
             <div class="cell-content">
               <div class="actions">
-                <button class="btn btn-ghost btn-sm" (click)="editCustomer(customer)">
+                <button class="btn btn-ghost btn-sm" (click)="editCustomer(customer)" title="Editar">
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button class="btn btn-ghost btn-sm" (click)="viewHistory(customer)">
+                <button class="btn btn-ghost btn-sm" (click)="viewHistory(customer)" title="Histórico">
                   <i class="pi pi-history"></i>
                 </button>
-                <button class="btn btn-ghost btn-sm" (click)="newSale(customer)">
-                  <i class="pi pi-plus"></i>
-                </button>
-                <button class="btn btn-ghost btn-sm text-error" (click)="deleteCustomer(customer)">
-                  <i class="pi pi-trash"></i>
+                @if (customer.status === 'ACTIVE') {
+                  <button class="btn btn-ghost btn-sm" (click)="newSale(customer)" title="Nova Venda">
+                    <i class="pi pi-plus"></i>
+                  </button>
+                }
+                <button 
+                  class="btn btn-ghost btn-sm" 
+                  [class.text-success]="customer.status === 'INACTIVE'"
+                  [class.text-warning]="customer.status === 'ACTIVE'"
+                  (click)="toggleCustomerStatus(customer)"
+                  [title]="customer.status === 'ACTIVE' ? 'Desativar' : 'Ativar'">
+                  <i [class]="customer.status === 'ACTIVE' ? 'pi pi-pause' : 'pi pi-check-circle'"></i>
                 </button>
               </div>
             </div>
@@ -168,7 +181,7 @@
   }
 
   <!-- Paginação -->
-  @if (filteredCustomers.length > 0) {
+  @if (paginationConfig.totalItems > 5) {
     <app-pagination
       [config]="paginationConfig"
       (pageChange)="onPageChange($event)"

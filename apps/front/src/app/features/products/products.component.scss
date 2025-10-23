@@ -435,31 +435,7 @@
   }
 }
 
-// Badges de status
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--border-radius-small);
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: capitalize;
-  
-  &.status-active {
-    background: var(--color-success-light);
-    color: var(--color-success);
-  }
-  
-  &.status-inactive {
-    background: var(--color-warning-light);
-    color: var(--color-warning);
-  }
-  
-  &.status-low-stock {
-    background: var(--color-warning-light);
-    color: var(--color-warning);
-  }
-}
+// Status badges now use global styles from styles.css
 
 // Image upload styles
 .image-upload-area {

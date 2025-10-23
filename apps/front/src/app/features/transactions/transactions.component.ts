@@ -8,6 +8,7 @@ import { TransactionService, TransactionFilters } from '../../core/services/tran
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
 import { ViewToggleComponent } from '../../core/components';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { TruncateTooltipDirective } from '../../core/directives';
 
 interface Transaction {
   id: string;
@@ -51,7 +52,7 @@ interface Transaction {
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectComponent, ViewToggleComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, MultiSelectComponent, ViewToggleComponent, PaginationComponent, TruncateTooltipDirective],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss'
 })
@@ -85,6 +86,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     totalItems: 0,
     itemsPerPage: 10
   };
+
+  // Modal states
+  showAddModal = false;
+  showViewModal = false;
+  editingTransaction: Transaction | null = null;
 
   statusOptions = [
     { value: '', label: 'Todos os status' },
@@ -180,19 +186,10 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   filterTransactions(): void {
-    this.filteredTransactions = this.transactions.filter(transaction => {
-      const matchesSearch = transaction.id.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           (transaction.customer?.name && transaction.customer.name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-                           (transaction.supplier?.name && transaction.supplier.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
-      
-      const matchesType = this.selectedTypes.length === 0 || this.selectedTypes.includes(transaction.type);
-      const matchesStatus = !this.selectedStatus || transaction.status === this.selectedStatus;
-      const matchesPaymentStatus = !this.selectedPaymentStatus || transaction.paymentStatus === this.selectedPaymentStatus;
-      
-      return matchesSearch && matchesType && matchesStatus && matchesPaymentStatus;
-    });
-    this.paginationConfig.totalItems = this.filteredTransactions.length;
-    this.updatePagination();
+    // Reset para primeira página ao filtrar
+    this.paginationConfig.currentPage = 1;
+    // Recarregar transações com filtros aplicados
+    this.loadTransactions();
   }
 
   onSearchChange(): void {
@@ -247,8 +244,8 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   editTransaction(transaction: Transaction): void {
-    console.log('Editando transação:', transaction);
-    // Implementar modal de edição
+    this.editingTransaction = { ...transaction };
+    this.showAddModal = true;
   }
 
   deleteTransaction(transaction: Transaction): void {
@@ -453,8 +450,8 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   viewTransaction(transaction: Transaction): void {
-    console.log('Ver transação:', transaction);
-    // Implementar modal de visualização
+    this.editingTransaction = { ...transaction };
+    this.showViewModal = true;
   }
 
   onItemsPerPageChange(limit: number): void {

@@ -248,11 +248,22 @@ export class CustomerService {
   async remove(id: string, companyId: string) {
     const customer = await this.findOne(id, companyId);
 
-    // Check if customer has transactions
+    // If customer has transactions, deactivate instead of delete
     if (customer._count.transactions > 0) {
-      throw new BadRequestException('Cannot delete customer with transaction history');
+      return this.prisma.customer.update({
+        where: { id },
+        data: { status: CustomerStatus.INACTIVE },
+        include: {
+          _count: {
+            select: {
+              transactions: true,
+            },
+          },
+        },
+      });
     }
 
+    // If no transactions, allow permanent deletion
     return this.prisma.customer.delete({
       where: { id },
     });

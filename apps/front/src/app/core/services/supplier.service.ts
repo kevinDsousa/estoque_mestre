@@ -146,31 +146,14 @@ export class SupplierService {
    * Create new supplier
    */
   createSupplier(supplierData: CreateSupplierRequest): Observable<SupplierResponse> {
-    return this.apiService.post<SupplierResponse>('suppliers', supplierData)
-      .pipe(
-        tap(supplier => {
-          const currentSuppliers = this.suppliersSubject.value;
-          this.suppliersSubject.next([supplier, ...currentSuppliers]);
-        })
-      );
+    return this.apiService.post<SupplierResponse>('suppliers', supplierData);
   }
 
   /**
    * Update supplier
    */
   updateSupplier(id: string, supplierData: UpdateSupplierRequest): Observable<SupplierResponse> {
-    return this.apiService.put<SupplierResponse>(`suppliers/${id}`, supplierData)
-      .pipe(
-        tap(supplier => {
-          this.currentSupplierSubject.next(supplier);
-          
-          const currentSuppliers = this.suppliersSubject.value;
-          const updatedSuppliers = currentSuppliers.map(s => 
-            s.id === id ? { ...s, ...supplier } : s
-          );
-          this.suppliersSubject.next(updatedSuppliers);
-        })
-      );
+    return this.apiService.patch<SupplierResponse>(`suppliers/${id}`, supplierData);
   }
 
   /**
@@ -271,7 +254,10 @@ export class SupplierService {
    * Get supplier products
    */
   getSupplierProducts(id: string): Observable<any[]> {
-    return this.apiService.get<any[]>(`suppliers/${id}/products`);
+    return this.apiService.get<any>(`suppliers/${id}/products`)
+      .pipe(
+        map((response: any) => response.products || [])
+      );
   }
 
   /**

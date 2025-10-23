@@ -6,7 +6,7 @@
     </div>
     <div class="header-actions">
       <app-view-toggle [currentView]="currentView" (viewChange)="onViewChange($event)"></app-view-toggle>
-      <button class="btn btn-primary">
+      <button class="btn btn-primary" (click)="addSupplier()">
         <i class="pi pi-plus"></i>
         Novo Fornecedor
       </button>
@@ -30,8 +30,8 @@
         <div class="supplier-card">
       <div class="supplier-header">
         <h3>{{ supplier.name }}</h3>
-        <span class="status-badge" [class]="supplier.isActive ? 'active' : 'inactive'">
-          {{ supplier.isActive ? 'Ativo' : 'Inativo' }}
+        <span class="status-badge" [class]="supplier.status === 'ACTIVE' ? 'status-active' : 'status-inactive'">
+          {{ supplier.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
         </span>
       </div>
       <div class="supplier-info">
@@ -67,9 +67,13 @@
           <i class="pi pi-eye"></i>
           Ver Produtos
         </button>
-        <button class="btn btn-ghost btn-sm text-error" (click)="deleteSupplier(supplier)">
-          <i class="pi pi-trash"></i>
-          Excluir
+        <button 
+          class="btn btn-ghost btn-sm" 
+          [class.text-success]="supplier.status === 'INACTIVE'"
+          [class.text-warning]="supplier.status === 'ACTIVE'"
+          (click)="toggleSupplierStatus(supplier)">
+          <i [class]="supplier.status === 'ACTIVE' ? 'pi pi-pause' : 'pi pi-check-circle'"></i>
+          {{ supplier.status === 'ACTIVE' ? 'Desativar' : 'Ativar' }}
         </button>
       </div>
     </div>
@@ -128,22 +132,27 @@
           </td>
           <td>
             <div class="cell-content">
-              <span class="status-badge" [class]="supplier.isActive ? 'active' : 'inactive'">
-                {{ supplier.isActive ? 'Ativo' : 'Inativo' }}
+              <span class="status-badge" [class]="supplier.status === 'ACTIVE' ? 'status-active' : 'status-inactive'">
+                {{ supplier.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
               </span>
             </div>
           </td>
           <td>
             <div class="cell-content">
               <div class="actions">
-                <button class="btn btn-ghost btn-sm" (click)="editSupplier(supplier)">
+                <button class="btn btn-ghost btn-sm" (click)="editSupplier(supplier)" title="Editar">
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button class="btn btn-ghost btn-sm" (click)="viewProducts(supplier)">
+                <button class="btn btn-ghost btn-sm" (click)="viewProducts(supplier)" title="Ver Produtos">
                   <i class="pi pi-eye"></i>
                 </button>
-                <button class="btn btn-ghost btn-sm text-error" (click)="deleteSupplier(supplier)">
-                  <i class="pi pi-trash"></i>
+                <button 
+                  class="btn btn-ghost btn-sm" 
+                  [class.text-success]="supplier.status === 'INACTIVE'"
+                  [class.text-warning]="supplier.status === 'ACTIVE'"
+                  (click)="toggleSupplierStatus(supplier)"
+                  [title]="supplier.status === 'ACTIVE' ? 'Desativar' : 'Ativar'">
+                  <i [class]="supplier.status === 'ACTIVE' ? 'pi pi-pause' : 'pi pi-check-circle'"></i>
                 </button>
               </div>
             </div>
@@ -156,7 +165,7 @@
   }
 
   <!-- Paginação -->
-  @if (filteredSuppliers.length > 0) {
+  @if (paginationConfig.totalItems > 5) {
     <app-pagination
       [config]="paginationConfig"
       (pageChange)="onPageChange($event)"
@@ -171,3 +180,323 @@
     </div>
   }
 </div>
+
+<!-- Modal de Edição/Criação de Fornecedor -->
+@if (showAddModal && editingSupplier) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content supplier-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingSupplier.id ? 'Editar Fornecedor' : 'Novo Fornecedor' }}</h2>
+        <button class="btn-close" (click)="closeModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form class="supplier-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Nome *</label>
+              <input 
+                id="name" 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.name"
+                name="name"
+                required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="document">CNPJ/CPF</label>
+              <input 
+                id="document" 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.document"
+                name="document">
+            </div>
+            
+            <div class="form-group">
+              <label for="type">Tipo</label>
+              <select 
+                id="type" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.type"
+                name="type">
+                <option value="DISTRIBUTOR">Distribuidor</option>
+                <option value="MANUFACTURER">Fabricante</option>
+                <option value="WHOLESALER">Atacadista</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select 
+                id="status" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.status"
+                name="status">
+                <option value="ACTIVE">Ativo</option>
+                <option value="INACTIVE">Inativo</option>
+                <option value="SUSPENDED">Suspenso</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="website">Website</label>
+              <input 
+                id="website" 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.website"
+                name="website">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contactName">Nome do Contato</label>
+              <input 
+                id="contactName" 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.contactName"
+                name="contactName">
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input 
+                id="email" 
+                type="email" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.email"
+                name="email">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Telefone</label>
+              <input 
+                id="phone" 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.phone"
+                name="phone">
+            </div>
+          </div>
+
+          @if (!editingSupplier.id) {
+            <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--text-color);">Endereço</h4>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="street">Rua *</label>
+                <input 
+                  id="street" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.street"
+                  name="street"
+                  required>
+              </div>
+              
+              <div class="form-group">
+                <label for="number">Número *</label>
+                <input 
+                  id="number" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.number"
+                  name="number"
+                  required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="complement">Complemento</label>
+                <input 
+                  id="complement" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.complement"
+                  name="complement">
+              </div>
+              
+              <div class="form-group">
+                <label for="neighborhood">Bairro *</label>
+                <input 
+                  id="neighborhood" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.neighborhood"
+                  name="neighborhood"
+                  required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">Cidade *</label>
+                <input 
+                  id="city" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.city"
+                  name="city"
+                  required>
+              </div>
+              
+              <div class="form-group">
+                <label for="state">Estado *</label>
+                <input 
+                  id="state" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.state"
+                  name="state"
+                  maxlength="2"
+                  placeholder="SP"
+                  required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="zipCode">CEP *</label>
+                <input 
+                  id="zipCode" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.zipCode"
+                  name="zipCode"
+                  placeholder="12345-678"
+                  required>
+              </div>
+              
+              <div class="form-group">
+                <label for="country">País</label>
+                <input 
+                  id="country" 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingSupplier.country"
+                  name="country"
+                  value="Brasil">
+              </div>
+            </div>
+          }
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="notes">Observações</label>
+              <textarea 
+                id="notes" 
+                class="form-control" 
+                [(ngModel)]="editingSupplier.notes"
+                name="notes"
+                rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" (click)="saveSupplier()">
+          Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Produtos do Fornecedor -->
+@if (showProductsModal && currentSupplier) {
+  <div class="modal-overlay" (click)="closeProductsModal()">
+    <div class="modal-content products-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Produtos de {{ currentSupplier.name }}</h2>
+        <button class="btn-close" (click)="closeProductsModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        @if (supplierProducts.length > 0) {
+          <div class="products-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>SKU</th>
+                  <th>Categoria</th>
+                  <th>Estoque</th>
+                  <th>Preço</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (product of supplierProducts; track product.id) {
+                  <tr>
+                    <td>
+                      <div class="cell-content">
+                        <strong>{{ product.name }}</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        {{ product.sku }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        {{ product.category?.name || 'Sem categoria' }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        {{ product.currentStock || 0 }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        {{ product.sellingPrice | currency:'BRL':'symbol':'1.2-2' }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-content">
+                        <span class="status-badge" [class]="product.status === 'ACTIVE' ? 'status-active' : 'status-inactive'">
+                          {{ product.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="no-results">
+            <i class="pi pi-box"></i>
+            <p>Nenhum produto encontrado para este fornecedor</p>
+          </div>
+        }
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeProductsModal()">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+}
