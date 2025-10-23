@@ -13,7 +13,7 @@ interface Category {
   name: string;
   description?: string;
   parentId?: string;
-  isActive: boolean;
+  status: 'ACTIVE' | 'INACTIVE';
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -84,7 +84,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Erro ao carregar categorias:', error);
-          this.dialogService.showError('Erro ao carregar categorias. Tente novamente.');
+          this.dialogService.showError('Erro ao carregar categorias. Tente novamente.')
+            .subscribe();
         }
       });
   }
@@ -128,7 +129,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       id: '',
       name: '',
       description: '',
-      isActive: true,
+      status: 'ACTIVE',
       sortOrder: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -145,8 +146,15 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     if (!this.editingCategory) return;
 
     if (this.editingCategory.id) {
-      // Update existing category
-      this.categoryService.updateCategory(this.editingCategory.id, this.editingCategory)
+      // Update existing category - send only updatable fields
+      const updateData = {
+        name: this.editingCategory.name,
+        description: this.editingCategory.description,
+        status: this.editingCategory.status,
+        sortOrder: this.editingCategory.sortOrder
+      };
+      
+      this.categoryService.updateCategory(this.editingCategory.id, updateData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -157,12 +165,24 @@ export class CategoriesComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erro ao atualizar categoria:', error);
-            this.dialogService.showError('Erro ao atualizar categoria. Tente novamente.');
+            this.dialogService.showError('Erro ao atualizar categoria. Tente novamente.')
+              .subscribe(() => {
+                // Close modal when user closes error dialog
+                this.showAddModal = false;
+                this.editingCategory = null;
+              });
           }
         });
     } else {
-      // Create new category
-      this.categoryService.createCategory(this.editingCategory)
+      // Create new category - send only required fields
+      const categoryData = {
+        name: this.editingCategory.name,
+        description: this.editingCategory.description,
+        status: this.editingCategory.status,
+        sortOrder: this.editingCategory.sortOrder
+      };
+      
+      this.categoryService.createCategory(categoryData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -173,7 +193,12 @@ export class CategoriesComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erro ao criar categoria:', error);
-            this.dialogService.showError('Erro ao criar categoria. Tente novamente.');
+            this.dialogService.showError('Erro ao criar categoria. Tente novamente.')
+              .subscribe(() => {
+                // Close modal when user closes error dialog
+                this.showAddModal = false;
+                this.editingCategory = null;
+              });
           }
         });
     }
@@ -194,7 +219,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
               console.error('Erro ao excluir categoria:', error);
-              this.dialogService.showError('Erro ao excluir categoria. Tente novamente.');
+              this.dialogService.showError('Erro ao excluir categoria. Tente novamente.')
+                .subscribe();
             }
           });
       }
@@ -202,18 +228,21 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   toggleCategoryStatus(category: Category): void {
-    const updatedCategory = { ...category, isActive: !category.isActive };
+    const updatedCategory = { 
+      status: category.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
+    };
     
     this.categoryService.updateCategory(category.id, updatedCategory)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.dialogService.showSuccess(`Categoria ${updatedCategory.isActive ? 'ativada' : 'desativada'} com sucesso!`);
+          this.dialogService.showSuccess(`Categoria ${updatedCategory.status === 'ACTIVE' ? 'ativada' : 'desativada'} com sucesso!`);
           this.loadCategories();
         },
         error: (error) => {
           console.error('Erro ao alterar status da categoria:', error);
-          this.dialogService.showError('Erro ao alterar status da categoria. Tente novamente.');
+          this.dialogService.showError('Erro ao alterar status da categoria. Tente novamente.')
+            .subscribe();
         }
       });
   }
@@ -223,12 +252,12 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     this.editingCategory = null;
   }
 
-  getStatusClass(isActive: boolean): string {
-    return isActive ? 'status-active' : 'status-inactive';
+  getStatusClass(status: 'ACTIVE' | 'INACTIVE'): string {
+    return status === 'ACTIVE' ? 'status-active' : 'status-inactive';
   }
 
-  getStatusLabel(isActive: boolean): string {
-    return isActive ? 'Ativa' : 'Inativa';
+  getStatusLabel(status: 'ACTIVE' | 'INACTIVE'): string {
+    return status === 'ACTIVE' ? 'Ativa' : 'Inativa';
   }
 
   getProductCount(category: Category): number {
@@ -252,8 +281,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     return this.filteredCategories;
   }
 
-  getStatusText(isActive: boolean): string {
-    return isActive ? 'Ativo' : 'Inativo';
+  getStatusText(status: 'ACTIVE' | 'INACTIVE'): string {
+    return status === 'ACTIVE' ? 'Ativo' : 'Inativo';
   }
 
   onItemsPerPageChange(limit: number): void {

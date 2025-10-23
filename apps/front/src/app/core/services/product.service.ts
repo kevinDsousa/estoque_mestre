@@ -219,7 +219,7 @@ export class ProductService {
       .pipe(
         map(response => {
           // Transform backend response to frontend format
-          const transformedData = response.data.map((product: any) => ({
+          const transformedData = (response as any).products.map((product: any) => ({
             id: product.id,
             name: product.name,
             description: product.description,

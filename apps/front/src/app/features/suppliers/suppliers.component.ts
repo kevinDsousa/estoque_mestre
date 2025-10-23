@@ -108,7 +108,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           // Mapear dados do backend para interface local
-          this.suppliers = response.data.map(supplier => ({
+          this.suppliers = (response as any).suppliers.map((supplier: any) => ({
             ...supplier,
             email: supplier.contacts?.[0]?.email || 'email@exemplo.com', // Usar email do primeiro contato ou fallback
             contactName: supplier.contacts?.[0]?.name,

@@ -116,6 +116,12 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-info: var(--primary-500);
+  
+  /* Light variants */
+  --color-error-light: #fef2f2;
+  --color-success-light: #f0fdf4;
+  --color-warning-light: #fffbeb;
+  --color-info-light: #eff6ff;
 
   /* Shadow */
   --shadow-light: var(--shadow-1);
@@ -194,6 +200,12 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-info: var(--primary-500);
+  
+  /* Light variants */
+  --color-error-light: #fef2f2;
+  --color-success-light: #f0fdf4;
+  --color-warning-light: #fffbeb;
+  --color-info-light: #eff6ff;
 
   /* Shadow */
   --shadow-light: var(--shadow-1);

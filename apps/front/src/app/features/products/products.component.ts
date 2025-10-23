@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -7,6 +7,7 @@ import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { ProductService, ProductFilters } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
+import { SupplierService } from '../../core/services/supplier.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 import { ViewToggleComponent } from '../../core/components';
@@ -68,6 +69,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   products: Product[] = [];
   filteredProducts: Product[] = [];
   categories: any[] = [];
+  suppliers: any[] = [];
   loading = false;
   searchTerm = '';
   selectedCategories: string[] = [];
@@ -93,7 +95,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private viewPreferencesService: ViewPreferencesService,
     private route: ActivatedRoute,
     private productService: ProductService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private supplierService: SupplierService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   statusOptions = [
@@ -116,6 +120,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadSuppliers();
     this.loadProducts();
     // Carrega a preferência salva
     this.currentView = this.viewPreferencesService.getViewPreference('products');
@@ -149,6 +154,19 @@ export class ProductsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadSuppliers(): void {
+    this.supplierService.getSuppliers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.suppliers = (response as any).suppliers || [];
+        },
+        error: (error) => {
+          console.error('Erro ao carregar fornecedores:', error);
+        }
+      });
+  }
+
   private initializeCategoryOptions(): void {
     this.categoryOptions = this.categories.map(category => ({
       value: category.id,
@@ -158,6 +176,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   private loadProducts(): void {
+    console.log('loadProducts chamado');
     this.loading = true;
     
     const filters: ProductFilters = {
@@ -171,6 +190,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
       sortBy: 'name',
       sortOrder: 'asc'
     };
+    
 
     this.productService.getProducts(filters)
       .pipe(
@@ -179,18 +199,40 @@ export class ProductsComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
+          console.log('Resposta da API recebida:', response);
+          // Verificar se a resposta tem a estrutura esperada
+          const productsData = (response as any).products || (response as any).data || [];
+          console.log('Produtos extraídos:', productsData.length);
+          
           // Mapear dados do backend para interface local
-          this.products = response.data.map(product => ({
+          this.products = productsData.map((product: any) => ({
             ...product,
             trackExpiration: (product as any).trackExpiration || false,
             isTaxable: (product as any).isTaxable || false,
             price: product.sellingPrice,
             stock: product.currentStock,
-            lastUpdated: product.updatedAt
+            lastUpdated: product.updatedAt,
+            category: product.category || { id: '', name: 'Sem categoria' },
+            // Garantir que o status seja preservado
+            status: product.status
           }));
-          this.paginationConfig.totalItems = response.pagination.total;
+          
+          
+          // Atualizar configuração de paginação
+          const paginationData = (response as any).pagination;
+          if (paginationData) {
+            this.paginationConfig.totalItems = paginationData.total || this.products.length;
+            this.paginationConfig.currentPage = paginationData.page || 1;
+            this.paginationConfig.itemsPerPage = paginationData.limit || 10;
+          } else {
+            // Fallback se não houver dados de paginação
+            this.paginationConfig.totalItems = this.products.length;
+            this.paginationConfig.currentPage = 1;
+          }
+          
           this.filteredProducts = [...this.products];
-          this.updatePagination();
+          console.log('Produtos atualizados no componente:', this.products.length);
+          console.log('Status dos produtos:', this.products.map(p => ({ id: p.id, name: p.name, status: p.status })));
         },
         error: (error) => {
           console.error('Erro ao carregar produtos:', error);
@@ -200,45 +242,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   filterProducts(): void {
-    this.filteredProducts = this.products.filter(product => {
-      // Filtro por busca (nome ou SKU)
-      const matchesSearch = product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           product.sku.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      // Filtro por categorias (múltiplas)
-      const matchesCategory = this.selectedCategories.length === 0 || 
-                             this.selectedCategories.includes(product.categoryId);
-      
-      // Filtro por status
-      const matchesStatus = !this.selectedStatus || product.status === this.selectedStatus;
-      
-      // Filtro por preço
-      const matchesPrice = (!this.minPrice || product.sellingPrice >= parseFloat(this.minPrice)) &&
-                          (!this.maxPrice || product.sellingPrice <= parseFloat(this.maxPrice));
-      
-      // Filtro por estoque
-      let matchesStock = true;
-      if (this.selectedStockFilter) {
-        switch (this.selectedStockFilter) {
-          case 'low':
-            matchesStock = product.currentStock < product.minStock;
-            break;
-          case 'medium':
-            matchesStock = product.currentStock >= product.minStock && product.currentStock <= 50;
-            break;
-          case 'high':
-            matchesStock = product.currentStock > 50;
-            break;
-          case 'out':
-            matchesStock = product.currentStock === 0;
-            break;
-        }
-      }
-      
-      return matchesSearch && matchesCategory && matchesStatus && matchesPrice && matchesStock;
-    });
-    
-    this.updatePagination();
+    // Reset to first page when filtering
+    this.paginationConfig.currentPage = 1;
+    this.loadProducts();
   }
 
   onSearchChange(): void {
@@ -271,11 +277,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.filterProducts();
   }
 
-  updatePagination(): void {
-    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
-    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
-    this.filteredProducts = this.products.slice(startIndex, endIndex);
-  }
 
   onPageChange(page: number): void {
     this.paginationConfig.currentPage = page;
@@ -317,9 +318,20 @@ export class ProductsComponent implements OnInit, OnDestroy {
   saveProduct(): void {
     if (!this.editingProduct) return;
 
+    // Map form data to API format
+    const productData = {
+      ...this.editingProduct,
+      type: 'ACCESSORY', // Use valid API type
+      costPrice: this.editingProduct.costPrice || 0,
+      sellingPrice: this.editingProduct.price || 0,
+      currentStock: this.editingProduct.stock || 0,
+      supplierId: this.editingProduct.supplierId || '', // Add default supplier
+      status: this.editingProduct.status || 'ACTIVE'
+    };
+
     if (this.editingProduct.id) {
       // Update existing product
-      this.productService.updateProduct(this.editingProduct.id, this.editingProduct)
+      this.productService.updateProduct(this.editingProduct.id, productData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -335,7 +347,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
         });
     } else {
       // Create new product
-      this.productService.createProduct(this.editingProduct)
+      this.productService.createProduct(productData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -367,7 +379,67 @@ export class ProductsComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
               console.error('Erro ao excluir produto:', error);
-              this.dialogService.showError('Erro ao excluir produto. Tente novamente.');
+              
+              // Verificar se é o erro específico de histórico de inventário
+              if (error.message && error.message.includes('inventory history')) {
+                this.showDeleteWithHistoryDialog(product);
+              } else {
+                this.dialogService.showError('Erro ao excluir produto. Tente novamente.');
+              }
+            }
+          });
+      }
+    });
+  }
+
+  private showDeleteWithHistoryDialog(product: Product): void {
+    this.dialogService.warning({
+      title: 'Não é possível excluir este produto',
+      message: `O produto "${product.name}" possui histórico de movimentação de inventário e não pode ser excluído. Você pode desativá-lo para que não apareça nas listagens ativas.`,
+      confirmText: 'Desativar produto',
+      cancelText: 'Cancelar',
+      icon: 'pi pi-exclamation-triangle'
+    }).subscribe(result => {
+      if (result.confirmed) {
+        this.deactivateProduct(product);
+      }
+    });
+  }
+
+  deactivateProduct(product: Product): void {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja desativar o produto "${product.name}"?`,
+      'Confirmar desativação'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        const updateData = {
+          ...product,
+          status: 'INACTIVE' as const
+        };
+
+        this.productService.updateProduct(product.id, updateData)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              console.log('Produto desativado com sucesso, atualizando lista local...');
+              this.dialogService.showSuccess('Produto desativado com sucesso!');
+              
+              // Atualizar produto na lista local
+              const productIndex = this.products.findIndex(p => p.id === product.id);
+              if (productIndex !== -1) {
+                this.products[productIndex].status = 'INACTIVE';
+                this.filteredProducts = [...this.products];
+                console.log('Produto atualizado na lista local:', this.products[productIndex]);
+              }
+              
+              // Limpar filtro de status para mostrar todos os produtos
+              this.selectedStatus = '';
+              // Forçar detecção de mudanças
+              this.cdr.detectChanges();
+            },
+            error: (error) => {
+              console.error('Erro ao desativar produto:', error);
+              this.dialogService.showError('Erro ao desativar produto. Tente novamente.');
             }
           });
       }
@@ -444,7 +516,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   // Métodos faltando para templates
   getPaginatedProducts(): Product[] {
-    return this.filteredProducts;
+    return this.products;
   }
 
   getStatusText(status: string): string {

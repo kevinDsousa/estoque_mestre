@@ -159,10 +159,14 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           // Mapear dados do backend para interface local
-          this.transactions = response.data.map(transaction => ({
+          this.transactions = (response as any).transactions.map((transaction: any) => ({
             ...transaction,
             amount: transaction.totalAmount,
-            date: transaction.createdAt
+            date: transaction.createdAt,
+            // Mapear cliente/fornecedor para string
+            customer: transaction.customer?.name || transaction.supplier?.name || 'N/A',
+            // Mapear itens para string
+            items: transaction.items?.length || 0
           }));
           this.paginationConfig.totalItems = response.pagination.total;
           this.filteredTransactions = [...this.transactions];

@@ -8,7 +8,7 @@ export interface CategoryResponse {
   name: string;
   description?: string;
   parentId?: string;
-  isActive: boolean;
+  status: 'ACTIVE' | 'INACTIVE';
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -23,7 +23,7 @@ export interface CreateCategoryRequest {
   name: string;
   description?: string;
   parentId?: string;
-  isActive?: boolean;
+  status?: 'ACTIVE' | 'INACTIVE';
   sortOrder?: number;
 }
 
@@ -31,14 +31,14 @@ export interface UpdateCategoryRequest {
   name?: string;
   description?: string;
   parentId?: string;
-  isActive?: boolean;
+  status?: 'ACTIVE' | 'INACTIVE';
   sortOrder?: number;
 }
 
 export interface CategoryFilters {
   query?: string;
   parentId?: string;
-  isActive?: boolean;
+  status?: 'ACTIVE' | 'INACTIVE';
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -49,7 +49,7 @@ export interface CategoryTree {
   id: string;
   name: string;
   description?: string;
-  isActive: boolean;
+  status: 'ACTIVE' | 'INACTIVE';
   children: CategoryTree[];
   productCount: number;
   level: number;
@@ -74,8 +74,21 @@ export class CategoryService {
    * Get all categories with pagination and filters
    */
   getCategories(filters: CategoryFilters = {}): Observable<PaginatedResponse<CategoryResponse>> {
-    return this.apiService.getPaginated<CategoryResponse>('categories', filters)
+    return this.apiService.get<CategoryResponse[]>('categories')
       .pipe(
+        map(categories => ({
+          data: categories,
+          pagination: {
+            total: categories.length,
+            page: 1,
+            limit: categories.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false
+          },
+          success: true,
+          timestamp: new Date().toISOString()
+        })),
         tap(response => {
           this.categoriesSubject.next(response.data);
         })
@@ -190,14 +203,14 @@ export class CategoryService {
    * Get active categories
    */
   getActiveCategories(filters: Partial<CategoryFilters> = {}): Observable<PaginatedResponse<CategoryResponse>> {
-    return this.getCategories({ ...filters, isActive: true });
+    return this.getCategories({ ...filters, status: 'ACTIVE' });
   }
 
   /**
    * Get inactive categories
    */
   getInactiveCategories(filters: Partial<CategoryFilters> = {}): Observable<PaginatedResponse<CategoryResponse>> {
-    return this.getCategories({ ...filters, isActive: false });
+    return this.getCategories({ ...filters, status: 'INACTIVE' });
   }
 
   /**

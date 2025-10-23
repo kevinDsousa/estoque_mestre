@@ -114,7 +114,7 @@ export class CustomersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           // Mapear dados do backend para interface local
-          this.customers = response.data.map(customer => ({
+          this.customers = (response as any).customers.map((customer: any) => ({
             ...customer,
             isActive: customer.status === 'ACTIVE',
             lastPurchase: customer.lastPurchaseAt

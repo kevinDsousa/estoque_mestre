@@ -82,6 +82,14 @@
         background: var(--color-error-light);
       }
     }
+    
+    &.text-warning {
+      color: var(--color-warning);
+      
+      &:hover {
+        background: var(--color-warning-light);
+      }
+    }
   }
   
   &.btn-sm {
@@ -443,8 +451,8 @@
   }
   
   &.status-inactive {
-    background: var(--color-error-light);
-    color: var(--color-error);
+    background: var(--color-warning-light);
+    color: var(--color-warning);
   }
   
   &.status-low-stock {

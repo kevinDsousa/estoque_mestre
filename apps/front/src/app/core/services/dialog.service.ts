@@ -150,6 +150,7 @@ export class DialogService {
    */
   confirmAction(data?: any): void {
     this.resultSubject.next({ confirmed: true, data });
+    this.clearDialog();
   }
 
   /**
@@ -157,6 +158,7 @@ export class DialogService {
    */
   cancelAction(): void {
     this.resultSubject.next({ confirmed: false });
+    this.clearDialog();
   }
 
   /**
@@ -164,7 +166,10 @@ export class DialogService {
    */
   private clearDialog(): void {
     this.dialogSubject.next(null);
-    this.resultSubject.next(null);
+    // Reset resultSubject after a small delay to ensure the result is consumed
+    setTimeout(() => {
+      this.resultSubject.next(null);
+    }, 0);
   }
 
   /**
@@ -177,8 +182,8 @@ export class DialogService {
   /**
    * Show success message
    */
-  showSuccess(message: string, title: string = 'Sucesso'): void {
-    this.info({
+  showSuccess(message: string, title: string = 'Sucesso'): Observable<DialogResult> {
+    return this.info({
       title,
       message,
       icon: 'pi pi-check-circle',
@@ -189,8 +194,8 @@ export class DialogService {
   /**
    * Show error message
    */
-  showError(message: string, title: string = 'Erro'): void {
-    this.error({
+  showError(message: string, title: string = 'Erro'): Observable<DialogResult> {
+    return this.error({
       title,
       message,
       icon: 'pi pi-times-circle',
