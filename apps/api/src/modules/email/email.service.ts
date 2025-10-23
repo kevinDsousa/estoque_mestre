@@ -58,22 +58,29 @@ export class EmailService {
   }
 
   private initializeTransporter() {
-    const emailConfig = this.configService.get('email');
-    
-    if (!emailConfig?.host) {
-      this.logger.warn('Email configuration not found. Email service will use console logging only.');
-      return;
-    }
+    try {
+      const emailConfig = this.configService.get('email');
+      
+      if (!emailConfig?.host) {
+        console.warn('[EMAIL] Email configuration not found. Email service will use console logging only.');
+        return;
+      }
 
-    this.transporter = nodemailer.createTransport({
-      host: emailConfig.host,
-      port: emailConfig.port,
-      secure: emailConfig.secure,
-      auth: {
-        user: emailConfig.user,
-        pass: emailConfig.password,
-      },
-    });
+      this.transporter = nodemailer.createTransport({
+        host: emailConfig.host,
+        port: emailConfig.port,
+        secure: emailConfig.secure,
+        auth: {
+          user: emailConfig.user,
+          pass: emailConfig.password,
+        },
+      });
+      
+      console.log('[EMAIL] Email transporter initialized successfully');
+    } catch (error) {
+      console.error('[EMAIL] Error initializing email transporter:', error.message);
+      console.warn('[EMAIL] Email service is not available. Emails will be logged to console.');
+    }
 
     // Verify connection configuration asynchronously to avoid blocking startup
     // setImmediate(() => {

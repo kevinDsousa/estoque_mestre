@@ -21,15 +21,25 @@ export class MinioService {
 
   async onModuleInit() {
     try {
-      // Check if bucket exists, create if not
-      const bucketExists = await this.minioClient.bucketExists(this.bucketName);
+      console.log('[MINIO] Connecting to MinIO...');
+      
+      // Add timeout for MinIO operations
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('MinIO connection timeout')), 5000)
+      );
+      
+      const bucketCheckPromise = this.minioClient.bucketExists(this.bucketName);
+      const bucketExists = await Promise.race([bucketCheckPromise, timeoutPromise]) as boolean;
+      
       if (!bucketExists) {
         await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
-        console.log(`Bucket ${this.bucketName} created successfully`);
+        console.log('[MINIO] Bucket ' + this.bucketName + ' created successfully');
+      } else {
+        console.log('[MINIO] Connected successfully');
       }
     } catch (error) {
-      console.error('Error initializing MinIO:', error);
-      console.warn('MinIO service is not available. File upload functionality will be limited.');
+      console.error('[MINIO] Error initializing MinIO:', error.message);
+      console.warn('[MINIO] MinIO service is not available. File upload functionality will be limited.');
       // Don't throw error to allow app to start even without MinIO
     }
   }

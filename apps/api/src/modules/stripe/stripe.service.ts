@@ -7,12 +7,28 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor(private configService: ConfigService) {
-    this.stripe = new Stripe(
-      this.configService.get('stripe.secretKey') || 'sk_test_dummy',
-      {
-        apiVersion: '2024-06-20',
+    try {
+      const stripeKey = this.configService.get('stripe.secretKey') || 'sk_test_dummy';
+      
+      if (!stripeKey || stripeKey === 'sk_test_dummy') {
+        console.warn('[STRIPE] Stripe API key not configured. Payment functionality will be limited.');
       }
-    );
+      
+      this.stripe = new Stripe(stripeKey, {
+        apiVersion: '2024-06-20',
+      });
+      
+      if (stripeKey && stripeKey !== 'sk_test_dummy') {
+        console.log('[STRIPE] Stripe client initialized successfully');
+      }
+    } catch (error) {
+      console.error('[STRIPE] Error initializing Stripe:', error.message);
+      console.warn('[STRIPE] Stripe service is not available. Payment functionality will be limited.');
+      // Initialize with dummy key to prevent crashes
+      this.stripe = new Stripe('sk_test_dummy', {
+        apiVersion: '2024-06-20',
+      });
+    }
   }
 
   // Customer Management

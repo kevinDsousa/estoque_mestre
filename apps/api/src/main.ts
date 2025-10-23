@@ -32,45 +32,63 @@ async function bootstrap() {
   );
 
   // Swagger documentation
+  console.log('[SWAGGER] Setting up Swagger...');
   if (configService.get<boolean>('app.enableSwagger')) {
-    const config = new DocumentBuilder()
-      .setTitle('Estoque Mestre API')
-      .setDescription('API para sistema de gestão de estoque')
-      .setVersion('1.0')
-      .setContact('Estoque Mestre', 'contato@estoquemestre.com', '')
-      .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-      .addBearerAuth(
-        {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          name: 'JWT',
-          description: 'Enter JWT token',
-          in: 'header',
-        },
-        'JWT-auth',
-      )
-      .addServer(`http://localhost:${configService.get<number>('app.port')}/api`, 'Development server')
-      .build();
+    try {
+      console.log('[SWAGGER] Building Swagger config...');
+      const config = new DocumentBuilder()
+        .setTitle('Estoque Mestre API')
+        .setDescription('API para sistema de gestão de estoque')
+        .setVersion('1.0')
+        .setContact('Estoque Mestre', 'contato@estoquemestre.com', '')
+        .setLicense('MIT', 'https://opensource.org/licenses/MIT')
+        .addBearerAuth(
+          {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            name: 'JWT',
+            description: 'Enter JWT token',
+            in: 'header',
+          },
+          'JWT-auth',
+        )
+        .addServer('http://localhost:3000/api', 'Development server')
+        .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
-        tagsSorter: 'alpha',
-        operationsSorter: 'alpha',
-      },
-    });
+      console.log('[SWAGGER] Creating Swagger document...');
+      const document = SwaggerModule.createDocument(app, config);
+      console.log('[SWAGGER] Setting up Swagger UI...');
+      SwaggerModule.setup('api/docs', app, document, {
+        swaggerOptions: {
+          persistAuthorization: true,
+          tagsSorter: 'alpha',
+          operationsSorter: 'alpha',
+        },
+      });
+      console.log('[SWAGGER] Swagger setup complete');
+    } catch (error) {
+      console.error('[ERROR] Error setting up Swagger:', error);
+    }
   }
 
   // Start server
   const port = configService.get<number>('app.port') || 3000;
-  await app.listen(port);
+  console.log('[SERVER] Starting server on port ' + port + '...');
   
-  console.log(`🚀 Application is running on: http://localhost:${port}/api`);
-  if (configService.get<boolean>('app.enableSwagger')) {
-    console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  try {
+    await app.listen(port, '0.0.0.0');
+    console.log('[SERVER] Application is running on: http://localhost:' + port + '/api');
+    if (configService.get<boolean>('app.enableSwagger')) {
+      console.log('[SWAGGER] Documentation: http://localhost:' + port + '/api/docs');
+    }
+  } catch (error) {
+    console.error('[ERROR] Failed to start server:', error);
+    process.exit(1);
   }
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('[ERROR] Failed to bootstrap application:', error);
+  process.exit(1);
+});
