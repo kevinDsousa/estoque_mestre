@@ -98,9 +98,15 @@ export class ApiService {
   patch<T>(endpoint: string, data: any): Observable<T> {
     this.setLoading(true);
     
-    return this.http.patch<ApiResponse<T>>(`${this.baseUrl}/${endpoint}`, data)
+    return this.http.patch(`${this.baseUrl}/${endpoint}`, data, { observe: 'response' as const })
       .pipe(
-        map(response => response.data),
+        map(resp => {
+          const body: any = resp.body;
+          if (body && typeof body === 'object' && 'data' in body) {
+            return (body as ApiResponse<T>).data;
+          }
+          return body as T;
+        }),
         catchError(this.handleError),
         tap(() => this.setLoading(false))
       );

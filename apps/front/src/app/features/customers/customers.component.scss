@@ -281,6 +281,88 @@
   font-size: 0.75rem;
 }
 
+// Modal (edição/criação de cliente)
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal);
+  padding: var(--spacing-lg);
+}
+
+.modal-content {
+  background: var(--color-card);
+  border-radius: var(--border-radius-medium);
+  box-shadow: var(--shadow-large);
+  width: 720px;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-header);
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    color: var(--text-color);
+  }
+
+  .btn-close {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-small);
+
+    &:hover { background: var(--color-surface-hover); }
+  }
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+  overflow: auto;
+  background: var(--color-card);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-header);
+}
+
+.customer-form {
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+
+    .form-group { display: flex; flex-direction: column; }
+    .full-width { grid-column: 1 / -1; }
+
+    label { color: var(--text-color); margin-bottom: var(--spacing-xs); font-weight: 500; }
+  }
+}
+
 @media (max-width: 768px) {
   .customers {
     padding: 1rem;
@@ -300,4 +382,7 @@
   .customers-grid {
     grid-template-columns: 1fr;
   }
+
+  .modal-content { width: 95vw; }
+  .customer-form .form-row { grid-template-columns: 1fr; }
 }

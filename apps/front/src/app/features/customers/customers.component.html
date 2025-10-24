@@ -6,7 +6,7 @@
     </div>
     <div class="header-actions">
       <app-view-toggle [currentView]="currentView" (viewChange)="onViewChange($event)"></app-view-toggle>
-      <button class="btn btn-primary">
+      <button class="btn btn-primary" (click)="addCustomer()">
         <i class="pi pi-plus"></i>
         Novo Cliente
       </button>
@@ -196,3 +196,69 @@
     </div>
   }
 </div>
+
+<!-- Modal de Edição/Criação de Cliente -->
+@if (showAddModal && editingCustomer) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingCustomer.id ? 'Editar Cliente' : 'Novo Cliente' }}</h2>
+        <button class="btn-close" (click)="closeModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form class="customer-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Nome *</label>
+              <input id="name" type="text" class="form-control" [(ngModel)]="editingCustomer.name" name="name" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input id="email" type="email" class="form-control" [(ngModel)]="editingCustomer.email" name="email">
+            </div>
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" class="form-control" [(ngModel)]="editingCustomer.status" name="status">
+                <option value="ACTIVE">Ativo</option>
+                <option value="INACTIVE">Inativo</option>
+                <option value="BLOCKED">Bloqueado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="type">Tipo</label>
+              <select id="type" class="form-control" [(ngModel)]="editingCustomer.customerType" name="type">
+                <option value="INDIVIDUAL">Pessoa Física</option>
+                <option value="COMPANY">Pessoa Jurídica</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="phone">Telefone</label>
+              <input id="phone" type="text" class="form-control" [(ngModel)]="editingCustomer.phone" name="phone" appPhoneMask>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="notes">Observações</label>
+              <textarea id="notes" class="form-control" [(ngModel)]="editingCustomer.notes" name="notes" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="saveCustomer()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}

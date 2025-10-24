@@ -59,7 +59,7 @@ export interface UpdateCustomerRequest {
 }
 
 export interface CustomerFilters {
-  query?: string;
+  search?: string;
   status?: string;
   type?: string;
   page?: number;
@@ -136,8 +136,12 @@ export class CustomerService {
     return this.apiService.patch<CustomerResponse>(`customers/${id}`, customerData)
       .pipe(
         tap(customer => {
+          // Alguns PATCH podem retornar 204/sem corpo; nesse caso não atualizamos os subjects
+          if (!customer) {
+            return;
+          }
           this.currentCustomerSubject.next(customer);
-          
+
           const currentCustomers = this.customersSubject.value;
           const updatedCustomers = currentCustomers.map(c => 
             c.id === id ? { ...c, ...customer } : c
@@ -201,7 +205,7 @@ export class CustomerService {
    * Search customers
    */
   searchCustomers(query: string, filters: Partial<CustomerFilters> = {}): Observable<PaginatedResponse<CustomerResponse>> {
-    return this.getCustomers({ ...filters, query });
+    return this.getCustomers({ ...filters, search: query });
   }
 
   /**
