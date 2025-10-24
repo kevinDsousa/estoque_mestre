@@ -84,8 +84,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.categories = response.data;
-          this.paginationConfig.totalItems = response.pagination.total;
-          this.filteredCategories = [...this.categories];
+          // Aplica filtro local de busca e atualiza paginação
+          this.applyCategoryFilter();
         },
         error: (error) => {
           console.error('Erro ao carregar categorias:', error);
@@ -98,8 +98,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   filterCategories(): void {
     // Reset para primeira página ao filtrar
     this.paginationConfig.currentPage = 1;
-    // Recarregar categorias com filtros aplicados
-    this.loadCategories();
+    // Aplicar filtro localmente (backend não expõe busca)
+    this.applyCategoryFilter();
   }
 
   onSearchChange(): void {
@@ -115,7 +115,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
   onPageChange(page: number): void {
     this.paginationConfig.currentPage = page;
-    this.loadCategories();
+    // Paginação local sobre a lista filtrada
   }
 
   onViewModeChange(mode: ViewMode): void {
@@ -277,7 +277,9 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
   // Métodos faltando para templates
   getPaginatedCategories(): Category[] {
-    return this.filteredCategories;
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    return this.filteredCategories.slice(startIndex, endIndex);
   }
 
   getStatusText(status: 'ACTIVE' | 'INACTIVE'): string {
@@ -287,7 +289,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   onItemsPerPageChange(limit: number): void {
     this.paginationConfig.itemsPerPage = limit;
     this.paginationConfig.currentPage = 1;
-    this.loadCategories();
+    // Atualiza exibição localmente
   }
 
   closeModal(): void {
@@ -298,5 +300,20 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   onViewChange(view: ViewMode): void {
     this.currentView = view;
     this.viewPreferencesService.setViewPreference('categories', view);
+  }
+
+  private applyCategoryFilter(): void {
+    const term = (this.searchTerm || '').trim().toLowerCase();
+    if (!term) {
+      this.filteredCategories = [...this.categories];
+      this.paginationConfig.totalItems = this.filteredCategories.length;
+      return;
+    }
+    this.filteredCategories = this.categories.filter(c => {
+      const name = (c.name || '').toLowerCase();
+      const desc = (c.description || '').toLowerCase();
+      return name.includes(term) || desc.includes(term);
+    });
+    this.paginationConfig.totalItems = this.filteredCategories.length;
   }
 }

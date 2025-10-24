@@ -192,11 +192,11 @@ export class QueryCacheService {
     }
     
     if (companyId) {
-      // Invalidar caches relacionados à empresa
-      await this.invalidateByPattern(`products:*:company:${companyId}`);
-      await this.invalidateByPattern(`products:category:*`);
-      await this.invalidateByPattern(`products:supplier:*`);
-      await this.invalidateByPattern(`products:status:*:company:${companyId}`);
+      // Invalidar chaves conhecidas relacionadas à empresa
+      // Importante: esta chave é consultada em findAll() via getProductsByStatus('ALL', companyId)
+      await this.cacheManager.del(`products:status:ALL:company:${companyId}`);
+      // Outras famílias de chaves podem existir em implementações futuras.
+      // Como invalidateByPattern não está implementado, focamos nas chaves realmente utilizadas.
     }
   }
 

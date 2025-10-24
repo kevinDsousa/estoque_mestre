@@ -262,3 +262,99 @@
     </div>
   </div>
 }
+
+<!-- Modal Nova Venda -->
+@if (showSaleModal && saleDraft) {
+  <div class="modal-overlay" (click)="closeSaleModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nova Venda</h2>
+        <button class="btn-close" (click)="closeSaleModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form class="customer-form">
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Cliente</label>
+              <input class="form-control" [value]="editingCustomer?.name || ''" disabled>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="productSearch">Adicionar produto</label>
+              <input id="productSearch" type="text" class="form-control" [(ngModel)]="productSearchTerm" name="productSearch" (input)="searchProducts()" placeholder="Buscar produtos por nome/SKU...">
+              @if (productSuggestions.length > 0) {
+                <div class="suggestions">
+                  @for (p of productSuggestions; track p.id) {
+                    <div class="suggestion-item" (click)="addProductToSale(p)">
+                      <span class="name">{{ p.name }}</span>
+                      <span class="price">{{ p.sellingPrice || 0 | currency:'BRL':'symbol':'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (saleDraft && saleDraft.items && saleDraft.items.length) {
+            <div class="form-row">
+              <div class="form-group full-width">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th style="width: 120px;">Qtd</th>
+                      <th style="width: 140px;">Preço</th>
+                      <th style="width: 140px;">Total</th>
+                      <th style="width: 60px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of saleDraft.items; let i = $index; track item.productId) {
+                      <tr>
+                        <td>{{ item.name || item.productId }}</td>
+                        <td>
+                          <input type="number" min="1" class="form-control" [(ngModel)]="item.quantity" name="qty{{i}}" (change)="onItemQuantityChange(i)">
+                        </td>
+                        <td>
+                          <input type="number" min="0" step="0.01" class="form-control" [(ngModel)]="item.unitPrice" name="price{{i}}" (change)="onItemQuantityChange(i)">
+                        </td>
+                        <td>{{ (item.totalPrice || (item.quantity * item.unitPrice)) | currency:'BRL':'symbol':'1.2-2' }}</td>
+                        <td>
+                          <button type="button" class="btn btn-ghost btn-sm" (click)="removeItem(i)"><i class="pi pi-times"></i></button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="sale-notes">Observações</label>
+              <textarea id="sale-notes" class="form-control" [(ngModel)]="saleDraft.notes" name="saleNotes" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Total</label>
+              <input class="form-control" [value]="saleDraft.totalAmount | number:'1.2-2'" disabled>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeSaleModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="submitSale()">Criar Venda</button>
+      </div>
+    </div>
+  </div>
+}

@@ -147,11 +147,12 @@
                 <i class="pi pi-pause"></i>
                 Desativar
               </button>
+            } @else {
+              <button class="btn btn-ghost btn-sm text-success" (click)="activateProduct(product)">
+                <i class="pi pi-play"></i>
+                Ativar
+              </button>
             }
-            <button class="btn btn-ghost btn-sm text-error" (click)="deleteProduct(product)">
-              <i class="pi pi-trash"></i>
-              Excluir
-            </button>
           </td>
           </tr>
         }
@@ -219,20 +220,21 @@
         </div>
         
         <div class="card-footer">
-          <button class="btn btn-ghost btn-sm" (click)="editProduct(product)">
-            <i class="pi pi-pencil"></i>
-            Editar
-          </button>
-          @if (product.status === 'ACTIVE') {
-            <button class="btn btn-ghost btn-sm text-warning" (click)="deactivateProduct(product)">
-              <i class="pi pi-pause"></i>
-              Desativar
+            <button class="btn btn-ghost btn-sm" (click)="editProduct(product)">
+              <i class="pi pi-pencil"></i>
+              Editar
             </button>
-          }
-          <button class="btn btn-ghost btn-sm text-error" (click)="deleteProduct(product)">
-            <i class="pi pi-trash"></i>
-            Excluir
-          </button>
+            @if (product.status === 'ACTIVE') {
+              <button class="btn btn-ghost btn-sm text-warning" (click)="deactivateProduct(product)">
+                <i class="pi pi-pause"></i>
+                Desativar
+              </button>
+            } @else {
+              <button class="btn btn-ghost btn-sm text-success" (click)="activateProduct(product)">
+                <i class="pi pi-play"></i>
+                Ativar
+              </button>
+            }
         </div>
           </div>
         }
@@ -369,6 +371,18 @@
               @if (editingProduct!.images && editingProduct!.images.length > 0) {
                 <div class="image-preview-list">
                   @for (image of editingProduct!.images; track $index) {
+                    <div class="image-preview-item">
+                      <img [src]="image" [alt]="'Imagem ' + ($index + 1)">
+                      <button type="button" class="remove-image" (click)="removeImage($index)">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+              @else if (selectedPreviews.length > 0) {
+                <div class="image-preview-list">
+                  @for (image of selectedPreviews; track $index) {
                     <div class="image-preview-item">
                       <img [src]="image" [alt]="'Imagem ' + ($index + 1)">
                       <button type="button" class="remove-image" (click)="removeImage($index)">

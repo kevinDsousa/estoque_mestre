@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, finalize } from 'rxjs';
@@ -7,6 +8,8 @@ import { ViewPreferencesService, ViewMode } from '../../core/services/view-prefe
 import { CustomerService, CustomerFilters } from '../../core/services/customer.service';
 import { ViewToggleComponent } from '../../core/components';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { ProductService } from '../../core/services/product.service';
+import { TransactionService } from '../../core/services/transaction.service';
 
 interface Customer {
   id: string;
@@ -45,6 +48,17 @@ interface Customer {
   styleUrl: './customers.component.scss'
 })
 export class CustomersComponent implements OnInit, OnDestroy {
+  // Modal Nova Venda
+  showSaleModal = false;
+  saleDraft: {
+    customerId: string;
+    items: Array<{ productId: string; name?: string; quantity: number; unitPrice: number; totalPrice?: number }>;
+    notes?: string;
+    totalAmount: number;
+  } | null = null;
+  productSearchTerm = '';
+  productSuggestions: Array<{ id: string; name: string; sellingPrice?: number }> = [];
+  productSearchLoading = false;
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
   loading = false;
@@ -82,7 +96,10 @@ export class CustomersComponent implements OnInit, OnDestroy {
   constructor(
     private dialogService: DialogService,
     private viewPreferencesService: ViewPreferencesService,
-    private customerService: CustomerService
+    private customerService: CustomerService,
+    private router: Router,
+    private productService: ProductService,
+    private transactionService: TransactionService
   ) {}
 
   ngOnInit(): void {
@@ -402,8 +419,103 @@ export class CustomersComponent implements OnInit, OnDestroy {
   }
 
   newSale(customer: Customer): void {
-    console.log('Nova venda para cliente:', customer);
-    // Implementar modal de nova venda
+    this.saleDraft = {
+      customerId: customer.id,
+      items: [],
+      totalAmount: 0
+    };
+    this.showSaleModal = true;
+  }
+
+  closeSaleModal(): void {
+    this.showSaleModal = false;
+    this.saleDraft = null;
+  }
+
+  searchProducts(): void {
+    const term = (this.productSearchTerm || '').trim();
+    if (!term) {
+      this.productSuggestions = [];
+      return;
+    }
+    this.productSearchLoading = true;
+    this.productService.getProducts({ query: term, limit: 5 })
+      .subscribe({
+        next: (response: any) => {
+          const list = (response?.data || response?.products || response?.items || []).map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            sellingPrice: p.sellingPrice
+          }));
+          this.productSuggestions = list;
+          this.productSearchLoading = false;
+        },
+        error: () => {
+          this.productSuggestions = [];
+          this.productSearchLoading = false;
+        }
+      });
+  }
+
+  addProductToSale(product: { id: string; name: string; sellingPrice?: number }): void {
+    if (!this.saleDraft) return;
+    const unitPrice = product.sellingPrice ?? 0;
+    const existing = this.saleDraft.items.find(i => i.productId === product.id);
+    if (existing) {
+      existing.quantity += 1;
+      existing.totalPrice = existing.quantity * existing.unitPrice;
+    } else {
+      this.saleDraft.items.push({ productId: product.id, name: product.name, quantity: 1, unitPrice, totalPrice: unitPrice });
+    }
+    this.recalculateSaleTotal();
+    this.productSearchTerm = '';
+    this.productSuggestions = [];
+  }
+
+  onItemQuantityChange(index: number): void {
+    if (!this.saleDraft) return;
+    const item = this.saleDraft.items[index];
+    if (!item) return;
+    if (!item.quantity || item.quantity < 1) item.quantity = 1;
+    item.totalPrice = item.quantity * item.unitPrice;
+    this.recalculateSaleTotal();
+  }
+
+  removeItem(index: number): void {
+    if (!this.saleDraft) return;
+    this.saleDraft.items.splice(index, 1);
+    this.recalculateSaleTotal();
+  }
+
+  private recalculateSaleTotal(): void {
+    if (!this.saleDraft) return;
+    this.saleDraft.totalAmount = this.saleDraft.items.reduce((sum, i) => sum + ((i.totalPrice ?? (i.quantity * i.unitPrice)) || 0), 0);
+  }
+
+  submitSale(): void {
+    if (!this.saleDraft) return;
+    if (!this.saleDraft.items.length) {
+      this.dialogService.showError('Adicione ao menos 1 produto para prosseguir.');
+      return;
+    }
+    const payload = {
+      type: 'SALE' as const,
+      customerId: this.saleDraft.customerId,
+      totalAmount: this.saleDraft.totalAmount,
+      notes: this.saleDraft.notes,
+      items: this.saleDraft.items.map(i => ({ productId: i.productId, quantity: i.quantity, unitPrice: i.unitPrice }))
+    };
+    this.transactionService.createTransaction(payload as any)
+      .subscribe({
+        next: () => {
+          this.dialogService.showSuccess('Venda criada com sucesso!');
+          this.closeSaleModal();
+        },
+        error: (error) => {
+          console.error('Erro ao criar venda:', error);
+          this.dialogService.showError('Erro ao criar venda. Tente novamente.');
+        }
+      });
   }
 
   onItemsPerPageChange(limit: number): void {

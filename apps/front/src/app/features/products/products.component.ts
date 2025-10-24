@@ -80,6 +80,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   showAddModal = false;
   editingProduct: Product | null = null;
   currentView: ViewMode = 'table';
+  // Upload de imagens (pré-visualização antes de enviar)
+  selectedFiles: File[] = [];
+  selectedPreviews: string[] = [];
   
   // Pagination
   paginationConfig: PaginationConfig = {
@@ -180,7 +183,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.loading = true;
     
     const filters: ProductFilters = {
-      query: this.searchTerm,
+      search: this.searchTerm,
       categoryId: this.selectedCategories.length > 0 ? this.selectedCategories[0] : undefined,
       status: this.selectedStatus || undefined,
       minPrice: this.minPrice ? parseFloat(this.minPrice) : undefined,
@@ -228,8 +231,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
             this.paginationConfig.currentPage = 1;
           }
           
-          // Forçar nova referência para detecção de mudanças
-          this.filteredProducts = this.products.slice();
+          // Aplicar filtros locais (estoque e preço)
+          this.applyClientFilters();
         },
         error: (error) => {
           console.error('Erro ao carregar produtos:', error);
@@ -242,6 +245,50 @@ export class ProductsComponent implements OnInit, OnDestroy {
     // Reset to first page when filtering
     this.paginationConfig.currentPage = 1;
     this.loadProducts();
+  }
+
+  private applyClientFilters(): void {
+    // Base list from backend
+    let list = this.products.slice();
+
+    // Stock filter
+    switch (this.selectedStockFilter) {
+      case 'out':
+        list = list.filter(p => (p.currentStock ?? p.stock ?? 0) === 0);
+        break;
+      case 'low':
+        list = list.filter(p => (p.currentStock ?? p.stock ?? 0) > 0 && (p.currentStock ?? p.stock ?? 0) < (p.minStock ?? 5));
+        break;
+      case 'medium':
+        list = list.filter(p => {
+          const stock = (p.currentStock ?? p.stock ?? 0);
+          const min = (p.minStock ?? 5);
+          return stock >= min && stock <= min * 3;
+        });
+        break;
+      case 'high':
+        list = list.filter(p => {
+          const stock = (p.currentStock ?? p.stock ?? 0);
+          const min = (p.minStock ?? 5);
+          return stock > min * 3;
+        });
+        break;
+      default:
+        break;
+    }
+
+    // Price filter (client-side)
+    const min = this.minPrice ? parseFloat(this.minPrice) : undefined;
+    const max = this.maxPrice ? parseFloat(this.maxPrice) : undefined;
+    if (min !== undefined) {
+      list = list.filter(p => (p.sellingPrice ?? p.price ?? 0) >= min);
+    }
+    if (max !== undefined) {
+      list = list.filter(p => (p.sellingPrice ?? p.price ?? 0) <= max);
+    }
+
+    this.filteredProducts = list;
+    this.paginationConfig.totalItems = list.length;
   }
 
   onSearchChange(): void {
@@ -257,11 +304,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onStockFilterChange(): void {
-    this.filterProducts();
+    // Reset to first page and apply local filters immediately
+    this.paginationConfig.currentPage = 1;
+    this.applyClientFilters();
   }
 
   onPriceFilterChange(): void {
-    this.filterProducts();
+    // Apply client-side price filter together with stock filter
+    this.paginationConfig.currentPage = 1;
+    this.applyClientFilters();
   }
 
   clearFilters(): void {
@@ -286,6 +337,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   addProduct(): void {
+    // Reset de seleção de imagens
+    this.selectedFiles = [];
+    this.selectedPreviews = [];
     this.editingProduct = {
       id: '',
       name: '',
@@ -308,6 +362,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   editProduct(product: Product): void {
+    // Reset de seleção de imagens ao abrir modal
+    this.selectedFiles = [];
+    this.selectedPreviews = [];
     this.editingProduct = { ...product };
     this.showAddModal = true;
   }
@@ -452,6 +509,42 @@ export class ProductsComponent implements OnInit, OnDestroy {
     });
   }
 
+  activateProduct(product: Product): void {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja ativar o produto "${product.name}"?`,
+      'Confirmar ativação'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        const updateData = {
+          ...product,
+          status: 'ACTIVE' as const
+        };
+
+        this.productService.updateProduct(product.id, updateData)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.dialogService.showSuccess('Produto ativado com sucesso!');
+
+              // Atualizar produto na lista local
+              const productIndex = this.products.findIndex(p => p.id === product.id);
+              if (productIndex !== -1) {
+                this.products[productIndex].status = 'ACTIVE';
+                this.applyClientFilters();
+              }
+
+              // Forçar detecção de mudanças se necessário
+              this.cdr.detectChanges();
+            },
+            error: (error) => {
+              console.error('Erro ao ativar produto:', error);
+              this.dialogService.showError('Erro ao ativar produto. Tente novamente.');
+            }
+          });
+      }
+    });
+  }
+
   cancelEdit(): void {
     this.showAddModal = false;
     this.editingProduct = null;
@@ -522,7 +615,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   // Métodos faltando para templates
   getPaginatedProducts(): Product[] {
-    return this.products;
+    const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.itemsPerPage;
+    const endIndex = startIndex + this.paginationConfig.itemsPerPage;
+    return this.filteredProducts.slice(startIndex, endIndex);
   }
 
   getStatusText(status: string): string {
@@ -544,16 +639,46 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onImageSelect(event: any): void {
-    console.log('Imagem selecionada:', event);
+    const files: FileList | null = event?.target?.files || null;
+    if (!files || !this.editingProduct) return;
+    const currentCount = this.selectedFiles.length;
+    const maxToAdd = Math.max(0, 5 - currentCount);
+    if (maxToAdd === 0) {
+      this.dialogService.showError('Você pode selecionar no máximo 5 imagens.');
+      return;
+    }
+
+    const filesArray = Array.from(files).slice(0, maxToAdd);
+    for (const file of filesArray) {
+      this.selectedFiles.push(file);
+      const objectUrl = URL.createObjectURL(file);
+      this.selectedPreviews.push(objectUrl);
+    }
+    // Atualiza pré-visualização no modal
+    (this.editingProduct as any).images = [...this.selectedPreviews];
   }
 
   removeImage(index: number): void {
-    console.log('Remover imagem:', index);
+    const url = this.selectedPreviews[index];
+    if (url) {
+      try { URL.revokeObjectURL(url); } catch {}
+    }
+    this.selectedPreviews.splice(index, 1);
+    this.selectedFiles.splice(index, 1);
+    if (this.editingProduct) {
+      (this.editingProduct as any).images = [...this.selectedPreviews];
+    }
   }
 
   closeModal(): void {
     this.showAddModal = false;
     this.editingProduct = null;
+    // Limpa seleções e pré-visualizações
+    for (const url of this.selectedPreviews) {
+      try { URL.revokeObjectURL(url); } catch {}
+    }
+    this.selectedFiles = [];
+    this.selectedPreviews = [];
   }
 
   onItemsPerPageChange(limit: number): void {

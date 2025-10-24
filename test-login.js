@@ -34,3 +34,4 @@ fetch('http://localhost:3000/api/auth/login', {
 .catch(error => {
   console.error('Erro na requisição:', error);
 });
+

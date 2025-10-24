@@ -98,6 +98,8 @@ export interface UpdateProductRequest {
 }
 
 export interface ProductFilters {
+  // Prefer 'search'; keep 'query' for backward compatibility
+  search?: string;
   query?: string;
   categoryId?: string;
   supplierId?: string;
@@ -200,7 +202,7 @@ export class ProductService {
    */
   getProducts(filters: ProductFilters = {}): Observable<PaginatedResponse<ProductListResponse>> {
     const searchParams = {
-      query: filters.query,
+      search: filters.search ?? filters.query,
       categoryId: filters.categoryId,
       supplierId: filters.supplierId,
       status: filters.status,
