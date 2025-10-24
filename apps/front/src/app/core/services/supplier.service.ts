@@ -85,7 +85,7 @@ export interface UpdateSupplierRequest {
 }
 
 export interface SupplierFilters {
-  query?: string;
+  search?: string;
   status?: string;
   rating?: number;
   page?: number;
@@ -157,6 +157,13 @@ export class SupplierService {
   }
 
   /**
+   * Update supplier status (with optional cascade to products)
+   */
+  updateSupplierStatus(id: string, status: string, updateProducts: boolean = false): Observable<SupplierResponse> {
+    return this.apiService.patch<SupplierResponse>(`suppliers/${id}/status`, { status, updateProducts });
+  }
+
+  /**
    * Delete supplier
    */
   deleteSupplier(id: string): Observable<void> {
@@ -178,7 +185,7 @@ export class SupplierService {
    * Search suppliers
    */
   searchSuppliers(query: string, filters: Partial<SupplierFilters> = {}): Observable<PaginatedResponse<SupplierResponse>> {
-    return this.getSuppliers({ ...filters, query });
+    return this.getSuppliers({ ...filters, search: query });
   }
 
   /**

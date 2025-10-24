@@ -215,7 +215,11 @@
                 type="text" 
                 class="form-control" 
                 [(ngModel)]="editingSupplier.document"
-                name="document">
+                #document="ngModel"
+                name="document"
+                appCpfCnpjMask
+                appCpfCnpjValidator>
+              <app-form-error [control]="document"></app-form-error>
             </div>
             
             <div class="form-group">
@@ -287,7 +291,10 @@
                 type="text" 
                 class="form-control" 
                 [(ngModel)]="editingSupplier.phone"
-                name="phone">
+                #phone="ngModel"
+                name="phone"
+                appPhoneMask>
+              <app-form-error [control]="phone"></app-form-error>
             </div>
           </div>
 

@@ -370,8 +370,34 @@ export class SupplierService {
     };
   }
 
-  async updateSupplierStatus(id: string, status: SupplierStatus, companyId: string) {
+  async updateSupplierStatus(id: string, status: SupplierStatus, companyId: string, updateProducts: boolean = false) {
     await this.findOne(id, companyId); // Verify supplier exists
+
+    // Se estiver desativando o fornecedor, sempre desativa os produtos
+    if (status === 'INACTIVE') {
+      await this.prisma.product.updateMany({
+        where: {
+          supplierId: id,
+          companyId,
+        },
+        data: {
+          status: 'INACTIVE',
+        },
+      });
+    }
+
+    // Se estiver ativando o fornecedor e updateProducts for true, ativa os produtos
+    if (status === 'ACTIVE' && updateProducts) {
+      await this.prisma.product.updateMany({
+        where: {
+          supplierId: id,
+          companyId,
+        },
+        data: {
+          status: 'ACTIVE',
+        },
+      });
+    }
 
     return this.prisma.supplier.update({
       where: { id },

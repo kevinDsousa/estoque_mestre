@@ -7,6 +7,10 @@ import { ViewPreferencesService, ViewMode } from '../../core/services/view-prefe
 import { SupplierService, SupplierFilters } from '../../core/services/supplier.service';
 import { ViewToggleComponent } from '../../core/components';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
+import { PhoneMaskDirective } from '../../core/directives/phone-mask.directive';
+import { CpfCnpjMaskDirective } from '../../core/directives/cpf-cnpj-mask.directive';
+import { CpfCnpjValidatorDirective } from '../../core/directives/cpf-cnpj-validator.directive';
+import { FormErrorComponent } from '../../core/components/form-error/form-error.component';
 
 interface Supplier {
   id?: string;
@@ -44,7 +48,17 @@ interface Supplier {
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [CommonModule, FormsModule, ViewToggleComponent, PaginationComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ViewToggleComponent,
+    PaginationComponent,
+    // Form helpers
+    PhoneMaskDirective,
+    CpfCnpjMaskDirective,
+    CpfCnpjValidatorDirective,
+    FormErrorComponent
+  ],
   templateUrl: './suppliers.component.html',
   styleUrl: './suppliers.component.scss'
 })
@@ -101,7 +115,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     this.loading = true;
     
     const filters: SupplierFilters = {
-      query: this.searchTerm,
+      search: this.searchTerm,
       status: this.selectedStatus || undefined,
       page: this.paginationConfig.currentPage,
       limit: this.paginationConfig.itemsPerPage,
@@ -154,9 +168,8 @@ export class SuppliersComponent implements OnInit, OnDestroy {
   }
 
   filterSuppliers(): void {
-    // Reset para primeira página ao filtrar
+    // Busca instantânea - digitou, buscou
     this.paginationConfig.currentPage = 1;
-    // Recarregar fornecedores com filtros aplicados
     this.loadSuppliers();
   }
 
@@ -165,7 +178,8 @@ export class SuppliersComponent implements OnInit, OnDestroy {
   }
 
   onStatusChange(): void {
-    this.filterSuppliers();
+    this.paginationConfig.currentPage = 1;
+    this.loadSuppliers();
   }
 
   clearFilters(): void {
@@ -207,13 +221,50 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     if (!supplier.id) return;
     
     const newStatus = supplier.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const isActivating = newStatus === 'ACTIVE';
     
-    // Enviar apenas o status para o backend
-    this.supplierService.updateSupplier(supplier.id, { status: newStatus as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' })
+    // Se estiver ativando e tem produtos, pergunta ao usuário
+    if (isActivating && supplier.productCount && supplier.productCount > 0) {
+      this.dialogService.confirm({
+        title: 'Ativar Fornecedor',
+        message: `Este fornecedor possui ${supplier.productCount} produto(s). Deseja ativar os produtos junto com o fornecedor?`,
+        confirmText: 'Sim, ativar tudo',
+        cancelText: 'Apenas fornecedor',
+        type: 'confirm',
+        icon: 'pi pi-question-circle'
+      }).subscribe(result => {
+        // Ambos os botões ativam o fornecedor, a diferença é se ativa os produtos
+        this.updateSupplierStatus(supplier.id!, newStatus, result.confirmed);
+      });
+    } else if (!isActivating && supplier.productCount && supplier.productCount > 0) {
+      // Se estiver desativando e tem produtos, avisa o usuário
+      this.dialogService.confirm({
+        title: 'Desativar Fornecedor',
+        message: `Ao desativar este fornecedor, todos os ${supplier.productCount} produto(s) associados também serão desativados. Deseja continuar?`,
+        confirmText: 'Sim, desativar',
+        cancelText: 'Cancelar',
+        type: 'warning',
+        icon: 'pi pi-exclamation-triangle'
+      }).subscribe(result => {
+        if (result.confirmed) {
+          this.updateSupplierStatus(supplier.id!, newStatus, false);
+        }
+      });
+    } else {
+      // Sem produtos ou ação sem confirmação
+      this.updateSupplierStatus(supplier.id!, newStatus, false);
+    }
+  }
+
+  private updateSupplierStatus(supplierId: string, status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED', updateProducts: boolean): void {
+    this.supplierService.updateSupplierStatus(supplierId, status, updateProducts)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.dialogService.showSuccess(`Fornecedor ${newStatus === 'ACTIVE' ? 'ativado' : 'desativado'} com sucesso!`);
+          const message = status === 'ACTIVE' 
+            ? (updateProducts ? 'Fornecedor e produtos ativados com sucesso!' : 'Fornecedor ativado com sucesso!')
+            : 'Fornecedor e produtos desativados com sucesso!';
+          this.dialogService.showSuccess(message);
           this.loadSuppliers();
         },
         error: (error) => {
@@ -350,7 +401,15 @@ export class SuppliersComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erro ao atualizar fornecedor:', error);
-            this.dialogService.showError('Erro ao atualizar fornecedor. Tente novamente.');
+            
+            // Tratamento específico para erros de conflito (documento duplicado)
+            if (error.status === 409) {
+              this.dialogService.showError('Este CNPJ/CPF já está cadastrado para outro fornecedor.');
+            } else if (error.error?.message) {
+              this.dialogService.showError(error.error.message);
+            } else {
+              this.dialogService.showError('Erro ao atualizar fornecedor. Tente novamente.');
+            }
           }
         });
     } else {
@@ -385,7 +444,15 @@ export class SuppliersComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erro ao criar fornecedor:', error);
-            this.dialogService.showError('Erro ao criar fornecedor. Tente novamente.');
+            
+            // Tratamento específico para erros de conflito (documento duplicado)
+            if (error.status === 409) {
+              this.dialogService.showError('Este CNPJ/CPF já está cadastrado para outro fornecedor.');
+            } else if (error.error?.message) {
+              this.dialogService.showError(error.error.message);
+            } else {
+              this.dialogService.showError('Erro ao criar fornecedor. Tente novamente.');
+            }
           }
         });
     }

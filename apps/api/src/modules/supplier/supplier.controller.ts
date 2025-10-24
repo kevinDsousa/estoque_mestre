@@ -120,8 +120,13 @@ export class SupplierController {
   @ApiParam({ name: 'id', description: 'Supplier ID' })
   @ApiResponse({ status: 200, description: 'Supplier status updated successfully' })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
-  updateStatus(@Param('id') id: string, @Body('status') status: SupplierStatus, @Request() req) {
-    return this.supplierService.updateSupplierStatus(id, status, req.user.companyId);
+  updateStatus(
+    @Param('id') id: string, 
+    @Body('status') status: SupplierStatus, 
+    @Body('updateProducts') updateProducts: boolean,
+    @Request() req
+  ) {
+    return this.supplierService.updateSupplierStatus(id, status, req.user.companyId, updateProducts);
   }
 
   @Patch(':id/toggle-preferred')

@@ -112,10 +112,12 @@
   .btn-primary {
     background: var(--color-warning) !important;
     border-color: var(--color-warning) !important;
+    color: white !important;
     
     &:hover {
       background: #d97706 !important;
       border-color: #d97706 !important;
+      color: white !important;
     }
   }
 }
@@ -128,10 +130,12 @@
   .btn-primary {
     background: var(--color-error) !important;
     border-color: var(--color-error) !important;
+    color: white !important;
     
     &:hover {
       background: #dc2626 !important;
       border-color: #dc2626 !important;
+      color: white !important;
     }
   }
 }
@@ -144,10 +148,12 @@
   .btn-primary {
     background: var(--color-info) !important;
     border-color: var(--color-info) !important;
+    color: white !important;
     
     &:hover {
       background: #0284c7 !important;
       border-color: #0284c7 !important;
+      color: white !important;
     }
   }
 }
@@ -191,11 +197,12 @@
 
 .btn-primary {
   background: var(--color-primary);
-  color: white;
+  color: white !important;
   box-shadow: var(--border-soft);
   
   &:hover:not(:disabled) {
     background: var(--color-primary-dark);
+    color: white !important;
     transform: translateY(-1px);
     box-shadow: var(--shadow-medium);
   }
