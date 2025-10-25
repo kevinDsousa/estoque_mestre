@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { ToastService } from '../shared/services/toast.service';
 import { ValidationService } from '../shared/services/validation.service';
-import { ToastContainerComponent } from '../shared/components/toast-container/toast-container.component';
 
 interface Country {
   code: string;
@@ -14,7 +13,7 @@ interface Country {
 @Component({
   selector: 'app-registration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ToastContainerComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.css'
 })

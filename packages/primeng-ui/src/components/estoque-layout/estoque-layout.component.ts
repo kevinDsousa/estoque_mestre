@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SidebarModule } from 'primeng/sidebar';
+import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
@@ -64,7 +64,7 @@ export interface EstoqueLayoutOutputs {
   standalone: true,
   imports: [
     CommonModule,
-    SidebarModule,
+    DrawerModule,
     ButtonModule,
     AvatarModule,
     MenuModule,

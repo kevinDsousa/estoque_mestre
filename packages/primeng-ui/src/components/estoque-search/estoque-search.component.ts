@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { CardModule } from 'primeng/card';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -64,9 +64,9 @@ export interface EstoqueSearchOutputs {
     FormsModule,
     InputTextModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     MultiSelectModule,
-    CalendarModule,
+    DatePickerModule,
     CardModule
   ],
   templateUrl: './estoque-search.component.html',

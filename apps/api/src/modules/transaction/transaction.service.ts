@@ -118,7 +118,10 @@ export class TransactionService {
   ) {
     const skip = (page - 1) * limit;
     
-    const where: any = { companyId };
+    const where: any = { 
+      companyId,
+      deletedAt: null // Exclude soft-deleted records
+    };
     
     if (type) where.type = type;
     if (status) where.status = status;
@@ -174,7 +177,11 @@ export class TransactionService {
 
   async findOne(id: string, companyId: string) {
     const transaction = await this.prisma.transaction.findFirst({
-      where: { id, companyId },
+      where: { 
+        id, 
+        companyId,
+        deletedAt: null // Exclude soft-deleted records
+      },
       include: {
         customer: true,
         supplier: true,
@@ -251,8 +258,10 @@ export class TransactionService {
     // Reverse inventory changes
     await this.reverseInventoryChanges(transaction.id, companyId);
 
-    return this.prisma.transaction.delete({
+    // Soft delete - set deletedAt instead of removing from database
+    return this.prisma.transaction.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 

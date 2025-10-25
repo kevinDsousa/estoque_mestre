@@ -67,14 +67,21 @@
           <i class="pi pi-eye"></i>
           Ver Produtos
         </button>
-        <button 
-          class="btn btn-ghost btn-sm" 
-          [class.text-success]="supplier.status === 'INACTIVE'"
-          [class.text-warning]="supplier.status === 'ACTIVE'"
-          (click)="toggleSupplierStatus(supplier)">
-          <i [class]="supplier.status === 'ACTIVE' ? 'pi pi-pause' : 'pi pi-check-circle'"></i>
-          {{ supplier.status === 'ACTIVE' ? 'Desativar' : 'Ativar' }}
-        </button>
+        @if (supplier.status === 'ACTIVE') {
+          <button class="btn btn-ghost btn-sm text-warning" (click)="toggleSupplierStatus(supplier)">
+            <i class="pi pi-pause"></i>
+            Desativar
+          </button>
+        } @else {
+          <button class="btn btn-ghost btn-sm text-success" (click)="toggleSupplierStatus(supplier)">
+            <i class="pi pi-check-circle"></i>
+            Ativar
+          </button>
+          <button class="btn btn-ghost btn-sm text-danger" (click)="deleteSupplier(supplier)">
+            <i class="pi pi-trash"></i>
+            Excluir
+          </button>
+        }
       </div>
     </div>
       }
@@ -146,14 +153,18 @@
                 <button class="btn btn-ghost btn-sm" (click)="viewProducts(supplier)" title="Ver Produtos">
                   <i class="pi pi-eye"></i>
                 </button>
-                <button 
-                  class="btn btn-ghost btn-sm" 
-                  [class.text-success]="supplier.status === 'INACTIVE'"
-                  [class.text-warning]="supplier.status === 'ACTIVE'"
-                  (click)="toggleSupplierStatus(supplier)"
-                  [title]="supplier.status === 'ACTIVE' ? 'Desativar' : 'Ativar'">
-                  <i [class]="supplier.status === 'ACTIVE' ? 'pi pi-pause' : 'pi pi-check-circle'"></i>
-                </button>
+                @if (supplier.status === 'ACTIVE') {
+                  <button class="btn btn-ghost btn-sm text-warning" (click)="toggleSupplierStatus(supplier)" title="Desativar">
+                    <i class="pi pi-pause"></i>
+                  </button>
+                } @else {
+                  <button class="btn btn-ghost btn-sm text-success" (click)="toggleSupplierStatus(supplier)" title="Ativar">
+                    <i class="pi pi-check-circle"></i>
+                  </button>
+                  <button class="btn btn-ghost btn-sm text-danger" (click)="deleteSupplier(supplier)" title="Excluir">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                }
               </div>
             </div>
           </td>
@@ -193,7 +204,7 @@
       </div>
       
       <div class="modal-body">
-        <form class="supplier-form">
+        <form class="supplier-form" #supplierForm="ngForm">
           <div class="form-row">
             <div class="form-group">
               <label for="name">Nome *</label>
@@ -202,8 +213,10 @@
                 type="text" 
                 class="form-control" 
                 [(ngModel)]="editingSupplier.name"
+                #name="ngModel"
                 name="name"
                 required>
+              <app-form-error [control]="name"></app-form-error>
             </div>
           </div>
 
@@ -273,13 +286,17 @@
             </div>
             
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="email">Email *</label>
               <input 
                 id="email" 
                 type="email" 
                 class="form-control" 
                 [(ngModel)]="editingSupplier.email"
-                name="email">
+                #email="ngModel"
+                name="email"
+                email
+                required>
+              <app-form-error [control]="email"></app-form-error>
             </div>
           </div>
 
@@ -309,8 +326,10 @@
                   type="text" 
                   class="form-control" 
                   [(ngModel)]="editingSupplier.street"
+                  #street="ngModel"
                   name="street"
                   required>
+                <app-form-error [control]="street"></app-form-error>
               </div>
               
               <div class="form-group">
@@ -320,8 +339,10 @@
                   type="text" 
                   class="form-control" 
                   [(ngModel)]="editingSupplier.number"
+                  #number="ngModel"
                   name="number"
                   required>
+                <app-form-error [control]="number"></app-form-error>
               </div>
             </div>
 
@@ -343,8 +364,11 @@
                   type="text" 
                   class="form-control" 
                   [(ngModel)]="editingSupplier.neighborhood"
+                  #neighborhood="ngModel"
                   name="neighborhood"
-                  required>
+                  required
+                  minlength="2">
+                <app-form-error [control]="neighborhood"></app-form-error>
               </div>
             </div>
 
@@ -356,8 +380,10 @@
                   type="text" 
                   class="form-control" 
                   [(ngModel)]="editingSupplier.city"
+                  #city="ngModel"
                   name="city"
                   required>
+                <app-form-error [control]="city"></app-form-error>
               </div>
               
               <div class="form-group">
@@ -367,10 +393,12 @@
                   type="text" 
                   class="form-control" 
                   [(ngModel)]="editingSupplier.state"
+                  #state="ngModel"
                   name="state"
                   maxlength="2"
                   placeholder="SP"
                   required>
+                <app-form-error [control]="state"></app-form-error>
               </div>
             </div>
 
@@ -382,9 +410,11 @@
                   type="text" 
                   class="form-control" 
                   [(ngModel)]="editingSupplier.zipCode"
+                  #zipCode="ngModel"
                   name="zipCode"
                   placeholder="12345-678"
                   required>
+                <app-form-error [control]="zipCode"></app-form-error>
               </div>
               
               <div class="form-group">
@@ -418,7 +448,10 @@
         <button class="btn btn-secondary" (click)="closeModal()">
           Cancelar
         </button>
-        <button class="btn btn-primary" (click)="saveSupplier()">
+        <button 
+          class="btn btn-primary" 
+          (click)="saveSupplier()"
+          [disabled]="!isFormValid()">
           Salvar
         </button>
       </div>
@@ -503,6 +536,96 @@
         <button class="btn btn-secondary" (click)="closeProductsModal()">
           Fechar
         </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Produtos do Fornecedor -->
+@if (showSupplierProductsModal) {
+  <div class="modal-overlay" (click)="closeSupplierProductsModal()">
+    <div class="modal-content products-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Produtos do Fornecedor: {{ selectedSupplier?.name }}</h2>
+        <button class="btn btn-ghost btn-sm" (click)="closeSupplierProductsModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        @if (supplierProducts.length === 0) {
+          <div class="empty-state">
+            <i class="pi pi-box"></i>
+            <p>Nenhum produto encontrado para este fornecedor.</p>
+          </div>
+        } @else {
+          <div class="products-table-container">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>SKU</th>
+                  <th>Status</th>
+                  <th>Estoque</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (product of supplierProducts; track product.id) {
+                  <tr>
+                    <td class="product-name">
+                      <strong>{{ product.name }}</strong>
+                    </td>
+                    <td class="sku">{{ product.sku }}</td>
+                    <td>
+                      <span class="status-badge" [class]="getProductStatusClass(product.status)">
+                        {{ getProductStatusText(product.status) }}
+                      </span>
+                    </td>
+                    <td class="stock">
+                      <span [class]="(product.stock || 0) < 5 ? 'low-stock' : ''">
+                        {{ product.stock || 0 }}
+                      </span>
+                    </td>
+                    <td class="actions">
+                      @if (product.status === 'ACTIVE') {
+                        <button class="btn btn-ghost btn-sm text-warning" (click)="deactivateProductFromSupplier(product)">
+                          <i class="pi pi-pause"></i>
+                          Desativar
+                        </button>
+                      } @else {
+                        <button class="btn btn-ghost btn-sm text-danger" (click)="deleteProductFromSupplier(product)">
+                          <i class="pi pi-trash"></i>
+                          Excluir
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        @if (supplierProducts.length > 0) {
+          <button class="btn btn-warning btn-sm" (click)="deactivateAllSupplierProducts()">
+            <i class="pi pi-pause"></i>
+            Desativar Todos
+          </button>
+          <button class="btn btn-danger btn-sm" (click)="deleteAllInactiveSupplierProducts()">
+            <i class="pi pi-trash"></i>
+            Excluir Inativos
+          </button>
+          <button class="btn btn-primary btn-sm" (click)="confirmDeleteSupplier()">
+            <i class="pi pi-check"></i>
+            Excluir Fornecedor
+          </button>
+        } @else {
+          <button class="btn btn-primary btn-sm" (click)="confirmDeleteSupplier()">
+            <i class="pi pi-trash"></i>
+            Excluir Fornecedor
+          </button>
+        }
       </div>
     </div>
   </div>

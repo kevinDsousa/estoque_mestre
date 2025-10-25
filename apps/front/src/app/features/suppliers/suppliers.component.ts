@@ -5,6 +5,8 @@ import { Subject, takeUntil, finalize } from 'rxjs';
 import { DialogService } from '../../core/services/dialog.service';
 import { ViewPreferencesService, ViewMode } from '../../core/services/view-preferences.service';
 import { SupplierService, SupplierFilters } from '../../core/services/supplier.service';
+import { ProductService } from '../../core/services/product.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { ViewToggleComponent } from '../../core/components';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 import { PhoneMaskDirective } from '../../core/directives/phone-mask.directive';
@@ -77,6 +79,10 @@ export class SuppliersComponent implements OnInit, OnDestroy {
   currentSupplier: Supplier | null = null;
   supplierProducts: any[] = [];
   
+  // Propriedades para modal de produtos do fornecedor
+  showSupplierProductsModal = false;
+  selectedSupplier: Supplier | null = null;
+  
   // Paginação
   paginationConfig: PaginationConfig = {
     currentPage: 1,
@@ -96,7 +102,9 @@ export class SuppliersComponent implements OnInit, OnDestroy {
   constructor(
     private dialogService: DialogService,
     private viewPreferencesService: ViewPreferencesService,
-    private supplierService: SupplierService
+    private supplierService: SupplierService,
+    private productService: ProductService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -467,5 +475,213 @@ export class SuppliersComponent implements OnInit, OnDestroy {
   onViewChange(view: ViewMode): void {
     this.currentView = view;
     this.viewPreferencesService.setViewPreference('suppliers', view);
+  }
+
+  // Métodos para exclusão de fornecedores
+  deleteSupplier(supplier: Supplier): void {
+    this.selectedSupplier = supplier;
+    this.loadSupplierProducts(supplier.id!);
+    this.showSupplierProductsModal = true;
+  }
+
+  loadSupplierProducts(supplierId: string): void {
+    this.productService.getProducts({ supplierId, page: 1, limit: 100 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.supplierProducts = response.data || [];
+        },
+        error: (error) => {
+          console.error('Erro ao carregar produtos do fornecedor:', error);
+          this.toast.error('Erro', 'Não foi possível carregar os produtos do fornecedor.');
+        }
+      });
+  }
+
+  closeSupplierProductsModal(): void {
+    this.showSupplierProductsModal = false;
+    this.selectedSupplier = null;
+    this.supplierProducts = [];
+  }
+
+  getProductStatusClass(status: string): string {
+    switch (status) {
+      case 'ACTIVE': return 'status-active';
+      case 'INACTIVE': return 'status-inactive';
+      case 'DISCONTINUED': return 'status-discontinued';
+      case 'OUT_OF_STOCK': return 'status-out-of-stock';
+      default: return 'status-inactive';
+    }
+  }
+
+  getProductStatusText(status: string): string {
+    switch (status) {
+      case 'ACTIVE': return 'Ativo';
+      case 'INACTIVE': return 'Inativo';
+      case 'DISCONTINUED': return 'Descontinuado';
+      case 'OUT_OF_STOCK': return 'Sem Estoque';
+      default: return 'Inativo';
+    }
+  }
+
+  deactivateProductFromSupplier(product: any): void {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja desativar o produto "${product.name}"?`,
+      'Confirmar desativação'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        this.productService.updateProduct(product.id, { status: 'INACTIVE' })
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.toast.success('Produto desativado', 'O produto foi desativado com sucesso.');
+              this.loadSupplierProducts(this.selectedSupplier!.id!);
+            },
+            error: (error) => {
+              console.error('Erro ao desativar produto:', error);
+              this.toast.error('Erro', 'Não foi possível desativar o produto.');
+            }
+          });
+      }
+    });
+  }
+
+  deleteProductFromSupplier(product: any): void {
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja excluir o produto "${product.name}"?`,
+      'Confirmar exclusão'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        this.productService.deleteProduct(product.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.toast.success('Produto excluído', 'O produto foi excluído com sucesso.');
+              this.loadSupplierProducts(this.selectedSupplier!.id!);
+            },
+            error: (error) => {
+              console.error('Erro ao excluir produto:', error);
+              this.toast.error('Erro', 'Não foi possível excluir o produto.');
+            }
+          });
+      }
+    });
+  }
+
+  deactivateAllSupplierProducts(): void {
+    const activeProducts = this.supplierProducts.filter(p => p.status === 'ACTIVE');
+    if (activeProducts.length === 0) {
+      this.toast.info('Informação', 'Não há produtos ativos para desativar.');
+      return;
+    }
+
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja desativar todos os ${activeProducts.length} produtos ativos deste fornecedor?`,
+      'Confirmar desativação em massa'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        const updatePromises = activeProducts.map(product => 
+          this.productService.updateProduct(product.id, { status: 'INACTIVE' }).toPromise()
+        );
+
+        Promise.all(updatePromises)
+          .then(() => {
+            this.toast.success('Produtos desativados', `${activeProducts.length} produtos foram desativados com sucesso.`);
+            this.loadSupplierProducts(this.selectedSupplier!.id!);
+          })
+          .catch((error) => {
+            console.error('Erro ao desativar produtos:', error);
+            this.toast.error('Erro', 'Não foi possível desativar todos os produtos.');
+          });
+      }
+    });
+  }
+
+  deleteAllInactiveSupplierProducts(): void {
+    const inactiveProducts = this.supplierProducts.filter(p => p.status !== 'ACTIVE');
+    if (inactiveProducts.length === 0) {
+      this.toast.info('Informação', 'Não há produtos inativos para excluir.');
+      return;
+    }
+
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja excluir todos os ${inactiveProducts.length} produtos inativos deste fornecedor?`,
+      'Confirmar exclusão em massa'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        const deletePromises = inactiveProducts.map(product => 
+          this.productService.deleteProduct(product.id).toPromise()
+        );
+
+        Promise.all(deletePromises)
+          .then(() => {
+            this.toast.success('Produtos excluídos', `${inactiveProducts.length} produtos foram excluídos com sucesso.`);
+            this.loadSupplierProducts(this.selectedSupplier!.id!);
+          })
+          .catch((error) => {
+            console.error('Erro ao excluir produtos:', error);
+            this.toast.error('Erro', 'Não foi possível excluir todos os produtos.');
+          });
+      }
+    });
+  }
+
+  confirmDeleteSupplier(): void {
+    if (!this.selectedSupplier) return;
+
+    this.dialogService.showConfirm(
+      `Tem certeza que deseja excluir o fornecedor "${this.selectedSupplier.name}"?`,
+      'Confirmar exclusão'
+    ).subscribe(result => {
+      if (result.confirmed) {
+        this.supplierService.deleteSupplier(this.selectedSupplier!.id!)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              console.log('Resposta da exclusão:', response);
+              this.toast.success('Fornecedor excluído', 'O fornecedor foi excluído com sucesso.');
+              this.closeSupplierProductsModal();
+              this.loadSuppliers();
+            },
+            error: (error) => {
+              console.error('Erro ao excluir fornecedor:', error);
+              this.toast.error('Erro', 'Não foi possível excluir o fornecedor.');
+            }
+          });
+      }
+    });
+  }
+
+  isFormValid(): boolean {
+    if (!this.editingSupplier) return false;
+
+    // Campos obrigatórios básicos
+    const basicFieldsValid = 
+      !!(this.editingSupplier.name && 
+      this.editingSupplier.name.trim().length > 0 &&
+      this.editingSupplier.email && 
+      this.editingSupplier.email.trim().length > 0);
+
+    // Se é um novo fornecedor, validar campos de endereço
+    if (!this.editingSupplier.id) {
+      const addressFieldsValid = 
+        !!(this.editingSupplier.street && 
+        this.editingSupplier.street.trim().length > 0 &&
+        this.editingSupplier.number && 
+        this.editingSupplier.number.trim().length > 0 &&
+        this.editingSupplier.neighborhood && 
+        this.editingSupplier.neighborhood.trim().length >= 2 &&
+        this.editingSupplier.city && 
+        this.editingSupplier.city.trim().length > 0 &&
+        this.editingSupplier.state && 
+        this.editingSupplier.state.trim().length > 0 &&
+        this.editingSupplier.zipCode && 
+        this.editingSupplier.zipCode.trim().length > 0);
+
+      return basicFieldsValid && addressFieldsValid;
+    }
+
+    // Para edição, apenas campos básicos são obrigatórios
+    return basicFieldsValid;
   }
 }

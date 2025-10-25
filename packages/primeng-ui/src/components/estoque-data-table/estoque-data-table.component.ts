@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
@@ -107,7 +107,7 @@ export interface EstoqueDataTableOutputs {
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     CheckboxModule,
     TagModule,
     BadgeModule,

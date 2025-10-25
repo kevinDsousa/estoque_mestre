@@ -88,7 +88,10 @@ export class CustomerService {
   ) {
     const skip = (page - 1) * limit;
     
-    const where: any = { companyId };
+    const where: any = { 
+      companyId,
+      deletedAt: null // Exclude soft-deleted records
+    };
     
     if (status) where.status = status;
     if (type) where.type = type;
@@ -131,7 +134,11 @@ export class CustomerService {
 
   async findOne(id: string, companyId: string) {
     const customer = await this.prisma.customer.findFirst({
-      where: { id, companyId },
+      where: { 
+        id, 
+        companyId,
+        deletedAt: null // Exclude soft-deleted records
+      },
       include: {
         transactions: {
           select: {
@@ -248,24 +255,17 @@ export class CustomerService {
   async remove(id: string, companyId: string) {
     const customer = await this.findOne(id, companyId);
 
-    // If customer has transactions, deactivate instead of delete
-    if (customer._count.transactions > 0) {
-      return this.prisma.customer.update({
-        where: { id },
-        data: { status: CustomerStatus.INACTIVE },
-        include: {
-          _count: {
-            select: {
-              transactions: true,
-            },
+    // Soft delete - set deletedAt instead of removing from database
+    return this.prisma.customer.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+      include: {
+        _count: {
+          select: {
+            transactions: true,
           },
         },
-      });
-    }
-
-    // If no transactions, allow permanent deletion
-    return this.prisma.customer.delete({
-      where: { id },
+      },
     });
   }
 

@@ -11,7 +11,7 @@
       <div class="header-right">
         <!-- Period Selector -->
         <div class="period-selector" *ngIf="showPeriodSelector && periods.length > 0">
-          <p-dropdown 
+          <p-select 
             [options]="periods"
             [(ngModel)]="selectedPeriod"
             optionLabel="label"
@@ -19,7 +19,7 @@
             placeholder="Período"
             (onChange)="onPeriodChangeHandler($event.value)"
             styleClass="period-dropdown">
-          </p-dropdown>
+          </p-select>
         </div>
 
         <!-- Action Buttons -->

@@ -1,6 +1,19 @@
 import { Injectable } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { EstoqueToastMessage, EstoqueToastSeverity } from '../components/estoque-toast/estoque-toast.component';
+
+// Local type definitions to avoid importing the component and creating circular deps
+export type EstoqueToastSeverity = 'success' | 'error' | 'warn' | 'info';
+
+export interface EstoqueToastMessage {
+  id?: string;
+  severity: EstoqueToastSeverity;
+  summary: string;
+  detail: string;
+  life?: number;
+  sticky?: boolean;
+  closable?: boolean;
+  data?: any;
+}
 
 /**
  * Serviço de toast para Estoque Mestre

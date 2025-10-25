@@ -166,11 +166,11 @@ export class SupplierService {
   /**
    * Delete supplier
    */
-  deleteSupplier(id: string): Observable<void> {
-    return this.apiService.delete<void>(`suppliers/${id}`)
+  deleteSupplier(id: string): Observable<any> {
+    return this.apiService.delete<any>(`suppliers/${id}`)
       .pipe(
         tap(() => {
-          const currentSuppliers = this.suppliersSubject.value;
+          const currentSuppliers = this.suppliersSubject.value || [];
           const filteredSuppliers = currentSuppliers.filter(s => s.id !== id);
           this.suppliersSubject.next(filteredSuppliers);
           

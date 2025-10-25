@@ -454,6 +454,7 @@ model Category {
   // Timestamps
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
   
   // Relations
   products        Product[]
@@ -504,6 +505,7 @@ model Supplier {
   // Timestamps
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
   
   // Relations
   products     Product[]
@@ -512,7 +514,6 @@ model Supplier {
   productBatches ProductBatch[]
   autoReplenishments AutoReplenishment[]
   
-  @@unique([companyId, document])
   @@map("suppliers")
 }
 
@@ -560,12 +561,12 @@ model Customer {
   // Timestamps
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
   
   // Relations
   transactions  Transaction[]
   paymentOrders PaymentOrder[]
   
-  @@unique([companyId, document])
   @@map("customers")
 }
 
@@ -633,6 +634,7 @@ model Product {
   // Timestamps
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
   
   // Relations
   transactionItems TransactionItem[]
@@ -682,6 +684,7 @@ model Transaction {
   // Timestamps
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
   
   // Relations
   items           TransactionItem[]

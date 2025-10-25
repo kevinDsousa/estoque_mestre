@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/cor
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { PasswordModule } from 'primeng/password';
 import { InputMaskModule } from 'primeng/inputmask';
@@ -34,7 +34,7 @@ export type EstoqueInputSize = 'small' | 'normal' | 'large';
   imports: [
     CommonModule, 
     InputTextModule, 
-    InputTextarea, 
+    TextareaModule, 
     InputNumberModule, 
     PasswordModule, 
     InputMaskModule,

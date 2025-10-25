@@ -5,14 +5,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // PrimeNG Components
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputMaskModule } from 'primeng/inputmask';
 import { PasswordModule } from 'primeng/password';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { AutoCompleteModule } from 'primeng/autocomplete';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ToggleButtonModule } from 'primeng/togglebutton';
@@ -41,7 +41,7 @@ import { DividerModule } from 'primeng/divider';
 import { PanelModule } from 'primeng/panel';
 import { CardModule } from 'primeng/card';
 import { AccordionModule } from 'primeng/accordion';
-import { TabViewModule } from 'primeng/tabview';
+import { TabsModule } from 'primeng/tabs';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ToolbarModule } from 'primeng/toolbar';
 import { SplitterModule } from 'primeng/splitter';
@@ -50,10 +50,10 @@ import { SplitterModule } from 'primeng/splitter';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { OverlayModule } from 'primeng/overlay';
 import { TooltipModule } from 'primeng/tooltip';
-import { SidebarModule } from 'primeng/sidebar';
-import { DynamicDialog } from 'primeng/dynamicdialog';
+import { DrawerModule } from 'primeng/drawer';
+import { DynamicDialogModule } from 'primeng/dynamicdialog';
 
 // Menu
 import { MenuModule } from 'primeng/menu';
@@ -64,7 +64,7 @@ import { DockModule } from 'primeng/dock';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { StepsModule } from 'primeng/steps';
-import { TabMenuModule } from 'primeng/tabmenu';
+// TabMenu removed in PrimeNG v20
 import { TieredMenuModule } from 'primeng/tieredmenu';
 
 // Chart
@@ -72,7 +72,6 @@ import { ChartModule } from 'primeng/chart';
 
 // Messages
 import { MessageModule } from 'primeng/message';
-import { MessagesModule } from 'primeng/messages';
 import { ToastModule } from 'primeng/toast';
 
 // Media
@@ -82,7 +81,6 @@ import { ImageModule } from 'primeng/image';
 
 // Misc
 import { BlockUIModule } from 'primeng/blockui';
-import { DeferModule } from 'primeng/defer';
 import { FocusTrapModule } from 'primeng/focustrap';
 import { RippleModule } from 'primeng/ripple';
 import { StyleClassModule } from 'primeng/styleclass';
@@ -128,14 +126,14 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     // Form Controls
     ButtonModule,
     InputTextModule,
-    InputTextarea,
+    TextareaModule,
     InputNumberModule,
     InputMaskModule,
     PasswordModule,
-    DropdownModule,
+    SelectModule,
     MultiSelectModule,
     AutoCompleteModule,
-    CalendarModule,
+    DatePickerModule,
     CheckboxModule,
     RadioButtonModule,
     ToggleButtonModule,
@@ -164,7 +162,7 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     PanelModule,
     CardModule,
     AccordionModule,
-    TabViewModule,
+    TabsModule,
     ScrollPanelModule,
     ToolbarModule,
     SplitterModule,
@@ -173,10 +171,10 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     DialogModule,
     ConfirmDialogModule,
     ConfirmPopupModule,
-    OverlayPanelModule,
+    OverlayModule,
     TooltipModule,
-    SidebarModule,
-    DynamicDialog,
+    DrawerModule,
+    DynamicDialogModule,
     
     // Menu
     MenuModule,
@@ -187,7 +185,6 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     MegaMenuModule,
     PanelMenuModule,
     StepsModule,
-    TabMenuModule,
     TieredMenuModule,
     
     // Chart
@@ -195,7 +192,6 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     
     // Messages
     MessageModule,
-    MessagesModule,
     ToastModule,
     
     // Media
@@ -205,7 +201,6 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     
     // Misc
     BlockUIModule,
-    DeferModule,
     FocusTrapModule,
     RippleModule,
     StyleClassModule,
@@ -216,14 +211,14 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     // Form Controls
     ButtonModule,
     InputTextModule,
-    InputTextarea,
+    TextareaModule,
     InputNumberModule,
     InputMaskModule,
     PasswordModule,
-    DropdownModule,
+    SelectModule,
     MultiSelectModule,
     AutoCompleteModule,
-    CalendarModule,
+    DatePickerModule,
     CheckboxModule,
     RadioButtonModule,
     ToggleButtonModule,
@@ -252,7 +247,7 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     PanelModule,
     CardModule,
     AccordionModule,
-    TabViewModule,
+    TabsModule,
     ScrollPanelModule,
     ToolbarModule,
     SplitterModule,
@@ -261,10 +256,10 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     DialogModule,
     ConfirmDialogModule,
     ConfirmPopupModule,
-    OverlayPanelModule,
+    OverlayModule,
     TooltipModule,
-    SidebarModule,
-    DynamicDialog,
+    DrawerModule,
+    DynamicDialogModule,
     
     // Menu
     MenuModule,
@@ -275,7 +270,6 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     MegaMenuModule,
     PanelMenuModule,
     StepsModule,
-    TabMenuModule,
     TieredMenuModule,
     
     // Chart
@@ -283,7 +277,6 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     
     // Messages
     MessageModule,
-    MessagesModule,
     ToastModule,
     
     // Media
@@ -293,7 +286,6 @@ import { EstoqueFilterComponent } from '../components/estoque-filter/estoque-fil
     
     // Misc
     BlockUIModule,
-    DeferModule,
     FocusTrapModule,
     RippleModule,
     StyleClassModule,

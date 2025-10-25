@@ -102,6 +102,7 @@ export class PaginationComponent implements OnInit, OnChanges {
   }
 
   getStartItem(): number {
+    if (this.config.totalItems === 0) return 0;
     return (this.config.currentPage - 1) * this.config.itemsPerPage + 1;
   }
 
@@ -125,7 +126,8 @@ export class PaginationComponent implements OnInit, OnChanges {
   }
 
   shouldShowPagination(): boolean {
-    return this.config.totalItems > 0;
+    // Mostrar apenas quando há mais que 5 itens
+    return this.config.totalItems > 5;
   }
 
   trackByPage(index: number, page: number): number {

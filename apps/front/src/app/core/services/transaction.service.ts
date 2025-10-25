@@ -72,16 +72,21 @@ export interface UpdateTransactionRequest {
 }
 
 export interface TransactionFilters {
-  query?: string;
+  query?: string; // usado somente para filtro local no front
   type?: string;
   status?: string;
+  paymentStatus?: string;
   customerId?: string;
   supplierId?: string;
   userId?: string;
+  // Backend espera dateFrom/dateTo (YYYY-MM-DD)
+  dateFrom?: string;
+  dateTo?: string;
+  // startDate/endDate mantidos por compatibilidade, mapeados para dateFrom/dateTo
   startDate?: string;
   endDate?: string;
-  minAmount?: number;
-  maxAmount?: number;
+  minAmount?: number; // filtro local no front
+  maxAmount?: number; // filtro local no front
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -128,7 +133,18 @@ export class TransactionService {
    * Get all transactions with pagination and filters
    */
   getTransactions(filters: TransactionFilters = {}): Observable<PaginatedResponse<TransactionResponse>> {
-    return this.apiService.getPaginated<TransactionResponse>('transactions', filters)
+    const params: any = { ...filters };
+    // Mapear startDate/endDate para dateFrom/dateTo se necessário
+    if (!params.dateFrom && params.startDate) params.dateFrom = params.startDate;
+    if (!params.dateTo && params.endDate) params.dateTo = params.endDate;
+    // Remover campos não suportados pelo backend
+    delete params.startDate;
+    delete params.endDate;
+    delete params.query;
+    delete params.minAmount;
+    delete params.maxAmount;
+
+    return this.apiService.getPaginated<TransactionResponse>('transactions', params)
       .pipe(
         tap(response => {
           this.transactionsSubject.next(response.data);

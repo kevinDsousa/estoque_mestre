@@ -98,7 +98,7 @@
                 class="filter-input">
               
               <!-- Dropdown Filter -->
-              <p-dropdown 
+              <p-select 
                 *ngIf="col.filterType === 'dropdown'"
                 [options]="col.filterOptions"
                 [placeholder]="'Filtrar ' + col.header"
@@ -106,10 +106,10 @@
                 (onChange)="onColumnFilter(col.field, $event.value)"
                 [showClear]="true"
                 class="filter-dropdown">
-              </p-dropdown>
+              </p-select>
               
               <!-- Boolean Filter -->
-              <p-dropdown 
+              <p-select 
                 *ngIf="col.filterType === 'boolean'"
                 [options]="[
                   { label: 'Todos', value: null },
@@ -121,7 +121,7 @@
                 (onChange)="onColumnFilter(col.field, $event.value)"
                 [showClear]="true"
                 class="filter-dropdown">
-              </p-dropdown>
+              </p-select>
             </div>
           </td>
           <td *ngIf="hasActions"></td>

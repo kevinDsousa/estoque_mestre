@@ -1,4 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { provideRouter, withRouterConfig } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -11,6 +12,8 @@ import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    // PrimeNG global services
+    MessageService,
     // Core Angular providers
     provideBrowserGlobalErrorListeners(),
     provideClientHydration(),

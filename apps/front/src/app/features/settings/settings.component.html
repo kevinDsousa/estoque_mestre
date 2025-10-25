@@ -4,10 +4,6 @@
       <h1>Configurações</h1>
       <p class="subtitle">Configure o sistema conforme suas necessidades</p>
     </div>
-    <app-view-toggle 
-      [currentView]="currentView" 
-      (viewChange)="onViewChange($event)">
-    </app-view-toggle>
   </div>
 
   <div class="settings-container">
@@ -41,124 +37,52 @@
             </div>
           </div>
 
-          @if (currentView === 'cards') {
-            <div class="settings-form">
-              @for (setting of getActiveSection()!.settings; track setting.id) {
-                <div class="setting-item">
-                  <div class="setting-info">
-                    <label class="setting-label">{{ setting.name }}</label>
-                    <p class="setting-description">{{ setting.description }}</p>
-                  </div>
-                  <div class="setting-control">
-                    @if (setting.type === 'text') {
-                      <input 
-                        type="text"
-                        [(ngModel)]="setting.value"
-                        class="form-control">
-                    }
-                    
-                    @if (setting.type === 'number') {
-                      <input 
-                        type="number"
-                        [(ngModel)]="setting.value"
-                        class="form-control">
-                    }
-                    
-                    @if (setting.type === 'select') {
-                      <select 
-                        [(ngModel)]="setting.value"
-                        class="form-control">
-                        @for (option of setting.options; track option.value) {
-                          <option [value]="option.value">
-                            {{ option.label }}
-                          </option>
-                        }
-                      </select>
-                    }
-                    
-                    @if (setting.type === 'boolean') {
-                      <label class="checkbox-label">
-                        <input 
-                          type="checkbox"
-                          [(ngModel)]="setting.value">
-                        <span class="checkbox-custom"></span>
-                      </label>
-                    }
-                  </div>
+          <div class="settings-form">
+            @for (setting of getActiveSection()!.settings; track setting.id) {
+              <div class="setting-item">
+                <div class="setting-info">
+                  <label class="setting-label">{{ setting.name }}</label>
+                  <p class="setting-description">{{ setting.description }}</p>
                 </div>
-              }
-            </div>
-          }
-
-          @if (currentView === 'table') {
-            <div class="settings-table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Configuração</th>
-                    <th>Descrição</th>
-                    <th>Valor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (setting of getActiveSection()!.settings; track setting.id) {
-                    <tr>
-                      <td>
-                        <div class="cell-content">
-                          <span class="setting-name">{{ setting.name }}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="cell-content">
-                          <span class="setting-description">{{ setting.description }}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="cell-content">
-                          <div class="setting-control">
-                            @if (setting.type === 'text') {
-                              <input 
-                                type="text"
-                                [(ngModel)]="setting.value"
-                                class="form-control">
-                            }
-                            
-                            @if (setting.type === 'number') {
-                              <input 
-                                type="number"
-                                [(ngModel)]="setting.value"
-                                class="form-control">
-                            }
-                            
-                            @if (setting.type === 'select') {
-                              <select 
-                                [(ngModel)]="setting.value"
-                                class="form-control">
-                                @for (option of setting.options; track option.value) {
-                                  <option [value]="option.value">
-                                    {{ option.label }}
-                                  </option>
-                                }
-                              </select>
-                            }
-                            
-                            @if (setting.type === 'boolean') {
-                              <label class="checkbox-label">
-                                <input 
-                                  type="checkbox"
-                                  [(ngModel)]="setting.value">
-                                <span class="checkbox-custom"></span>
-                              </label>
-                            }
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                <div class="setting-control">
+                  @if (setting.type === 'text') {
+                    <input 
+                      type="text"
+                      [(ngModel)]="setting.value"
+                      class="form-control">
                   }
-                </tbody>
-              </table>
-            </div>
-          }
+                  
+                  @if (setting.type === 'number') {
+                    <input 
+                      type="number"
+                      [(ngModel)]="setting.value"
+                      class="form-control">
+                  }
+                  
+                  @if (setting.type === 'select') {
+                    <select 
+                      [(ngModel)]="setting.value"
+                      class="form-control">
+                      @for (option of setting.options; track option.value) {
+                        <option [value]="option.value">
+                          {{ option.label }}
+                        </option>
+                      }
+                    </select>
+                  }
+                  
+                  @if (setting.type === 'boolean') {
+                    <label class="checkbox-label">
+                      <input 
+                        type="checkbox"
+                        [(ngModel)]="setting.value">
+                      <span class="checkbox-custom"></span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+          </div>
 
           <div class="section-actions">
             <button class="btn btn-secondary" (click)="resetSettings()">

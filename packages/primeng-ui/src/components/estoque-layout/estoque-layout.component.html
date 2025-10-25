@@ -1,6 +1,6 @@
 <div class="estoque-layout">
   <!-- Sidebar -->
-  <p-sidebar 
+  <p-drawer 
     [(visible)]="sidebarVisible"
     [modal]="false"
     [dismissible]="true"
@@ -43,7 +43,7 @@
         </div>
       </div>
     </div>
-  </p-sidebar>
+  </p-drawer>
 
   <!-- Main Content Area -->
   <div class="main-content" [class.sidebar-collapsed]="!sidebarVisible">

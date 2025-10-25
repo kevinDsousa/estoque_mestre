@@ -189,4 +189,94 @@
     </div>
     </div>
   }
+
+  <!-- Modal de Produtos da Categoria -->
+  @if (showProductsModal) {
+    <div class="modal-overlay" (click)="closeProductsModal()">
+      <div class="modal-content products-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Produtos da Categoria: {{ selectedCategory?.name }}</h2>
+          <button class="btn btn-ghost btn-sm" (click)="closeProductsModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          @if (categoryProducts.length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-box"></i>
+              <p>Nenhum produto encontrado nesta categoria.</p>
+            </div>
+          } @else {
+            <div class="products-table-container">
+              <table class="products-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>SKU</th>
+                    <th>Status</th>
+                    <th>Estoque</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (product of categoryProducts; track product.id) {
+                    <tr>
+                      <td class="product-name">
+                        <strong>{{ product.name }}</strong>
+                      </td>
+                      <td class="sku">{{ product.sku }}</td>
+                      <td>
+                        <span class="status-badge" [class]="getProductStatusClass(product.status)">
+                          {{ getProductStatusText(product.status) }}
+                        </span>
+                      </td>
+                      <td class="stock">
+                        <span [class]="(product.stock || 0) < 5 ? 'low-stock' : ''">
+                          {{ product.stock || 0 }}
+                        </span>
+                      </td>
+                      <td class="actions">
+                        @if (product.status === 'ACTIVE') {
+                          <button class="btn btn-ghost btn-sm text-warning" (click)="deactivateProductFromCategory(product)">
+                            <i class="pi pi-pause"></i>
+                            Desativar
+                          </button>
+                        } @else {
+                          <button class="btn btn-ghost btn-sm text-danger" (click)="deleteProductFromCategory(product)">
+                            <i class="pi pi-trash"></i>
+                            Excluir
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          @if (categoryProducts.length > 0) {
+            <button class="btn btn-warning btn-sm" (click)="deactivateAllProducts()">
+              <i class="pi pi-pause"></i>
+              Desativar Todos
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="deleteAllInactiveProducts()">
+              <i class="pi pi-trash"></i>
+              Excluir Inativos
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="confirmDeleteCategory()">
+              <i class="pi pi-check"></i>
+              Excluir Categoria
+            </button>
+          } @else {
+            <button class="btn btn-primary btn-sm" (click)="confirmDeleteCategory()">
+              <i class="pi pi-trash"></i>
+              Excluir Categoria
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>

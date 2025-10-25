@@ -220,8 +220,9 @@ export class ProductService {
     return this.apiService.getPaginated<any>('products', searchParams)
       .pipe(
         map(response => {
-          // Transform backend response to frontend format
-          const transformedData = (response as any).products.map((product: any) => ({
+          // Accept multiple backend shapes: { products: [...] } or { data: [...] }
+          const rawList = (response as any)?.products ?? (response as any)?.data ?? [];
+          const transformedData = rawList.map((product: any) => ({
             id: product.id,
             name: product.name,
             description: product.description,
@@ -253,11 +254,20 @@ export class ProductService {
             images: product.images || []
           }));
 
+          const pagination = (response as any)?.pagination ?? {
+            total: transformedData.length,
+            page: searchParams.page || 1,
+            limit: searchParams.limit || transformedData.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false
+          };
+
           return {
             data: transformedData,
-            pagination: response.pagination,
-            success: response.success,
-            timestamp: response.timestamp
+            pagination,
+            success: (response as any)?.success ?? true,
+            timestamp: (response as any)?.timestamp ?? new Date().toISOString()
           };
         }),
         tap(response => {

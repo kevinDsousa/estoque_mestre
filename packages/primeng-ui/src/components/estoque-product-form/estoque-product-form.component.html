@@ -73,7 +73,7 @@
           <!-- Categoria -->
           <div class="form-field full-width">
             <label for="categoryId">Categoria *</label>
-            <p-dropdown 
+            <p-select 
               id="categoryId"
               formControlName="categoryId"
               [options]="categories"
@@ -83,7 +83,7 @@
               [class.p-invalid]="isFieldInvalid('categoryId')"
               [filter]="true"
               filterBy="name">
-            </p-dropdown>
+            </p-select>
             <small class="p-error" *ngIf="isFieldInvalid('categoryId')">
               {{ getFieldError('categoryId') }}
             </small>

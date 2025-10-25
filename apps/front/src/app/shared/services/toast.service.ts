@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { EstoqueToastService } from '@estoque-mestre/primeng-ui';
+import { Injectable } from '@angular/core';
+import { MessageService } from 'primeng/api';
 
 /**
  * Serviço de toast para o frontend
@@ -10,41 +10,41 @@ import { EstoqueToastService } from '@estoque-mestre/primeng-ui';
   providedIn: 'root'
 })
 export class ToastService {
-  private estoqueToastService = inject(EstoqueToastService);
+  constructor(private messageService: MessageService) {}
 
   /**
    * Mostra um toast de sucesso
    */
   success(title: string, message: string, duration?: number): void {
-    this.estoqueToastService.success(title, message, duration);
+    this.messageService.add({ severity: 'success', summary: title, detail: message, life: duration ?? 5000 });
   }
 
   /**
    * Mostra um toast de erro
    */
   error(title: string, message: string, duration?: number): void {
-    this.estoqueToastService.error(title, message, duration);
+    this.messageService.add({ severity: 'error', summary: title, detail: message, life: duration ?? 7000 });
   }
 
   /**
    * Mostra um toast de aviso
    */
   warning(title: string, message: string, duration?: number): void {
-    this.estoqueToastService.warning(title, message, duration);
+    this.messageService.add({ severity: 'warn', summary: title, detail: message, life: duration ?? 6000 });
   }
 
   /**
    * Mostra um toast de informação
    */
   info(title: string, message: string, duration?: number): void {
-    this.estoqueToastService.info(title, message, duration);
+    this.messageService.add({ severity: 'info', summary: title, detail: message, life: duration ?? 5000 });
   }
 
   /**
    * Limpa todos os toasts
    */
   clear(): void {
-    this.estoqueToastService.clear();
+    this.messageService.clear();
   }
 
   /**
@@ -55,7 +55,7 @@ export class ToastService {
    * Toast para operações de autenticação
    */
   loginSuccess(userName: string): void {
-    this.estoqueToastService.userLoggedIn(userName);
+    this.info('Login Realizado', `Bem-vindo, ${userName}!`);
   }
 
   loginError(message: string): void {
@@ -63,7 +63,7 @@ export class ToastService {
   }
 
   logoutSuccess(): void {
-    this.estoqueToastService.userLoggedOut();
+    this.info('Logout Realizado', 'Você foi desconectado com sucesso');
   }
 
   /**
@@ -78,7 +78,7 @@ export class ToastService {
   }
 
   validationError(field: string, message: string): void {
-    this.estoqueToastService.validationError(field, message);
+    this.error('Erro de Validação', `${field}: ${message}`);
   }
 
   /**
@@ -96,44 +96,44 @@ export class ToastService {
    * Toast para operações de arquivo
    */
   fileUploaded(fileName: string): void {
-    this.estoqueToastService.fileUploaded(fileName);
+    this.success('Arquivo Enviado', `${fileName} foi enviado com sucesso`);
   }
 
   fileUploadFailed(fileName: string, error: string): void {
-    this.estoqueToastService.fileUploadFailed(fileName, error);
+    this.error('Falha no Upload', `Erro ao enviar ${fileName}: ${error}`);
   }
 
   fileDeleted(fileName: string): void {
-    this.estoqueToastService.fileDeleted(fileName);
+    this.info('Arquivo Removido', `${fileName} foi removido com sucesso`);
   }
 
   /**
    * Toast para operações de produto
    */
   productCreated(productName: string): void {
-    this.estoqueToastService.productCreated(productName);
+    this.success('Produto Criado', `${productName} foi criado com sucesso`);
   }
 
   productUpdated(productName: string): void {
-    this.estoqueToastService.productUpdated(productName);
+    this.success('Produto Atualizado', `${productName} foi atualizado com sucesso`);
   }
 
   productDeleted(productName: string): void {
-    this.estoqueToastService.productDeleted(productName);
+    this.info('Produto Removido', `${productName} foi removido com sucesso`);
   }
 
   /**
    * Toast para operações de estoque
    */
   stockUpdated(productName: string, quantity: number): void {
-    this.estoqueToastService.stockUpdated(productName, quantity);
+    this.success('Estoque Atualizado', `Estoque de ${productName} atualizado para ${quantity} unidades`);
   }
 
   lowStockWarning(productName: string, quantity: number): void {
-    this.estoqueToastService.lowStockWarning(productName, quantity);
+    this.warning('Estoque Baixo', `${productName} está com estoque baixo (${quantity} unidades)`);
   }
 
   outOfStock(productName: string): void {
-    this.estoqueToastService.outOfStock(productName);
+    this.error('Estoque Esgotado', `${productName} está sem estoque`);
   }
 }

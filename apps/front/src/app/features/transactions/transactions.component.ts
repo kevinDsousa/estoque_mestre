@@ -144,13 +144,15 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   private loadTransactions(): void {
     this.loading = true;
     
+    const { startDate, endDate } = this.getDateRangeFromPreset(this.selectedDateRange);
     const filters: TransactionFilters = {
-      query: this.searchTerm,
+      query: this.searchTerm || undefined,
       type: this.selectedTypes.length > 0 ? this.selectedTypes[0] : undefined,
       status: this.selectedStatus || undefined,
-      // paymentStatus: this.selectedPaymentStatus || undefined, // Removido - não existe no TransactionFilters
-      // dateFrom: this.dateFrom || undefined, // Removido - não existe no TransactionFilters
-      // dateTo: this.dateTo || undefined, // Removido - não existe no TransactionFilters
+      dateFrom: startDate,
+      dateTo: endDate,
+      minAmount: this.minAmount ? parseFloat(this.minAmount) : undefined,
+      maxAmount: this.maxAmount ? parseFloat(this.maxAmount) : undefined,
       page: this.paginationConfig.currentPage,
       limit: this.paginationConfig.itemsPerPage,
       sortBy: 'createdAt',
@@ -219,6 +221,9 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.selectedPaymentStatus = '';
     this.dateFrom = '';
     this.dateTo = '';
+    this.selectedDateRange = '';
+    this.minAmount = '';
+    this.maxAmount = '';
     this.filterTransactions();
   }
 
@@ -231,6 +236,44 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   onPageChange(page: number): void {
     this.paginationConfig.currentPage = page;
     this.loadTransactions();
+  }
+
+  private getDateRangeFromPreset(preset: string): { startDate?: string; endDate?: string } {
+    const today = new Date();
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    switch (preset) {
+      case 'today': {
+        const d = fmt(today);
+        return { startDate: d, endDate: d };
+      }
+      case 'week': {
+        const day = today.getDay();
+        const diffToMonday = (day + 6) % 7;
+        const start = new Date(today);
+        start.setDate(today.getDate() - diffToMonday);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        return { startDate: fmt(start), endDate: fmt(end) };
+      }
+      case 'month': {
+        const start = new Date(today.getFullYear(), today.getMonth(), 1);
+        const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        return { startDate: fmt(start), endDate: fmt(end) };
+      }
+      case 'quarter': {
+        const quarter = Math.floor(today.getMonth() / 3);
+        const start = new Date(today.getFullYear(), quarter * 3, 1);
+        const end = new Date(today.getFullYear(), quarter * 3 + 3, 0);
+        return { startDate: fmt(start), endDate: fmt(end) };
+      }
+      case 'year': {
+        const start = new Date(today.getFullYear(), 0, 1);
+        const end = new Date(today.getFullYear(), 11, 31);
+        return { startDate: fmt(start), endDate: fmt(end) };
+      }
+      default:
+        return {};
+    }
   }
 
   onViewModeChange(mode: ViewMode): void {

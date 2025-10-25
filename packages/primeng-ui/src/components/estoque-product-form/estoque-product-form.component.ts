@@ -3,9 +3,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormBuilder, FormGroup, Valida
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -88,9 +88,9 @@ export interface EstoqueProductFormOutputs {
     CommonModule,
     ReactiveFormsModule,
     InputTextModule,
-    InputTextarea,
+    TextareaModule,
     InputNumberModule,
-    DropdownModule,
+    SelectModule,
     CheckboxModule,
     ButtonModule,
     CardModule,

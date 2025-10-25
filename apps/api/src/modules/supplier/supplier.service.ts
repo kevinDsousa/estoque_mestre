@@ -10,11 +10,12 @@ export class SupplierService {
   constructor(private prisma: PrismaService) {}
 
   async create(createSupplierDto: CreateSupplierDto, companyId: string) {
-    // Check if supplier with same document already exists in company
+    // Check if supplier with same document already exists in company (excluding soft-deleted)
     const existingSupplier = await this.prisma.supplier.findFirst({
       where: {
         document: createSupplierDto.document,
         companyId,
+        deletedAt: null, // Exclude soft-deleted suppliers
       },
     });
 
@@ -88,7 +89,10 @@ export class SupplierService {
   ) {
     const skip = (page - 1) * limit;
     
-    const where: any = { companyId };
+    const where: any = { 
+      companyId,
+      deletedAt: null // Exclude soft-deleted records
+    };
     
     if (status) where.status = status;
     if (type) where.type = type;
@@ -110,8 +114,16 @@ export class SupplierService {
         include: {
           _count: {
             select: {
-              products: true,
-              transactions: true,
+              products: {
+                where: {
+                  deletedAt: null // Exclude soft-deleted products
+                }
+              },
+              transactions: {
+                where: {
+                  deletedAt: null // Exclude soft-deleted transactions
+                }
+              },
             },
           },
         },
@@ -132,7 +144,11 @@ export class SupplierService {
 
   async findOne(id: string, companyId: string) {
     const supplier = await this.prisma.supplier.findFirst({
-      where: { id, companyId },
+      where: { 
+        id, 
+        companyId,
+        deletedAt: null // Exclude soft-deleted records
+      },
       include: {
         products: {
           select: {
@@ -157,8 +173,16 @@ export class SupplierService {
         },
         _count: {
           select: {
-            products: true,
-            transactions: true,
+            products: {
+              where: {
+                deletedAt: null // Exclude soft-deleted products
+              }
+            },
+            transactions: {
+              where: {
+                deletedAt: null // Exclude soft-deleted transactions
+              }
+            },
           },
         },
       },
@@ -181,6 +205,7 @@ export class SupplierService {
           document: updateSupplierDto.document,
           companyId,
           id: { not: id },
+          deletedAt: null, // Exclude soft-deleted suppliers
         },
       });
 
@@ -263,7 +288,30 @@ export class SupplierService {
 
     // Check if supplier has products
     if (supplier._count.products > 0) {
-      throw new BadRequestException('Cannot delete supplier with products');
+      // Check if all products in this supplier are inactive and not soft-deleted
+      const activeProductsCount = await this.prisma.product.count({
+        where: {
+          supplierId: id,
+          companyId,
+          status: 'ACTIVE',
+          deletedAt: null // Exclude soft-deleted products
+        }
+      });
+
+      if (activeProductsCount > 0) {
+        throw new BadRequestException(`Cannot delete supplier with ${activeProductsCount} active products. Please deactivate or delete the products first.`);
+      }
+
+      // If all products are inactive, soft delete them first
+      await this.prisma.product.updateMany({
+        where: {
+          supplierId: id,
+          companyId,
+          status: { in: ['INACTIVE', 'DISCONTINUED', 'OUT_OF_STOCK'] },
+          deletedAt: null // Only soft delete products that aren't already deleted
+        },
+        data: { deletedAt: new Date() }
+      });
     }
 
     // Check if supplier has transactions
@@ -271,8 +319,10 @@ export class SupplierService {
       throw new BadRequestException('Cannot delete supplier with transaction history');
     }
 
-    return this.prisma.supplier.delete({
+    // Soft delete - set deletedAt instead of removing from database
+    return this.prisma.supplier.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 

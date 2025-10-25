@@ -11,6 +11,7 @@ import { SupplierService } from '../../core/services/supplier.service';
 import { MultiSelectComponent, MultiSelectOption } from '../../core/components/multi-select/multi-select.component';
 import { PaginationComponent, PaginationConfig } from '../../core/components/pagination/pagination.component';
 import { ViewToggleComponent } from '../../core/components';
+import { ToastService } from '../../shared/services/toast.service';
 
 interface Product {
   id: string;
@@ -100,7 +101,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     private categoryService: CategoryService,
     private supplierService: SupplierService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService
   ) {}
 
   statusOptions = [
@@ -224,7 +226,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
           if (paginationData) {
             this.paginationConfig.totalItems = paginationData.total || this.products.length;
             this.paginationConfig.currentPage = paginationData.page || 1;
-            this.paginationConfig.itemsPerPage = paginationData.limit || 10;
+            // Não sobrescrever itemsPerPage escolhido pelo usuário
           } else {
             // Fallback se não houver dados de paginação
             this.paginationConfig.totalItems = this.products.length;
@@ -650,6 +652,12 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     const filesArray = Array.from(files).slice(0, maxToAdd);
     for (const file of filesArray) {
+      // Verifica duplicado por nome+tamanho (heurística suficiente para evitar reenvio da mesma imagem)
+      const isDuplicate = this.selectedFiles.some(f => f.name === file.name && f.size === file.size);
+      if (isDuplicate) {
+        this.toast.warning('Imagem duplicada', 'Esta imagem já foi adicionada.');
+        continue;
+      }
       this.selectedFiles.push(file);
       const objectUrl = URL.createObjectURL(file);
       this.selectedPreviews.push(objectUrl);
@@ -684,7 +692,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   onItemsPerPageChange(limit: number): void {
     this.paginationConfig.itemsPerPage = limit;
     this.paginationConfig.currentPage = 1;
-    this.loadProducts();
+    // Recalcula apenas no cliente para refletir range e páginas
+    this.applyClientFilters();
+    this.cdr.detectChanges();
   }
 
   onViewChange(view: ViewMode): void {

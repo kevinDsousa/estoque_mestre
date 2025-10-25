@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -76,7 +76,7 @@ export interface EstoqueFilterOutputs {
   imports: [
     CommonModule,
     FormsModule,
-    DropdownModule,
+    SelectModule,
     MultiSelectModule,
     CheckboxModule,
     RadioButtonModule,

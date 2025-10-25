@@ -152,6 +152,10 @@
                 <i class="pi pi-play"></i>
                 Ativar
               </button>
+              <button class="btn btn-ghost btn-sm text-danger" (click)="deleteProduct(product)">
+                <i class="pi pi-trash"></i>
+                Excluir
+              </button>
             }
           </td>
           </tr>
@@ -233,6 +237,10 @@
               <button class="btn btn-ghost btn-sm text-success" (click)="activateProduct(product)">
                 <i class="pi pi-play"></i>
                 Ativar
+              </button>
+              <button class="btn btn-ghost btn-sm text-danger" (click)="deleteProduct(product)">
+                <i class="pi pi-trash"></i>
+                Excluir
               </button>
             }
         </div>

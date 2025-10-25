@@ -70,7 +70,10 @@ export class CategoryService {
   }
 
   async findAll(companyId: string, includeInactive: boolean = false) {
-    const where: any = { companyId };
+    const where: any = { 
+      companyId,
+      deletedAt: null // Exclude soft-deleted records
+    };
     
     if (!includeInactive) {
       where.status = CategoryStatus.ACTIVE;
@@ -107,7 +110,11 @@ export class CategoryService {
 
   async findOne(id: string, companyId: string) {
     const category = await this.prisma.category.findFirst({
-      where: { id, companyId },
+      where: { 
+        id, 
+        companyId,
+        deletedAt: null // Exclude soft-deleted records
+      },
       include: {
         parent: true,
         children: {
@@ -273,11 +280,36 @@ export class CategoryService {
 
     // Check if category has products
     if (category._count.products > 0) {
-      throw new BadRequestException('Cannot delete category with products');
+      // Check if all products in this category are inactive
+      const activeProductsCount = await this.prisma.product.count({
+        where: {
+          categoryId: id,
+          companyId,
+          status: 'ACTIVE',
+          deletedAt: null // Exclude soft-deleted products
+        }
+      });
+
+      if (activeProductsCount > 0) {
+        throw new BadRequestException(`Cannot delete category with ${activeProductsCount} active products. Please deactivate or delete the products first.`);
+      }
+
+      // If all products are inactive, soft delete them first
+      await this.prisma.product.updateMany({
+        where: {
+          categoryId: id,
+          companyId,
+          status: { in: ['INACTIVE', 'DISCONTINUED', 'OUT_OF_STOCK'] },
+          deletedAt: null // Only soft delete products that aren't already deleted
+        },
+        data: { deletedAt: new Date() }
+      });
     }
 
-    return this.prisma.category.delete({
+    // Soft delete category instead of hard delete
+    return this.prisma.category.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 

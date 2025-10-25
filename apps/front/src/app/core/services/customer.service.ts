@@ -142,8 +142,8 @@ export class CustomerService {
           }
           this.currentCustomerSubject.next(customer);
 
-          const currentCustomers = this.customersSubject.value;
-          const updatedCustomers = currentCustomers.map(c => 
+          const currentCustomers = this.customersSubject.value || [];
+          const updatedCustomers = (Array.isArray(currentCustomers) ? currentCustomers : []).map(c => 
             c.id === id ? { ...c, ...customer } : c
           );
           this.customersSubject.next(updatedCustomers);
@@ -160,15 +160,15 @@ export class CustomerService {
         tap((response) => {
           // Se retornou o cliente, foi desativado ao invés de excluído
           if (response && typeof response === 'object' && 'status' in response) {
-            const currentCustomers = this.customersSubject.value;
-            const updatedCustomers = currentCustomers.map(c => 
+            const currentCustomers = this.customersSubject.value || [];
+            const updatedCustomers = (Array.isArray(currentCustomers) ? currentCustomers : []).map(c => 
               c.id === id ? { ...c, ...response } : c
             );
             this.customersSubject.next(updatedCustomers);
           } else {
             // Foi realmente excluído
-            const currentCustomers = this.customersSubject.value;
-            const filteredCustomers = currentCustomers.filter(c => c.id !== id);
+            const currentCustomers = this.customersSubject.value || [];
+            const filteredCustomers = (Array.isArray(currentCustomers) ? currentCustomers : []).filter(c => c.id !== id);
             this.customersSubject.next(filteredCustomers);
             
             if (this.currentCustomerSubject.value?.id === id) {
@@ -190,9 +190,9 @@ export class CustomerService {
           this.currentCustomerSubject.next(customer);
           
           // Só atualiza o array se ele existir
-          const currentCustomers = this.customersSubject.value;
-          if (currentCustomers && Array.isArray(currentCustomers)) {
-            const updatedCustomers = currentCustomers.map(c => 
+          const currentCustomers = this.customersSubject.value || [];
+          if (Array.isArray(currentCustomers)) {
+            const updatedCustomers = (Array.isArray(currentCustomers) ? currentCustomers : []).map(c => 
               c.id === id ? { ...c, ...customer } : c
             );
             this.customersSubject.next(updatedCustomers);

@@ -14,14 +14,14 @@
 
       <!-- Select Filter -->
       <div *ngIf="filter.type === 'select'" class="filter-control">
-        <p-dropdown 
+        <p-select 
           [(ngModel)]="values[filter.key]"
           (onChange)="onFilterValueChange(filter.key, $event.value)"
           [options]="filter.options"
           [placeholder]="filter.placeholder || 'Selecione...'"
           [showClear]="filter.showClear"
           class="filter-dropdown">
-        </p-dropdown>
+        </p-select>
         
         <button 
           *ngIf="isFilterActive(filter)"

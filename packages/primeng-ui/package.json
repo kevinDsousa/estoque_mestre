@@ -20,15 +20,22 @@
   "author": "Estoque Mestre Team",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@angular/forms": "^18.0.0",
-    "@angular/router": "^18.0.0",
-    "primeflex": "^3.3.1",
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/forms": "^20.0.0",
+    "@angular/router": "^20.0.0",
+    "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
-    "primeng": "^18.0.0"
+    "primeng": "^20.0.0"
   },
   "devDependencies": {
+    "@angular/animations": "20.3.2",
+    "@angular/common": "20.3.2",
+    "@angular/compiler": "20.3.2",
+    "@angular/core": "20.3.2",
+    "@angular/forms": "20.3.2",
+    "@angular/platform-browser": "20.3.2",
+    "@angular/router": "20.3.2",
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0"
   },

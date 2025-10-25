@@ -8,6 +8,7 @@ import { HeaderComponent } from './core/components/header/header.component';
 import { SidebarComponent } from './core/components/sidebar/sidebar.component';
 import { FooterComponent } from './core/components/footer/footer.component';
 import { DialogComponent } from './core/components/dialog/dialog.component';
+import { ToastModule } from 'primeng/toast';
 
 // Core services
 import { ThemeService } from './core/services/theme.service';
@@ -25,7 +26,8 @@ import { AuthService } from './core/services/auth.service';
     HeaderComponent,
     SidebarComponent,
     FooterComponent,
-    DialogComponent
+    DialogComponent,
+    ToastModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

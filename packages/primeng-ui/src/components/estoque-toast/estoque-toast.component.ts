@@ -38,38 +38,26 @@ export interface EstoqueToastMessage {
     <p-toast
       [position]="position"
       [life]="life"
-      [sticky]="sticky"
-      [closable]="closable"
-      [showTransformOptions]="showTransformOptions"
-      [hideTransformOptions]="hideTransformOptions"
-      [showTransitionOptions]="showTransitionOptions"
-      [hideTransitionOptions]="hideTransitionOptions"
       [style]="style"
       [styleClass]="styleClass"
       [baseZIndex]="baseZIndex"
       [autoZIndex]="autoZIndex"
-      [breakpoints]="breakpoints"
       (onClose)="onClose.emit($event)"
       (onShow)="onShow.emit($event)"
       (onHide)="onHide.emit($event)">
     </p-toast>
   `,
-  providers: [MessageService]
+  // MessageService should be provided at app root to avoid circular deps
 })
 export class EstoqueToastComponent {
   @Input() position: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center' = 'top-right';
   @Input() life: number = 5000;
-  @Input() sticky: boolean = false;
-  @Input() closable: boolean = true;
-  @Input() showTransformOptions: string = 'translateY(100%)';
-  @Input() hideTransformOptions: string = 'translateY(-100%)';
-  @Input() showTransitionOptions: string = '300ms ease-out';
-  @Input() hideTransitionOptions: string = '250ms ease-in';
+  // Removed invalid p-toast inputs (sticky, closable, transform/transition options)
   @Input() style?: { [key: string]: any };
   @Input() styleClass?: string;
-  @Input() baseZIndex: number = 0;
+  @Input() baseZIndex: number = 11000;
   @Input() autoZIndex: boolean = true;
-  @Input() breakpoints?: { [key: string]: any };
+  // breakpoints not required for p-toast
 
   @Output() onClose = new EventEmitter<any>();
   @Output() onShow = new EventEmitter<any>();
@@ -85,8 +73,7 @@ export class EstoqueToastComponent {
       severity: 'success',
       summary,
       detail,
-      life: life || this.life,
-      sticky: sticky || this.sticky
+      life: life || this.life
     });
   }
 
@@ -98,8 +85,7 @@ export class EstoqueToastComponent {
       severity: 'error',
       summary,
       detail,
-      life: life || this.life,
-      sticky: sticky || this.sticky
+      life: life || this.life
     });
   }
 
@@ -111,8 +97,7 @@ export class EstoqueToastComponent {
       severity: 'warn',
       summary,
       detail,
-      life: life || this.life,
-      sticky: sticky || this.sticky
+      life: life || this.life
     });
   }
 
@@ -124,8 +109,7 @@ export class EstoqueToastComponent {
       severity: 'info',
       summary,
       detail,
-      life: life || this.life,
-      sticky: sticky || this.sticky
+      life: life || this.life
     });
   }
 
@@ -138,8 +122,6 @@ export class EstoqueToastComponent {
       summary: message.summary,
       detail: message.detail,
       life: message.life || this.life,
-      sticky: message.sticky || this.sticky,
-      closable: message.closable !== false,
       data: message.data
     });
   }

@@ -139,26 +139,29 @@ export class ProductService {
     supplierId?: string,
     search?: string,
   ) {
-    // Verificar cache primeiro (apenas para consultas sem filtros complexos)
-    if (!search && !status && !categoryId && !supplierId) {
-      const cacheKey = `products:company:${companyId}:page:${page}:limit:${limit}`;
-      const cached = await this.queryCacheService.getProductsByStatus('ALL', companyId);
-      if (cached) {
-        return {
-          products: cached.slice((page - 1) * limit, page * limit),
-          pagination: {
-            page,
-            limit,
-            total: cached.length,
-            totalPages: Math.ceil(cached.length / limit),
-          },
-        };
-      }
-    }
+    // Cache temporariamente desabilitado para debug
+    // if (!search && !status && !categoryId && !supplierId) {
+    //   const cacheKey = `products:company:${companyId}:page:${page}:limit:${limit}`;
+    //   const cached = await this.queryCacheService.getProductsByStatus('ALL', companyId);
+    //   if (cached) {
+    //     return {
+    //       products: cached.slice((page - 1) * limit, page * limit),
+    //       pagination: {
+    //         page,
+    //         limit,
+    //         total: cached.length,
+    //         totalPages: Math.ceil(cached.length / limit),
+    //       },
+    //     };
+    //   }
+    // }
 
     const skip = (page - 1) * limit;
     
-    const where: any = { companyId };
+    const where: any = { 
+      companyId,
+      deletedAt: null // Exclude soft-deleted records
+    };
     
     if (status) where.status = status;
     if (categoryId) where.categoryId = categoryId;
@@ -210,7 +213,11 @@ export class ProductService {
 
   async findOne(id: string, companyId: string) {
     const product = await this.prisma.product.findFirst({
-      where: { id, companyId },
+      where: { 
+        id, 
+        companyId,
+        deletedAt: null // Exclude soft-deleted records
+      },
       include: {
         category: true,
         supplier: true,
@@ -294,7 +301,12 @@ export class ProductService {
   }
 
   async remove(id: string, companyId: string) {
-    await this.findOne(id, companyId);
+    const product = await this.findOne(id, companyId);
+
+    // Check if product is active
+    if (product.status === 'ACTIVE') {
+      throw new BadRequestException('Cannot delete active product. Please deactivate the product first.');
+    }
 
     // Check if product has inventory movements
     const movementCount = await this.prisma.inventoryMovement.count({
@@ -302,11 +314,17 @@ export class ProductService {
     });
 
     if (movementCount > 0) {
-      throw new BadRequestException('Cannot delete product with inventory history');
+      // If product has inventory history, always use soft delete
+      return this.prisma.product.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
     }
 
-    return this.prisma.product.delete({
+    // If no inventory history, also use soft delete for consistency
+    return this.prisma.product.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 

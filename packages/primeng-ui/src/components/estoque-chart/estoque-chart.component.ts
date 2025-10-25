@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ChartModule } from 'primeng/chart';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TooltipModule } from 'primeng/tooltip';
 
@@ -125,7 +125,7 @@ export interface EstoqueChartOutputs {
     ChartModule,
     CardModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     SkeletonModule,
     TooltipModule
   ],
